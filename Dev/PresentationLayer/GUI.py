@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 import open3d as o3d
 import os
 
+
 absolute_path = os.path.dirname(__file__)
 assets_path = os.path.join(absolute_path, "Assets")
 
