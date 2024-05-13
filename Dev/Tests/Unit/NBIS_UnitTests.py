@@ -1,6 +1,6 @@
 import os
 import unittest
-from TestUtils import templates_path, images_path
+from Dev.Tests.TestUtils import templates_path, images_path
 from Dev.NBIS.NBIS import detect_minutiae, match_templates, get_image_quality
 
 

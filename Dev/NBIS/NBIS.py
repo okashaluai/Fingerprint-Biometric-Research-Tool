@@ -57,8 +57,9 @@ def get_image_quality(image_path: str) -> int:
 
 def run_process(exe_lib_path: str, arguments: str) -> str:
     # Give the lib an execution permission
-    if not os.access(exe_lib_path, mode=os.X_OK):
-        os.chmod(exe_lib_path, mode=stat.S_IRWXU + stat.S_IRWXG + stat.S_IROTH + stat.S_IXOTH)
+    # TODO: this command corrupts NBIS executables on Windows.
+    # if not os.access(exe_lib_path, mode=os.X_OK):
+    #     os.chmod(exe_lib_path, mode=stat.S_IRWXU + stat.S_IRWXG + stat.S_IROTH + stat.S_IXOTH)
 
     # Execute lib
     completed_process = subprocess.run(
