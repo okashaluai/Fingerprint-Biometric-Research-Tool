@@ -7,7 +7,6 @@ from PIL import Image, ImageTk
 import open3d as o3d
 import os
 
-
 absolute_path = os.path.dirname(__file__)
 assets_path = os.path.join(absolute_path, "Assets")
 
@@ -20,18 +19,82 @@ class Tk(customtkinter.CTk, TkinterDnD.DnDWrapper):
 
 
 # Builds drag and drop files widget
-def build_drag_n_drop(frame, text, handle_drop_fun, width=240, height=80):
-    dnd = customtkinter.CTkLabel(
+def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose_file_title, file_types,
+                      choose_directory_title, width=240, height=80):
+    dnd_frame = customtkinter.CTkFrame(
         master=frame,
-        fg_color="grey",
-        text=text,
-        corner_radius=20,
         width=width,
         height=height,
+        corner_radius=20,
+        border_width=2,
     )
-    dnd.drop_target_register(DND_FILES)
-    dnd.dnd_bind("<<Drop>>", handle_drop_fun)
-    return dnd
+    dnd_frame.columnconfigure(0, weight=1)
+    dnd_frame.rowconfigure((0, 4), weight=1)
+    dnd_frame.drop_target_register(DND_FILES)
+
+    def handle_drop(e):
+        path = e.data
+        if os.path.isdir(path):
+            handle_choose_directory(path)
+        elif os.path.isfile(path):
+            handle_choose_file(path)
+
+    dnd_frame.dnd_bind("<<Drop>>", handle_drop)
+
+    dnd_label = customtkinter.CTkLabel(
+        master=dnd_frame,
+        text=f"Drag & drop files here...",
+        corner_radius=20,
+        width=width,
+        font=customtkinter.CTkFont(slant='italic')
+    )
+    dnd_label.grid(row=1, column=0, sticky=customtkinter.EW, padx=10, pady=(20, 0))
+
+    customtkinter.CTkLabel(
+        master=dnd_frame,
+        text="\nor\n",
+        corner_radius=20,
+        width=width,
+    ).grid(row=2, column=0, sticky=customtkinter.EW, padx=10)
+
+    choose_file_label = customtkinter.CTkLabel(
+        master=dnd_frame,
+        text="Select File",
+        corner_radius=20,
+        width=width,
+        cursor="hand2",
+        text_color="dodger blue",
+        font=customtkinter.CTkFont(underline=True)
+    )
+    choose_file_label.grid(row=3, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 0))
+
+    choose_directory_label = customtkinter.CTkLabel(
+        master=dnd_frame,
+        text="Select Directory",
+        corner_radius=20,
+        width=width,
+        cursor="hand2",
+        text_color="dodger blue",
+        font=customtkinter.CTkFont(underline=True)
+    )
+    choose_directory_label.grid(row=4, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
+
+    def handle_choose_file_event(e):
+        from tkinter import filedialog
+        file_path = filedialog.askopenfilename(title=choose_file_title, filetypes=file_types)
+        if file_path:
+            handle_choose_file(file_path)
+
+    def handle_choose_directory_event(e):
+        from tkinter import filedialog
+        file_path = filedialog.askdirectory(title=choose_directory_title)
+        if file_path:
+            handle_choose_directory(file_path)
+
+    choose_file_label.bind("<Button-1>", handle_choose_file_event)
+    choose_directory_label.bind("<Button-1>", handle_choose_directory_event)
+
+    return dnd_frame
 
 
 class SideMenuFrame(customtkinter.CTkFrame):
@@ -224,9 +287,8 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.grid_columnconfigure((0, 2), weight=1)
                     self.grid_rowconfigure((0, 4), weight=1)
 
-                    def handle_drop(e):
-                        print(e.data)
-                        image = Image.open(e.data)
+                    def handle_drop(path):
+                        image = Image.open(path)
                         image = image.resize((300, 300), Image.Resampling.LANCZOS)
                         self.pic = ImageTk.PhotoImage(image)
 
@@ -239,8 +301,20 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                         self.back.configure(state=tkinter.NORMAL)
 
+                    def handle_choose_file(path):
+                        print(f"works = {path}")
+                        handle_drop(path)
+
+                    def handle_choose_directory(path):
+                        print(f"works = {path}")
+
                     self.dnd = build_drag_n_drop(
-                        self, "Drag & drop template here", handle_drop_fun=handle_drop
+                        self,
+                        handle_choose_directory=handle_choose_directory,
+                        handle_choose_file=handle_choose_file,
+                        choose_file_title="Choose a template file",
+                        file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+                        choose_directory_title="Choose a templates directory"
                     )
                     self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
 
@@ -251,12 +325,18 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     )
                     self.convert_to_image_button.grid(
                         row=1, column=1, padx=(20, 20), pady=5
+
                     )
 
                     def handle_back_button():
                         self.canvas.destroy()
                         self.dnd = build_drag_n_drop(
-                            self, "Drag & drop image here", handle_drop_fun=handle_drop
+                            self,
+                            handle_choose_directory=handle_choose_directory,
+                            handle_choose_file=handle_choose_file,
+                            choose_file_title="Choose a template file",
+                            file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+                            choose_directory_title="Choose a templates directory"
                         )
                         self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
                         self.back.configure(state=tkinter.DISABLED)
@@ -295,9 +375,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 main_frame_grid_config(self.template_export_frame)
 
                 # Printing object export frame
-                self.printing_object_export_frame = self.PrintingObjectExportFrame(
-                    parent_tab=self
-                )
+                self.printing_object_export_frame = self.PrintingObjectExportFrame(parent_tab=self)
                 main_frame_grid_config(self.printing_object_export_frame)
 
                 # Default frame
@@ -317,9 +395,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.export_button = customtkinter.CTkButton(self, text="Export")
                     self.export_button.grid(row=1, column=1, padx=(20, 20), pady=5)
 
-                    self.back_button = customtkinter.CTkButton(
-                        self, text="Back", command=self.handle_back_button
-                    )
+                    self.back_button = customtkinter.CTkButton(self, text="Back", command=self.handle_back_button)
                     self.back_button.grid(row=2, column=1, padx=(20, 20), pady=5)
 
                 def handle_back_button(self):
@@ -358,9 +434,8 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.grid_columnconfigure((0, 2), weight=1)
                     self.grid_rowconfigure((0, 5), weight=1)
 
-                    def handle_drop(e):
-                        print(e.data)
-                        image = Image.open(e.data)
+                    def view_image(path):
+                        image = Image.open(path)
 
                         default_width = 800
                         default_height = 800
@@ -391,8 +466,20 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                         self.back.configure(state=tkinter.NORMAL)
 
+                    def handle_choose_file(path):
+                        print(f"works = {path}")
+                        view_image(path)
+
+                    def handle_choose_directory(path):
+                        print(f"works = {path}")
+
                     self.dnd = build_drag_n_drop(
-                        self, "Drag & drop image here", handle_drop_fun=handle_drop
+                        self,
+                        handle_choose_directory=handle_choose_directory,
+                        handle_choose_file=handle_choose_file,
+                        choose_file_title="Choose a template file",
+                        file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+                        choose_directory_title="Choose a templates directory"
                     )
                     self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
 
@@ -417,7 +504,12 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     def handle_back_button():
                         self.canvas.destroy()
                         self.dnd = build_drag_n_drop(
-                            self, "Drag & drop image here", handle_drop_fun=handle_drop
+                            self,
+                            handle_choose_directory=handle_choose_directory,
+                            handle_choose_file=handle_choose_file,
+                            choose_file_title="Choose a template file",
+                            file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+                            choose_directory_title="Choose a templates directory"
                         )
                         self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
                         self.back.configure(state=tkinter.DISABLED)
