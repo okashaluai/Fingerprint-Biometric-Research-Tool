@@ -1,4 +1,7 @@
+import time
 import tkinter
+from datetime import datetime
+
 import PIL.Image
 import customtkinter
 from tkinterdnd2 import DND_FILES, TkinterDnD
@@ -17,7 +20,7 @@ class Tk(customtkinter.CTk, TkinterDnD.DnDWrapper):
         self.TkdndVersion = TkinterDnD._require(self)
 
 
-# Builds drag and drop files widget
+# Builds drag and drop / browse files widget
 def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose_file_title, file_types,
                       choose_directory_title, width=240, height=80):
     dnd_frame = customtkinter.CTkFrame(
@@ -307,7 +310,6 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     )
                     self.convert_to_image_button.grid(
                         row=1, column=1, padx=(20, 20), pady=5
-
                     )
 
                     def handle_back_button():
@@ -627,12 +629,12 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             row=0,
             column=1,
             sticky=customtkinter.NS + customtkinter.EW,
-            padx=(20, 20),
+            padx=(0, 20),
             pady=(20, 20),
         )
 
         self.scrollable_frame = customtkinter.CTkScrollableFrame(
-            self.frame, label_text="Experiments"
+            self.frame, label_text="Experiments", label_font=customtkinter.CTkFont(weight="bold", size=16)
         )
         self.scrollable_frame.grid(
             row=1,
@@ -648,7 +650,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         for i in range(8):
             if i == 6:
                 row_frame = self.ExperimentRowFrame(
-                    self.scrollable_frame, index=i, fg_color="red"
+                    self.scrollable_frame, index=i
                 )
             else:
                 row_frame = self.ExperimentRowFrame(self.scrollable_frame, index=i)
@@ -704,83 +706,73 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             )
 
     class ExperimentRowFrame(customtkinter.CTkFrame):
-        def __init__(self, master, index, fg_color="transparent"):
+        def __init__(self, master, index, ):
             super().__init__(
-                master=master, corner_radius=10, border_width=5, fg_color=fg_color
+                master=master, corner_radius=10, border_width=2,
             )
             self.index = index
             self.columnconfigure((0), weight=1)
-            self.rowconfigure(2, weight=1)
+            self.rowconfigure(3, weight=1)
 
-            self.search_entry = customtkinter.CTkEntry(
-                self, placeholder_text="Operation name"
-            )
-            self.search_entry.grid(
-                row=0,
-                column=0,
-                sticky=customtkinter.NS + customtkinter.EW,
-                padx=(25, 20),
-                pady=(20, 20),
-            )
+            experiment_name = "Yazan's Experiment"
+            experiment_date = datetime.fromtimestamp(time.time()).strftime("%d/%m/%Y    %H:%M:%S")
+            self.experiment_info = customtkinter.CTkLabel(self, text=f"{experiment_name}    {experiment_date}")
+            self.experiment_info.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
 
-            self.search_button = customtkinter.CTkButton(
+            def f(e):
+                pass
+
+            self.export_button = customtkinter.CTkLabel(
                 self,
-                text="Search",
-                width=100,
+                text="",
+                cursor="hand2",
                 image=customtkinter.CTkImage(
-                    Image.open(os.path.join(assets_path, "icons8-search-256.png"))
+                    Image.open(os.path.join(assets_path,
+                                            r"C:\Users\Yazan\Desktop\Final_Project\Dev\PresentationLayer\Assets\pen.png")),
+                    size=(25, 25)
                 ),
             )
-            self.search_button.grid(
-                row=0, column=1, sticky=customtkinter.EW, padx=(20, 10), pady=(20, 20)
-            )
-
-            self.delete_button = customtkinter.CTkButton(
-                self,
-                text="Delete Experiment",
-                command=self.destroy,
-                image=customtkinter.CTkImage(
-                    Image.open(os.path.join(assets_path, "icons8-remove-80.png"))
-                ),
-            )
-            self.delete_button.grid(
-                row=0, column=2, sticky=customtkinter.EW, padx=(20, 10), pady=(20, 20)
-            )
-
-            self.export_button = customtkinter.CTkButton(
-                self,
-                text="Export",
-                width=100,
-                image=customtkinter.CTkImage(
-                    Image.open(os.path.join(assets_path, "icons8-export-64.png"))
-                ),
-            )
+            self.export_button.bind('<Button-1>', command=f)
             self.export_button.grid(
-                row=0, column=3, sticky=customtkinter.EW, padx=(20, 25), pady=(20, 20)
+                row=0, column=1, padx=(20, 10), pady=10
             )
 
-            self.scrollable_frame = customtkinter.CTkScrollableFrame(
-                self, label_text="Operations"
+            self.delete_button = customtkinter.CTkLabel(
+                self,
+                text="",
+                cursor="hand2",
+                image=customtkinter.CTkImage(
+                    Image.open(os.path.join(assets_path, "icons8-remove-80.png")),
+                    size=(25, 25)
+                ),
             )
-            self.scrollable_frame.grid(
-                row=1,
-                column=0,
-                columnspan=4,
-                sticky=customtkinter.NS + customtkinter.EW,
-                padx=(20, 20),
-                pady=(0, 20),
+            self.delete_button.bind('<Button-1>', command=f)
+            self.delete_button.grid(
+                row=0, column=2, padx=(10, 25), pady=10
             )
-            self.scrollable_frame.columnconfigure(0, weight=1)
 
-            for i in range(10):
-                row_frame = self.OperationRowFrame(self.scrollable_frame)
-                row_frame.grid(
-                    row=i,
-                    column=0,
-                    sticky=customtkinter.NS + customtkinter.EW,
-                    padx=(20, 20),
-                    pady=5,
-                )
+            # self.scrollable_frame = customtkinter.CTkScrollableFrame(
+            #     self, label_text="Operations"
+            # )
+            # self.scrollable_frame.grid(
+            #     row=1,
+            #     column=0,
+            #     columnspan=4,
+            #     sticky=customtkinter.NS + customtkinter.EW,
+            #     padx=(20, 20),
+            #     pady=(0, 20),
+            # )
+            # self.scrollable_frame.columnconfigure(0, weight=1)
+            #
+            # for i in range(10):
+            #     row_frame = self.OperationRowFrame(self.scrollable_frame)
+            #     row_frame.grid(
+            #         row=i,
+            #         column=0,
+            #         sticky=customtkinter.NS + customtkinter.EW,
+            #         padx=(20, 20),
+            #         pady=5,
+            #     )
 
         class OperationRowFrame(customtkinter.CTkFrame):
             def __init__(self, master):
