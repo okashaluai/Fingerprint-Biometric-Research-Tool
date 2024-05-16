@@ -1,5 +1,4 @@
 import tkinter
-import tkinter.ttk
 import PIL.Image
 import customtkinter
 from tkinterdnd2 import DND_FILES, TkinterDnD
@@ -542,15 +541,51 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             padx=(20, 20),
             pady=(20, 20),
         )
+        self.frame.grid_columnconfigure((0, 3), weight=1)
+        self.frame.grid_rowconfigure((0, 6), weight=1)
 
-        self.button1 = customtkinter.CTkButton(self.frame, text="Button2")
-        self.button1.grid(
-            row=0,
-            column=0,
-            sticky=customtkinter.NS + customtkinter.EW,
+        def handle_choose_file(path):
+            print(f"works = {path}")
+
+        def handle_choose_directory(path):
+            print(f"works = {path}")
+
+        font = customtkinter.CTkFont(size=16, weight="bold")
+        customtkinter.CTkLabel(self.frame, text="First Set", font=font).grid(row=2, column=1, padx=(20, 20),
+                                                                             sticky=customtkinter.EW, pady=5)
+        self.dnd1 = build_drag_n_drop(
+            self.frame,
+            handle_choose_directory=handle_choose_directory,
+            handle_choose_file=handle_choose_file,
+            choose_file_title="Choose a template file",
+            file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+            choose_directory_title="Choose a templates directory"
+        )
+        self.dnd1.grid(row=3, column=1, padx=(20, 20), pady=5)
+
+        customtkinter.CTkLabel(self.frame, text="Second Set", font=font).grid(row=2, column=2, padx=(20, 20),
+                                                                              sticky=customtkinter.EW, pady=5)
+        self.dnd2 = build_drag_n_drop(
+            self.frame,
+            handle_choose_directory=handle_choose_directory,
+            handle_choose_file=handle_choose_file,
+            choose_file_title="Choose a template file",
+            file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+            choose_directory_title="Choose a templates directory"
+        )
+        self.dnd2.grid(row=3, column=2, padx=(20, 20), pady=5)
+
+        self.match_button = customtkinter.CTkButton(self.frame, text="Button2")
+        self.match_button.grid(
+            row=4,
+            columnspan=4,
+            sticky=customtkinter.NS,
             padx=(20, 20),
             pady=(20, 20),
         )
+
+        # customtkinter.
+        # self.back.configure(state=tkinter.DISABLED)
 
 
 class ExperimentsFrame(customtkinter.CTkFrame):
