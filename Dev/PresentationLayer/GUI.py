@@ -101,58 +101,40 @@ class SideMenuFrame(customtkinter.CTkFrame):
         super().__init__(master=master, corner_radius=0)
         self.grid_rowconfigure(4, weight=1)
 
+        self.font = customtkinter.CTkFont(weight="bold")
+
         self.logo_label = customtkinter.CTkLabel(
             self, text="Menu", font=customtkinter.CTkFont(size=20, weight="bold")
         )
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
         self.convert_assets_button = customtkinter.CTkButton(
-            self, text="Convert Assets", command=self.handle_convert_assets_button
+            self, text="Convert Assets", font=customtkinter.CTkFont(weight="bold"),
+            command=self.handle_convert_assets_button
         )
         self.convert_assets_button.grid(row=1, column=0, padx=20, pady=10)
 
         self.match_templates_button = customtkinter.CTkButton(
-            self, text="Match Templates", command=self.handle_match_template_button
+            self, text="Match Templates", font=customtkinter.CTkFont(weight="bold"),
+            command=self.handle_match_template_button
         )
         self.match_templates_button.grid(row=2, column=0, padx=20, pady=10)
 
         self.experiments_button = customtkinter.CTkButton(
-            self, text="Experiments", command=self.handle_experiments_button
+            self, text="Experiments", font=customtkinter.CTkFont(weight="bold"), command=self.handle_experiments_button
         )
         self.experiments_button.grid(row=3, column=0, padx=20, pady=10)
 
-        self.appearance_mode_label = customtkinter.CTkLabel(
-            self, text="Theme:", anchor="w"
+        self.is_light_mode = False
+        self.appearance_mode_switch = customtkinter.CTkSwitch(
+            self, text="Light Mode", font=customtkinter.CTkFont(weight="bold"), command=self.change_to_light_mode_event
         )
-        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
-
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(
-            self,
-            values=["Light", "Dark", "System"],
-            command=self.change_appearance_mode_event,
-        )
-        self.appearance_mode_optionemenu.grid(row=6, column=0, padx=20, pady=(5, 0))
-        self.appearance_mode_optionemenu.set(
-            self.appearance_mode_optionemenu._values[2]
-        )
-
-        self.scaling_label = customtkinter.CTkLabel(
-            self, text="UI Scaling:", anchor="w"
-        )
-        self.scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
-
-        self.scaling_optionemenu = customtkinter.CTkOptionMenu(
-            self,
-            values=["80%", "90%", "100%", "110%", "120%"],
-            command=self.change_scaling_event,
-        )
-        self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(5, 10))
-        self.scaling_optionemenu.set(self.scaling_optionemenu._values[2])
+        self.appearance_mode_switch.grid(row=5, column=0, padx=20, pady=10)
 
         self.experiments_button = customtkinter.CTkButton(
-            self, text="Info", command=self.handle_experiments_button
+            self, text="Info", font=customtkinter.CTkFont(weight="bold"), command=self.handle_experiments_button
         )
-        self.experiments_button.grid(row=9, column=0, padx=20, pady=(10, 10))
+        self.experiments_button.grid(row=6, column=0, padx=20, pady=(10, 10))
 
     def handle_convert_assets_button(self):
         self.master.convert_assets_frame.tkraise()
@@ -163,12 +145,13 @@ class SideMenuFrame(customtkinter.CTkFrame):
     def handle_experiments_button(self):
         self.master.experiments_frame.tkraise()
 
-    def change_appearance_mode_event(self, new_appearance_mode: str):
-        customtkinter.set_appearance_mode(new_appearance_mode)
-
-    def change_scaling_event(self, new_scaling: str):
-        new_scaling_float = int(new_scaling.replace("%", "")) / 100
-        customtkinter.set_widget_scaling(new_scaling_float)
+    def change_to_light_mode_event(self):
+        if not self.is_light_mode:
+            self.is_light_mode = True
+            customtkinter.set_appearance_mode("Light")
+        else:
+            self.is_light_mode = False
+            customtkinter.set_appearance_mode("Dark")
 
 
 class ConvertAssetsFrame(customtkinter.CTkFrame):
@@ -338,13 +321,13 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                             choose_directory_title="Choose a templates directory"
                         )
                         self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
-                        self.back.configure(state=tkinter.DISABLED)
+                        self.reset_button.configure(state=tkinter.DISABLED)
 
-                    self.back = customtkinter.CTkButton(
-                        self, text="Back", command=handle_back_button
+                    self.reset_button = customtkinter.CTkButton(
+                        self, text="Reset", command=handle_back_button
                     )
-                    self.back.grid(row=3, column=1, padx=(20, 20), pady=5)
-                    self.back.configure(state=tkinter.DISABLED)
+                    self.reset_button.grid(row=3, column=1, padx=(20, 20), pady=5)
+                    self.reset_button.configure(state=tkinter.DISABLED)
 
                 def handle_convert_to_image_button(self):
                     self.parent_tab.image_export_frame.tkraise()
@@ -463,7 +446,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self.canvas.image = pic
                         self.canvas.grid(row=0, column=1, padx=(20, 20), pady=5)
 
-                        self.back.configure(state=tkinter.NORMAL)
+                        self.reset_button.configure(state=tkinter.NORMAL)
 
                     def handle_choose_file(path):
                         print(f"works = {path}")
@@ -511,13 +494,13 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                             choose_directory_title="Choose a templates directory"
                         )
                         self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
-                        self.back.configure(state=tkinter.DISABLED)
+                        self.reset_button.configure(state=tkinter.DISABLED)
 
-                    self.back = customtkinter.CTkButton(
-                        self, text="Back", command=handle_back_button
+                    self.reset_button = customtkinter.CTkButton(
+                        self, text="Reset", command=handle_back_button
                     )
-                    self.back.grid(row=3, column=1, padx=(20, 20), pady=5)
-                    self.back.configure(state=tkinter.DISABLED)
+                    self.reset_button.grid(row=3, column=1, padx=(20, 20), pady=5)
+                    self.reset_button.configure(state=tkinter.DISABLED)
 
                 def handle_convert_to_template_button(self):
                     self.parent_tab.template_export_frame.tkraise()
@@ -575,17 +558,37 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         )
         self.dnd2.grid(row=3, column=2, padx=(20, 20), pady=5)
 
-        self.match_button = customtkinter.CTkButton(self.frame, text="Button2")
+        self.match_button = customtkinter.CTkButton(self.frame, text="Match Templates",
+                                                    command=self.handle_match_templates_button)
         self.match_button.grid(
             row=4,
             columnspan=4,
-            sticky=customtkinter.NS,
             padx=(20, 20),
-            pady=(20, 20),
+            pady=(40, 5)
         )
 
-        # customtkinter.
+        self.reset_button = customtkinter.CTkButton(
+            self.frame, text="Reset", command=self.handle_reset_button
+        )
+        self.reset_button.grid(row=5, columnspan=4, padx=(20, 20), pady=5)
+        self.reset_button.configure(state=tkinter.DISABLED)
+
+    def handle_reset_button(self):
+        # self.canvas.destroy()
+        # self.dnd = build_drag_n_drop(
+        #     self,
+        #     handle_choose_directory=handle_choose_directory,
+        #     handle_choose_file=handle_choose_file,
+        #     choose_file_title="Choose a template file",
+        #     file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+        #     choose_directory_title="Choose a templates directory"
+        # )
+        # self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
         # self.back.configure(state=tkinter.DISABLED)
+        pass
+
+    def handle_match_templates_button(self):
+        pass
 
 
 class ExperimentsFrame(customtkinter.CTkFrame):
