@@ -27,8 +27,8 @@ class Image(Asset):
             return False
         
     def convert_to_template(self) -> str:
-        image_path = str(super().__path)
-        template_name = image_path[0:image_path.find(".")]
+        image_path = str(self.__path)
+        template_name = os.path.basename(image_path).split(".")[-2]
         detect_minutiae(image_path , Playground.PATH, template_name)
         template_path = os.path.join(Playground.PATH, template_name)
         return template_path
