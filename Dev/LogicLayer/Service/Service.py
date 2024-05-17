@@ -13,31 +13,62 @@ class Service(IService):
         self.convertor_controller = MatcherController()
 
     def convert_template_to_image(self, template_path: str) -> Response:
-        raise NotImplementedError
-
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
+        
+        
     def convert_image_to_template(self, image_path: str) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def convert_image_to_3d_object(self, image_path: str) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def match(self, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def get_experiments(self) -> Response:
-        raise NotImplementedError
-
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
+        
     def delete_experiment(self, experiment_id: int) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def export_experiment(self, experiment_id: int) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def rename_experiment(self, experiment_id: int, name: str) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def create_experiment(self, name: str) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def add_operation(self, experiment_id: int, operation: OperationDTO) -> Response:
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
