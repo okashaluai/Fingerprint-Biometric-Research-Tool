@@ -23,80 +23,145 @@ class Tk(customtkinter.CTk, TkinterDnD.DnDWrapper):
 # Builds drag and drop / browse files widget
 def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose_file_title, file_types,
                       choose_directory_title, width=240, height=80):
-    dnd_frame = customtkinter.CTkFrame(
+    main_frame = customtkinter.CTkFrame(
         master=frame,
         width=width,
         height=height,
         corner_radius=20,
-        border_width=2,
+        fg_color="transparent",
+        bg_color="transparent"
     )
-    dnd_frame.columnconfigure(0, weight=1)
-    dnd_frame.rowconfigure((0, 4), weight=1)
-    dnd_frame.drop_target_register(DND_FILES)
 
-    def handle_drop(e):
-        path = e.data
-        if os.path.isdir(path):
-            handle_choose_directory(path)
-        elif os.path.isfile(path):
-            handle_choose_file(path)
+    def build_dnd_frame():
+        dnd_frame = customtkinter.CTkFrame(
+            master=main_frame,
+            width=width,
+            height=height,
+            corner_radius=20,
+            border_width=2,
+        )
+        dnd_frame.grid(row=0, column=0)
+        dnd_frame.columnconfigure(0, weight=1)
+        dnd_frame.rowconfigure((0, 4), weight=1)
+        dnd_frame.drop_target_register(DND_FILES)
 
-    dnd_frame.dnd_bind("<<Drop>>", handle_drop)
+        def handle_drop(e):
+            path = e.data
+            if os.path.isdir(path):
+                build_selected_labels(path)
+                handle_choose_directory(path)
+            elif os.path.isfile(path):
+                build_selected_labels(path)
+                handle_choose_file(path)
 
-    dnd_label = customtkinter.CTkLabel(
-        master=dnd_frame,
-        text=f"Drag & drop files here...",
-        corner_radius=20,
-        width=width,
-        font=customtkinter.CTkFont(slant='italic')
-    )
-    dnd_label.grid(row=1, column=0, sticky=customtkinter.EW, padx=10, pady=(20, 0))
+        dnd_frame.dnd_bind("<<Drop>>", handle_drop)
 
-    customtkinter.CTkLabel(
-        master=dnd_frame,
-        text="\nor\n",
-        corner_radius=20,
-        width=width,
-    ).grid(row=2, column=0, sticky=customtkinter.EW, padx=10)
+        return dnd_frame
 
-    choose_file_label = customtkinter.CTkLabel(
-        master=dnd_frame,
-        text="Select File",
-        corner_radius=20,
-        width=width,
-        cursor="hand2",
-        text_color="dodger blue",
-        font=customtkinter.CTkFont(underline=True)
-    )
-    choose_file_label.grid(row=3, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 0))
+    def build_selected_frame():
+        selected_frame = customtkinter.CTkFrame(
+            master=main_frame,
+            width=width,
+            height=height,
+            corner_radius=20,
+            border_width=2,
+        )
+        selected_frame.grid(row=0, column=0)
+        selected_frame.columnconfigure(0, weight=1)
+        selected_frame.rowconfigure((0, 3), weight=1)
+        return selected_frame
 
-    choose_directory_label = customtkinter.CTkLabel(
-        master=dnd_frame,
-        text="Select Directory",
-        corner_radius=20,
-        width=width,
-        cursor="hand2",
-        text_color="dodger blue",
-        font=customtkinter.CTkFont(underline=True)
-    )
-    choose_directory_label.grid(row=4, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
+    def build_selected_labels(file_path):
+        selected_frame = build_selected_frame()
 
-    def handle_choose_file_event(e):
-        from tkinter import filedialog
-        file_path = filedialog.askopenfilename(title=choose_file_title, filetypes=file_types)
-        if file_path:
-            handle_choose_file(file_path)
+        selected_label = customtkinter.CTkLabel(
+            selected_frame,
+            width=width,
+            height=height,
+            text=f"Selected {'Directory' if os.path.isdir(file_path) else 'File'}\n[ {os.path.basename(file_path)} ]",
+            font=customtkinter.CTkFont(weight="bold", size=16)
+        )
+        selected_label.grid(row=1, column=0, sticky=customtkinter.EW, padx=10, pady=(20, 20))
 
-    def handle_choose_directory_event(e):
-        from tkinter import filedialog
-        file_path = filedialog.askdirectory(title=choose_directory_title)
-        if file_path:
-            handle_choose_directory(file_path)
+        reset_label = customtkinter.CTkLabel(
+            selected_frame,
+            width=width,
+            height=height,
+            text="Reset",
+            cursor="hand2",
+        )
+        reset_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10, pady=(20, 20))
 
-    choose_file_label.bind("<Button-1>", handle_choose_file_event)
-    choose_directory_label.bind("<Button-1>", handle_choose_directory_event)
+        def handle_reset(e):
+            selected_frame.destroy()
+            build_dnd_labels()
 
-    return dnd_frame
+        reset_label.bind('<Button-1>', handle_reset)
+
+    def build_dnd_labels():
+        dnd_frame = build_dnd_frame()
+
+        dnd_label = customtkinter.CTkLabel(
+            master=dnd_frame,
+            text=f"Drag & drop files here...",
+            corner_radius=20,
+            width=width,
+            font=customtkinter.CTkFont(slant='italic')
+        )
+        dnd_label.grid(row=1, column=0, sticky=customtkinter.EW, padx=10, pady=(20, 0))
+
+        or_label = customtkinter.CTkLabel(
+            master=dnd_frame,
+            text="\nor\n",
+            corner_radius=20,
+            width=width,
+        )
+        or_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10)
+
+        choose_file_label = customtkinter.CTkLabel(
+            master=dnd_frame,
+            text="Select File",
+            corner_radius=20,
+            width=width,
+            cursor="hand2",
+            text_color="dodger blue",
+            font=customtkinter.CTkFont(underline=True)
+        )
+        choose_file_label.grid(row=3, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 0))
+
+        choose_directory_label = customtkinter.CTkLabel(
+            master=dnd_frame,
+            text="Select Directory",
+            corner_radius=20,
+            width=width,
+            cursor="hand2",
+            text_color="dodger blue",
+            font=customtkinter.CTkFont(underline=True)
+        )
+        choose_directory_label.grid(row=4, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
+
+        def handle_choose_file_event(e):
+            from tkinter import filedialog
+            file_path = filedialog.askopenfilename(title=choose_file_title, filetypes=file_types)
+            if file_path:
+                dnd_frame.destroy()
+                build_selected_labels(file_path)
+                handle_choose_file(file_path)
+
+        def handle_choose_directory_event(e):
+            from tkinter import filedialog
+            directory_path = filedialog.askdirectory(title=choose_directory_title)
+            if directory_path:
+                dnd_frame.destroy()
+                build_selected_labels(directory_path)
+                handle_choose_directory(directory_path)
+
+        choose_file_label.bind("<Button-1>", handle_choose_file_event)
+        choose_directory_label.bind("<Button-1>", handle_choose_directory_event)
+
+    build_dnd_labels()
+
+    return main_frame
 
 
 class SideMenuFrame(customtkinter.CTkFrame):
@@ -727,8 +792,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 text="",
                 cursor="hand2",
                 image=customtkinter.CTkImage(
-                    Image.open(os.path.join(assets_path,
-                                            r"C:\Users\Yazan\Desktop\Final_Project\Dev\PresentationLayer\Assets\pen.png")),
+                    Image.open(os.path.join(assets_path, "pen.png")),
                     size=(25, 25)
                 ),
             )
