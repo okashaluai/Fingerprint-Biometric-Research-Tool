@@ -20,16 +20,16 @@ class Template(Asset):
         f2_min_content = []
         f2_xyt_content = []
         
-        with open(os.path.join(self.__path, '.min')) as f:
+        with open(self.__path.join('.min')) as f:
             f1_min_content = f.readlines()
 
-        with open(os.path.join(self.__path, '.xyt')) as f:
+        with open(self.__path.join('.xyt')) as f:
             f1_xyt_content = f.readlines()
         
-        with open(os.path.join(other.__path, '.min')) as f:
+        with open(other.__path.join('.min')) as f:
             f2_min_content = f.readlines()
 
-        with open(os.path.join(other.__path, '.xyt')) as f:
+        with open(other.__path.join('.xyt')) as f:
             f2_xyt_content = f.readlines()
 
         return (f1_min_content.sort() == f2_min_content.sort()) and (f1_xyt_content.sort() == f2_xyt_content.sort())
