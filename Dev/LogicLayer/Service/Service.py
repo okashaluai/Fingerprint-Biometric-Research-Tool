@@ -3,7 +3,7 @@ from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.Controllers.MatcherController import MatcherController
 from Dev.LogicLayer.Service.IService import IService
-
+from Enums import OperationType
 
 class Service(IService):
 
@@ -19,9 +19,12 @@ class Service(IService):
             return Response(False, None, str(error))
         
         
-    def convert_image_to_template(self, image_path: str) -> Response:
+    def convert_image_to_template(self, experiment_name : str, image_path: str) -> Response:
         try:
-            raise NotImplementedError
+            template_path = self.convertor_controller.convert_image_to_template(image_path)
+            rebased_template_path = self.experiment_controller.add_operation(experiment_name, OperationType.IMG2TMP, image_path, template_path)
+            return Response(True, rebased_template_path, None)
+        
         except Exception as error:
             return Response(False, None, str(error))
 

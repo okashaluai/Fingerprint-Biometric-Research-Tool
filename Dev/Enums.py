@@ -8,6 +8,6 @@ class OperationType(Enum):
     :param TMP_IMG: Image to Template.
     :param TMP_IMG: Image to Printing Object.
     """
-    TMP_IMG: int = 1
-    IMG_TMP: int = 2
-    IMG_POBJ: int = 3
+    TMP2IMG: int = 1
+    IMG2TMP: int = 2
+    IMG2POBJ: int = 3
