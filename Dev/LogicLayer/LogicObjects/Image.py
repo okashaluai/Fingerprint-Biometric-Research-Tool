@@ -4,6 +4,7 @@ from Dev.LogicLayer.LogicObjects.Asset import Asset
 from PIL import Image as PImage
 from NBIS.NBIS import detect_minutiae
 import os
+from pathlib import Path
 
 class Image(Asset):
     def __init__(self, image_path):
@@ -28,7 +29,7 @@ class Image(Asset):
         
     def convert_to_template(self) -> str:
         image_path = str(self.__path)
-        template_name = os.path.basename(image_path).split(".")[-2]
+        template_name = Path(image_path).stem
         detect_minutiae(image_path , Playground.PATH, template_name)
         template_path = os.path.join(Playground.PATH, template_name)
         return template_path

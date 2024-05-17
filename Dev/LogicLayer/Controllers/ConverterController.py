@@ -1,5 +1,5 @@
 from Dev.Utils import Singleton
-from LogicObjects import Image
+from LogicObjects.Image import Image
 
 class ConvertorController(metaclass=Singleton):
     def __init__(self):
