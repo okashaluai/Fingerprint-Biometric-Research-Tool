@@ -14,7 +14,7 @@ class Template(Asset):
     def to_dao(self) -> TemplateDAO:
         raise NotImplementedError
 
-    def equal(self, other : object) -> bool:
+    def __eq__(self, other):
         f1_min_content = []
         f1_xyt_content = []
         f2_min_content = []
