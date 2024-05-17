@@ -5,6 +5,7 @@ from PIL import Image as PImage
 from NBIS.NBIS import detect_minutiae
 import os
 from pathlib import Path
+from Dev.Playground import PLAYGROUND
 
 class Image(Asset):
     def __init__(self, image_path):
@@ -30,13 +31,6 @@ class Image(Asset):
     def convert_to_template(self) -> str:
         image_path = str(self.__path)
         template_name = Path(image_path).stem
-        detect_minutiae(image_path , Playground.PATH, template_name)
-        template_path = os.path.join(Playground.PATH, template_name)
+        detect_minutiae(image_path , PLAYGROUND.PATH, template_name)
+        template_path = os.path.join(PLAYGROUND.PATH, template_name)
         return template_path
-
-
-class Playground:
-    PATH = ''
-
-    def __init(self):
-        raise NotImplementedError
