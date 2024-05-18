@@ -22,7 +22,7 @@ class Tk(customtkinter.CTk, TkinterDnD.DnDWrapper):
 
 # Builds drag and drop / browse files widget
 def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose_file_title, file_types,
-                      choose_directory_title, width=240, height=80):
+                      choose_directory_title, invoke_reset_wrapper=None, width=240, height=80):
     main_frame = customtkinter.CTkFrame(
         master=frame,
         width=width,
@@ -83,6 +83,15 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
         )
         selected_label.grid(row=1, column=0, sticky=customtkinter.EW, padx=10, pady=(20, 0))
 
+        view_label = customtkinter.CTkLabel(
+            selected_frame,
+            width=width,
+            text="View",
+            cursor="hand2",
+            text_color="dodger blue"
+        )
+        view_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10, pady=18)
+
         reset_label = customtkinter.CTkLabel(
             selected_frame,
             width=width,
@@ -90,11 +99,13 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
             cursor="hand2",
             text_color="dodger blue"
         )
-        reset_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
+        reset_label.grid(row=3, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
 
         def handle_reset(e):
             selected_frame.destroy()
             build_dnd_labels()
+            if invoke_reset_wrapper is not None:
+                invoke_reset_wrapper()
 
         reset_label.bind('<Button-1>', handle_reset)
 
@@ -195,9 +206,10 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
         self.is_light_mode = False
         self.appearance_mode_switch = customtkinter.CTkSwitch(
-            self, text="Light Mode", font=customtkinter.CTkFont(weight="bold"), command=self.change_to_light_mode_event
+            self, text="Dark Mode", font=customtkinter.CTkFont(weight="bold"), command=self.change_to_light_mode_event
         )
         self.appearance_mode_switch.grid(row=5, column=0, padx=20, pady=10)
+        self.appearance_mode_switch.select()
 
         self.experiments_button = customtkinter.CTkButton(
             self, text="Info", font=customtkinter.CTkFont(weight="bold"), command=self.handle_experiments_button
@@ -337,19 +349,14 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.grid_columnconfigure((0, 2), weight=1)
                     self.grid_rowconfigure((0, 4), weight=1)
 
-                    def handle_choose_file(path):
-                        print(f"works = {path}")
-
-                    def handle_choose_directory(path):
-                        print(f"works = {path}")
-
                     self.dnd = build_drag_n_drop(
                         self,
-                        handle_choose_directory=handle_choose_directory,
-                        handle_choose_file=handle_choose_file,
+                        handle_choose_directory=self.handle_choose_directory,
+                        handle_choose_file=self.handle_choose_file,
                         choose_file_title="Choose a template file",
                         file_types=[("Text files", "*.txt"), ("All files", "*.*")],
-                        choose_directory_title="Choose a templates directory"
+                        choose_directory_title="Choose a templates directory",
+                        invoke_reset_wrapper=self.handle_reset
                     )
                     self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
 
@@ -361,6 +368,18 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.convert_to_image_button.grid(
                         row=1, column=1, padx=(20, 20), pady=5
                     )
+                    self.convert_to_image_button.configure(state=customtkinter.DISABLED)
+
+                def handle_reset(self):
+                    self.convert_to_image_button.configure(state=customtkinter.DISABLED)
+
+                def handle_choose_file(self, path):
+                    self.convert_to_image_button.configure(state=customtkinter.NORMAL)
+                    print(f"works = {path}")
+
+                def handle_choose_directory(self, path):
+                    self.convert_to_image_button.configure(state=customtkinter.NORMAL)
+                    print(f"works = {path}")
 
                 def handle_convert_to_image_button(self):
                     self.parent_tab.image_export_frame.tkraise()
@@ -449,54 +468,37 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.grid_columnconfigure((0, 2), weight=1)
                     self.grid_rowconfigure((0, 5), weight=1)
 
-                    def view_image(path):
-                        image = Image.open(path)
-
-                        # default_width = 800
-                        # default_height = 800
-                        # max_val = max(image.width, image.height)
-                        # scale_factor = default_width / max_val
-                        # image = image.resize(
-                        #     (
-                        #         int(image.width * scale_factor),
-                        #         int(image.height * scale_factor),
-                        #     ),
-                        #     Image.Resampling.LANCZOS,
-                        # )
-                        # # image = image.resize((300,300), Image.Resampling.LANCZOS)
-                        # pic = ImageTk.PhotoImage(image)
-                        # Orignial image: 800 x 600 => (800 x 0.25) x (600 x 0.25)  =  (200 x 150)
-                        # Initial Canvas: 200 x 200
-
-                        self.dnd.destroy()
-
-                        # self.canvas = customtkinter.CTkCanvas(
-                        #     self, width=image.width, height=image.height
-                        # )
-                        # self.image_id = self.canvas.create_image(
-                        #     0, 0, image=pic, anchor="nw"
-                        # )
-                        # self.canvas.image = pic
-                        # self.canvas.grid(row=0, column=1, padx=(20, 20), pady=5)
-                        #
-                        # self.reset_button.configure(state=tkinter.NORMAL)
-
-                    def handle_choose_file(path):
-                        print(f"works = {path}")
-                        view_image(path)
-
-                    def handle_choose_directory(path):
-                        print(f"works = {path}")
-
-                    self.dnd = build_drag_n_drop(
-                        self,
-                        handle_choose_directory=handle_choose_directory,
-                        handle_choose_file=handle_choose_file,
-                        choose_file_title="Choose a template file",
-                        file_types=[("Text files", "*.txt"), ("All files", "*.*")],
-                        choose_directory_title="Choose a templates directory"
-                    )
-                    self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
+                    # def view_image(path):
+                    #     image = Image.open(path)
+                    #
+                    #     # default_width = 800
+                    #     # default_height = 800
+                    #     # max_val = max(image.width, image.height)
+                    #     # scale_factor = default_width / max_val
+                    #     # image = image.resize(
+                    #     #     (
+                    #     #         int(image.width * scale_factor),
+                    #     #         int(image.height * scale_factor),
+                    #     #     ),
+                    #     #     Image.Resampling.LANCZOS,
+                    #     # )
+                    #     # # image = image.resize((300,300), Image.Resampling.LANCZOS)
+                    #     # pic = ImageTk.PhotoImage(image)
+                    #     # Orignial image: 800 x 600 => (800 x 0.25) x (600 x 0.25)  =  (200 x 150)
+                    #     # Initial Canvas: 200 x 200
+                    #
+                    #     self.dnd.destroy()
+                    #
+                    #     # self.canvas = customtkinter.CTkCanvas(
+                    #     #     self, width=image.width, height=image.height
+                    #     # )
+                    #     # self.image_id = self.canvas.create_image(
+                    #     #     0, 0, image=pic, anchor="nw"
+                    #     # )
+                    #     # self.canvas.image = pic
+                    #     # self.canvas.grid(row=0, column=1, padx=(20, 20), pady=5)
+                    #     #
+                    #     # self.reset_button.configure(state=tkinter.NORMAL)
 
                     self.convert_to_template_button = customtkinter.CTkButton(
                         self,
@@ -515,6 +517,34 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.convert_to_printing_object_button.grid(
                         row=2, column=1, padx=(20, 20), pady=5
                     )
+
+                    self.convert_to_template_button.configure(state=customtkinter.DISABLED)
+                    self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
+
+                    self.dnd = build_drag_n_drop(
+                        self,
+                        handle_choose_directory=self.handle_choose_directory,
+                        handle_choose_file=self.handle_choose_file,
+                        choose_file_title="Choose a template file",
+                        file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+                        choose_directory_title="Choose a templates directory",
+                        invoke_reset_wrapper=self.handle_reset
+                    )
+                    self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
+
+                def handle_reset(self):
+                    self.convert_to_template_button.configure(state=customtkinter.DISABLED)
+                    self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
+
+                def handle_choose_file(self, path):
+                    self.convert_to_template_button.configure(state=customtkinter.NORMAL)
+                    self.convert_to_printing_object_button.configure(state=customtkinter.NORMAL)
+                    print(f"works = {path}")
+
+                def handle_choose_directory(self, path):
+                    self.convert_to_template_button.configure(state=customtkinter.NORMAL)
+                    self.convert_to_printing_object_button.configure(state=customtkinter.NORMAL)
+                    print(f"works = {path}")
 
                 def handle_convert_to_template_button(self):
                     self.parent_tab.template_export_frame.tkraise()
@@ -541,10 +571,31 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.frame.grid_columnconfigure((0, 3), weight=1)
         self.frame.grid_rowconfigure((0, 6), weight=1)
 
-        def handle_choose_file(path):
+        self.f1_is_selected = False
+        self.f2_is_selected = False
+        self.dir1_is_selected = False
+        self.dir2_is_selected = False
+
+        def handle_reset1():
+            self.f1_is_selected = False
+            self.dir1_is_selected = False
+            self.match_button.configure(state=customtkinter.DISABLED)
+
+        def handle_reset2():
+            self.f2_is_selected = False
+            self.dir2_is_selected = False
+            self.match_button.configure(state=customtkinter.DISABLED)
+
+        def handle_choose_file1(path):
+            self.f1_is_selected = True
+            if self.f2_is_selected or self.dir2_is_selected:
+                self.match_button.configure(state=customtkinter.NORMAL)
             print(f"works = {path}")
 
-        def handle_choose_directory(path):
+        def handle_choose_directory1(path):
+            self.dir1_is_selected = True
+            if self.f2_is_selected or self.dir2_is_selected:
+                self.match_button.configure(state=customtkinter.NORMAL)
             print(f"works = {path}")
 
         font = customtkinter.CTkFont(size=16, weight="bold")
@@ -552,23 +603,38 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
                                                                              sticky=customtkinter.EW, pady=5)
         self.dnd1 = build_drag_n_drop(
             self.frame,
-            handle_choose_directory=handle_choose_directory,
-            handle_choose_file=handle_choose_file,
+            handle_choose_directory=handle_choose_directory1,
+            handle_choose_file=handle_choose_file1,
             choose_file_title="Choose a template file",
             file_types=[("Text files", "*.txt"), ("All files", "*.*")],
-            choose_directory_title="Choose a templates directory"
+            choose_directory_title="Choose a templates directory",
+            invoke_reset_wrapper=handle_reset1
         )
         self.dnd1.grid(row=3, column=1, padx=(20, 20), pady=5)
 
         customtkinter.CTkLabel(self.frame, text="Second Set", font=font).grid(row=2, column=2, padx=(20, 20),
                                                                               sticky=customtkinter.EW, pady=5)
+
+        def handle_choose_file2(path):
+            self.f2_is_selected = True
+            if self.f1_is_selected or self.dir1_is_selected:
+                self.match_button.configure(state=customtkinter.NORMAL)
+            print(f"works = {path}")
+
+        def handle_choose_directory2(path):
+            self.dir2_is_selected = True
+            if self.f1_is_selected or self.dir1_is_selected:
+                self.match_button.configure(state=customtkinter.NORMAL)
+            print(f"works = {path}")
+
         self.dnd2 = build_drag_n_drop(
             self.frame,
-            handle_choose_directory=handle_choose_directory,
-            handle_choose_file=handle_choose_file,
+            handle_choose_directory=handle_choose_directory2,
+            handle_choose_file=handle_choose_file2,
             choose_file_title="Choose a template file",
             file_types=[("Text files", "*.txt"), ("All files", "*.*")],
-            choose_directory_title="Choose a templates directory"
+            choose_directory_title="Choose a templates directory",
+            invoke_reset_wrapper=handle_reset2
         )
         self.dnd2.grid(row=3, column=2, padx=(20, 20), pady=5)
 
@@ -580,6 +646,7 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             padx=(20, 20),
             pady=(40, 5)
         )
+        self.match_button.configure(state=customtkinter.DISABLED)
 
     def handle_match_templates_button(self):
         pass
