@@ -1,7 +1,9 @@
 import time
 import tkinter
 from datetime import datetime
+from tkinter import ttk
 
+from tooltip import ToolTip
 import PIL.Image
 import customtkinter
 from tkinterdnd2 import DND_FILES, TkinterDnD
@@ -781,7 +783,22 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             def f(e):
                 pass
 
-            self.export_button = customtkinter.CTkLabel(
+            self.continue_experiment = customtkinter.CTkLabel(
+                self,
+                text="",
+                cursor="hand2",
+                image=customtkinter.CTkImage(
+                    Image.open(os.path.join(assets_path, "arrows.png")),
+                    size=(25, 25)
+                ),
+            )
+            self.continue_experiment.bind('<Button-1>', command=f)
+            self.continue_experiment.grid(
+                row=0, column=1, padx=(20, 10), pady=10
+            )
+            ToolTip(self.continue_experiment, msg="Continue Experiment", delay=1.0)
+
+            self.edit_experiment = customtkinter.CTkLabel(
                 self,
                 text="",
                 cursor="hand2",
@@ -790,10 +807,11 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                     size=(25, 25)
                 ),
             )
-            self.export_button.bind('<Button-1>', command=f)
-            self.export_button.grid(
-                row=0, column=1, padx=(20, 10), pady=10
+            self.edit_experiment.bind('<Button-1>', command=f)
+            self.edit_experiment.grid(
+                row=0, column=2, padx=(10, 10), pady=10
             )
+            ToolTip(self.edit_experiment, msg="Edit Experiment", delay=1.0)
 
             self.delete_button = customtkinter.CTkLabel(
                 self,
@@ -806,8 +824,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             )
             self.delete_button.bind('<Button-1>', command=f)
             self.delete_button.grid(
-                row=0, column=2, padx=(10, 25), pady=10
+                row=0, column=3, padx=(10, 25), pady=10
             )
+            ToolTip(self.delete_button, msg="Delete Experiment", delay=1.0)
 
             # self.scrollable_frame = customtkinter.CTkScrollableFrame(
             #     self, label_text="Operations"
@@ -857,6 +876,33 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.date_label.grid(
                     row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
                 )
+
+
+class HomeFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master=master, corner_radius=0)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        # Subframe
+        self.frame = customtkinter.CTkFrame(self)
+        self.frame.grid(
+            row=0,
+            column=0,
+            sticky=customtkinter.NS + customtkinter.EW,
+            padx=(20, 20),
+            pady=(20, 20),
+        )
+        self.frame.columnconfigure(0, weight=1)
+        # self.frame.rowconfigure(0, weight=1)
+
+        self.label = customtkinter.CTkLabel(self.frame, text="Experiments",
+                                            font=customtkinter.CTkFont(weight="bold", size=20))
+        self.label.grid(row=0, column=0, padx=(20, 20), pady=(20, 20))
+
+        self.new_experiment_radio_button = customtkinter.CTkRadioButton(self.frame, text="Start new experiment")
+        self.new_experiment_radio_button.grid(row=1, column=0, padx=(20, 20))
+
 
 
 class App(Tk):
@@ -911,8 +957,12 @@ class App(Tk):
         self.experiments_frame = ExperimentsFrame(master=self)
         main_frame_grid_config(self.experiments_frame)
 
+        # Home main frame
+        self.home_frame = HomeFrame(master=self)
+        main_frame_grid_config(self.home_frame)
+
         # Default home frame
-        self.convert_assets_frame.tkraise()
+        self.home_frame.tkraise()
 
 
 if __name__ == "__main__":
