@@ -180,7 +180,7 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
 class SideMenuFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master=master, corner_radius=0)
-        self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(5, weight=1)
 
         self.font = customtkinter.CTkFont(weight="bold")
 
@@ -190,33 +190,55 @@ class SideMenuFrame(customtkinter.CTkFrame):
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
         self.convert_assets_button = customtkinter.CTkButton(
-            self, text="Convert Assets", font=customtkinter.CTkFont(weight="bold"),
+            self, text="Convert Assets", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "file.png")),
+                size=(25, 25)
+            ), anchor='w',
             command=self.handle_convert_assets_button
         )
-        self.convert_assets_button.grid(row=1, column=0, padx=20, pady=10)
+        self.convert_assets_button.grid(row=1, column=0, padx=20, pady=10, sticky=customtkinter.EW)
 
         self.match_templates_button = customtkinter.CTkButton(
             self, text="Match Templates", font=customtkinter.CTkFont(weight="bold"),
+            image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "compare.png")),
+                size=(25, 25)
+            ), anchor='w',
             command=self.handle_match_template_button
         )
-        self.match_templates_button.grid(row=2, column=0, padx=20, pady=10)
+        self.match_templates_button.grid(row=2, column=0, padx=20, pady=10, sticky=customtkinter.EW)
 
         self.experiments_button = customtkinter.CTkButton(
-            self, text="Experiments", font=customtkinter.CTkFont(weight="bold"), command=self.handle_experiments_button
+            self, text="Experiments", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "chemistry.png")),
+                size=(25, 25),
+            ), anchor='w', command=self.handle_experiments_button
         )
-        self.experiments_button.grid(row=3, column=0, padx=20, pady=10)
+        self.experiments_button.grid(row=3, column=0, padx=20, pady=10, sticky=customtkinter.EW)
+
+        self.experiments_button = customtkinter.CTkButton(
+            self, text="New Experiment", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "add.png")),
+                size=(25, 25)
+            ), anchor='w',
+            command=self.handle_new_experiment_button
+        )
+        self.experiments_button.grid(row=4, column=0, padx=20, pady=10, sticky=customtkinter.EW)
 
         self.is_light_mode = False
         self.appearance_mode_switch = customtkinter.CTkSwitch(
             self, text="Dark Mode", font=customtkinter.CTkFont(weight="bold"), command=self.change_to_light_mode_event
         )
-        self.appearance_mode_switch.grid(row=5, column=0, padx=20, pady=10)
+        self.appearance_mode_switch.grid(row=6, column=0, padx=20, pady=10)
         self.appearance_mode_switch.select()
 
         self.experiments_button = customtkinter.CTkButton(
-            self, text="Info", font=customtkinter.CTkFont(weight="bold"), command=self.handle_experiments_button
+            self, text="Info", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "info.png")),
+                size=(25, 25)
+            ), command=self.handle_experiments_button
         )
-        self.experiments_button.grid(row=6, column=0, padx=20, pady=(10, 10))
+        self.experiments_button.grid(row=7, column=0, padx=20, pady=(10, 10), sticky=customtkinter.EW)
 
     def handle_convert_assets_button(self):
         self.master.convert_assets_frame.tkraise()
@@ -226,6 +248,9 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
     def handle_experiments_button(self):
         self.master.experiments_frame.tkraise()
+
+    def handle_new_experiment_button(self):
+        self.master.new_experiment_frame.tkraise()
 
     def change_to_light_mode_event(self):
         if not self.is_light_mode:
@@ -878,7 +903,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 )
 
 
-class HomeFrame(customtkinter.CTkFrame):
+class NewExperimentFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master=master, corner_radius=0)
         self.columnconfigure(0, weight=1)
@@ -894,15 +919,30 @@ class HomeFrame(customtkinter.CTkFrame):
             pady=(20, 20),
         )
         self.frame.columnconfigure(0, weight=1)
-        # self.frame.rowconfigure(0, weight=1)
+        self.frame.rowconfigure((0, 5), weight=1)
 
-        self.label = customtkinter.CTkLabel(self.frame, text="Experiments",
+        self.label = customtkinter.CTkLabel(self.frame, text="Create New Experiment",
                                             font=customtkinter.CTkFont(weight="bold", size=20))
-        self.label.grid(row=0, column=0, padx=(20, 20), pady=(20, 20))
+        self.label.grid(row=1, column=0, padx=(20, 20), pady=(0, 10))
 
-        self.new_experiment_radio_button = customtkinter.CTkRadioButton(self.frame, text="Start new experiment")
-        self.new_experiment_radio_button.grid(row=1, column=0, padx=(20, 20))
+        self.new_experiment_entry = customtkinter.CTkEntry(self.frame, placeholder_text="Experiment Name", width=300,
+                                                           justify=customtkinter.CENTER)
+        self.new_experiment_entry.grid(row=2, column=0, padx=(20, 20), pady=(10, 10))
 
+        self.new_experiment_button = customtkinter.CTkButton(self.frame, text="Create",
+                                                             command=self.handle_create_new_experiment_button)
+        self.new_experiment_button.grid(row=3, column=0, padx=(20, 20), pady=(10, 10))
+
+        self.continue_experiment_button = customtkinter.CTkLabel(self.frame, text="Continue from existing experiment?",
+                                                                 cursor="hand2", text_color="dodger blue2")
+        self.continue_experiment_button.grid(row=4, column=0, padx=(20, 20), pady=(10, 40))
+        self.continue_experiment_button.bind('<Button-1>', self.handle_continue_experiment_button)
+
+    def handle_create_new_experiment_button(self):
+        pass
+
+    def handle_continue_experiment_button(self, e):
+        self.master.experiments_frame.tkraise()
 
 
 class App(Tk):
@@ -957,8 +997,11 @@ class App(Tk):
         self.experiments_frame = ExperimentsFrame(master=self)
         main_frame_grid_config(self.experiments_frame)
 
+        self.new_experiment_frame = NewExperimentFrame(master=self)
+        main_frame_grid_config(self.new_experiment_frame)
+
         # Home main frame
-        self.home_frame = HomeFrame(master=self)
+        self.home_frame = NewExperimentFrame(master=self)
         main_frame_grid_config(self.home_frame)
 
         # Default home frame
