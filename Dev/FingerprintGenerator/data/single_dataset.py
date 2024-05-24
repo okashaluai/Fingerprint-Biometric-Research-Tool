@@ -1,5 +1,5 @@
-from data.base_dataset import BaseDataset, get_transform
-from data.image_folder import make_dataset
+from Dev.FingerprintGenerator.data.base_dataset import BaseDataset, get_transform
+from Dev.FingerprintGenerator.data.image_folder import make_dataset
 from PIL import Image
 
 

@@ -30,9 +30,9 @@ import ntpath
 import os
 
 from Dev.FingerprintGenerator.util import util
-from data import create_dataset
-from models import create_model
-from options.test_options import TestOptions
+from Dev.FingerprintGenerator.data import create_dataset
+from Dev.FingerprintGenerator.models import create_model
+from Dev.FingerprintGenerator.options.test_options import TestOptions
 
 try:
     import wandb
@@ -75,4 +75,4 @@ def generate(images_output_path: str):
             util.save_image(im, save_path, aspect_ratio=opt.aspect_ratio)
 
 
-generate(r'C:\Users\Yazan\Desktop')
+
