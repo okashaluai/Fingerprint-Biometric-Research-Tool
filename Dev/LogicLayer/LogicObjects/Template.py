@@ -1,11 +1,15 @@
 from Dev.DTOs import TemplateDTO
 from Dev.DataAccessLayer.DAOs import TemplateDAO
+from Dev.FingerprintGenerator import generator
 from Dev.LogicLayer.LogicObjects.Asset import Asset
 
 
 class Template(Asset):
     def __init__(self, path):
         super().__init__(path)
+
+    def convert_to_image(self, minutiae_map_path: str, output_path: str):
+        generator.generate()
 
     def to_dto(self) -> TemplateDTO:
         raise NotImplementedError
