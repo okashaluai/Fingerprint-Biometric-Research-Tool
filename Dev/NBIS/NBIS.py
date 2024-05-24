@@ -1,8 +1,7 @@
-import stat
-import subprocess
 import os
-from enum import Enum
 import platform
+import subprocess
+from enum import Enum
 
 
 class LibName(Enum):
