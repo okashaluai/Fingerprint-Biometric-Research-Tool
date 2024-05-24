@@ -37,3 +37,8 @@ class Image(Asset):
         detect_minutiae(image_path, PLAYGROUND.PATH, template_name)
         template_path = os.path.join(PLAYGROUND.PATH, template_name)
         return template_path
+
+
+# from Dev.FingerprintGenerator.generator import generate
+#
+# generate(r'C:\Users\Yazan\Desktop')
