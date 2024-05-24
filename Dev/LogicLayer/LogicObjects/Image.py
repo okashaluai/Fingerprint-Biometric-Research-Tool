@@ -39,6 +39,7 @@ class Image(Asset):
         return template_path
 
 
+
+# For Testing
 # from Dev.FingerprintGenerator.generator import generate
-#
-# generate(r'C:\Users\Yazan\Desktop')
+# generate(r'/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/FingerprintGenerator/temp', r'/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/FingerprintGenerator/temp')

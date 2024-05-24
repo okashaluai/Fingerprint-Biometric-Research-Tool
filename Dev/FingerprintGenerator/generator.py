@@ -40,8 +40,8 @@ except ImportError:
     print('Warning: wandb package cannot be found. The option "--use_wandb" will result in error.')
 
 
-def generate(images_output_path: str):
-    opt = TestOptions().parse()  # get test options
+def generate(input_images_dir: str, output_images_dir: str):
+    opt = TestOptions().parse(input_images_dir)  # get test options
     # hard-code some parameters for test
     opt.num_threads = 0  # test code only supports num_threads = 0
     opt.batch_size = 1  # test code only supports batch_size = 1
@@ -71,8 +71,11 @@ def generate(images_output_path: str):
         for label, im_data in visuals.items():
             im = util.tensor2im(im_data)
             image_name = '%s_%s.png' % (name, label)
-            save_path = os.path.join(images_output_path, image_name)
+            save_path = os.path.join(output_images_dir, image_name)
             util.save_image(im, save_path, aspect_ratio=opt.aspect_ratio)
 
 
 
+
+# Testing
+# generate(r'temp', r'temp')

@@ -1,6 +1,6 @@
 import argparse
 import os
-
+import pathlib
 import torch
 
 from Dev.FingerprintGenerator import data, models
@@ -17,16 +17,17 @@ class BaseOptions():
     def __init__(self):
         """Reset the class; indicates the class hasn't been initailized"""
         self.initialized = False
-
+        self.input_images_dir = None
     def initialize(self, parser):
         """Define the common options that are used in both training and test."""
         # basic parameters
-        parser.add_argument('--dataroot', default=r'C:\Users\Yazan\Desktop\dir',
+        parser.add_argument('--dataroot', default=self.input_images_dir,
                             help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
-        parser.add_argument('--name', type=str, default=r'C:\Users\Yazan\Desktop\Final_Project\Dev\FingerprintGenerator',
+
+        parser.add_argument('--name', type=str, default=str(pathlib.Path(__file__).parent.parent.resolve()),
                             help='name of the experiment. It decides where to store samples and models')
         parser.add_argument('--gpu_ids', type=str, default='-1', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-        parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
+        parser.add_argument('--checkpoints_dir', type=str, default='', help='models are saved here')
         # model parameters
         parser.add_argument('--model', type=str, default='test',
                             help='chooses which model to use. [cycle_gan | pix2pix | test | colorization]')
@@ -134,11 +135,11 @@ class BaseOptions():
             opt_file.write(message)
             opt_file.write('\n')
 
-    def parse(self):
+    def parse(self, input_images_dir:str):
         """Parse our options, create checkpoints directory suffix, and set up gpu device."""
+        self.input_images_dir = input_images_dir
         opt = self.gather_options()
         opt.isTrain = self.isTrain  # train or test
-
         # process opt.suffix
         if opt.suffix:
             suffix = ('_' + opt.suffix.format(**vars(opt))) if opt.suffix != '' else ''
