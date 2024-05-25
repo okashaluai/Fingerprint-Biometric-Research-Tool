@@ -1,15 +1,14 @@
-import time
-import tkinter
-from datetime import datetime
-from tkinter import ttk
-
-from tooltip import ToolTip
-import PIL.Image
-import customtkinter
-from tkinterdnd2 import DND_FILES, TkinterDnD
-from PIL import Image, ImageTk
-import open3d as o3d
 import os
+import time
+from datetime import datetime
+
+import customtkinter
+import open3d as o3d
+from PIL import Image
+from tkinterdnd2 import DND_FILES, TkinterDnD
+
+from Dev.LogicLayer.Service.IService import IService
+from Dev.PresentationLayer.tooltip import ToolTip
 
 absolute_path = os.path.dirname(__file__)
 assets_path = os.path.join(absolute_path, "Assets")
@@ -946,7 +945,7 @@ class NewExperimentFrame(customtkinter.CTkFrame):
 
 
 class App(Tk):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, service: IService, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Configure app window
@@ -1006,7 +1005,3 @@ class App(Tk):
 
         # Default home frame
         self.home_frame.tkraise()
-
-
-if __name__ == "__main__":
-    App().mainloop()
