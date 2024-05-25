@@ -3,9 +3,9 @@ from abc import abstractmethod
 from Dev.Utils import Interface
 
 
-class IMatcher(Interface):
+class IMatcher:
     @abstractmethod
-    def match_one_to_one(self, template1_path: str, template2_path: str) -> str:
+    def match_one_to_one(self, template1_path: str, template2_path: str) -> int:
         pass
 
     @abstractmethod

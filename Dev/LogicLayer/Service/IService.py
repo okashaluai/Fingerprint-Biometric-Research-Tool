@@ -1,10 +1,9 @@
 from abc import abstractmethod
 
 from Dev.DTOs import Response, ImageDTO, TemplateDTO
-from Dev.Utils import Interface
 
 
-class IService(Interface):
+class IService:
     """ SYSTEM INTERFACE """
 
     @abstractmethod
