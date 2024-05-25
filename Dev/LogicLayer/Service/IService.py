@@ -41,10 +41,10 @@ class IService(Interface):
     def match(self, experiment_name: str, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
         """
         This function matches 2 groups of imported templates and returns comparison statistics.
+                :param str experiment_name: Experiment's name.
         :param tuple[str] templates_path1: First imported template group.
-        :param str experiment_name: Experiment's name.
         :param tuple[str] templates_path2: Second imported template group.
-        :returns Response(success:bool, data:str|None, errors:str|None)
+        :returns Response(success:bool, data:int|dict[str, int]|dict[str, dict[str, int]]|None, errors:str|None)
         """
         pass
 

@@ -41,6 +41,7 @@ def detect_minutiae(image_path: str, working_dir_path: str, template_name: str) 
 
 
 def match_templates(first_xyt_template_path, second_xyt_template_path) -> int:
+    print(first_xyt_template_path)
     stdout = run_process(get_exe_lib_path(LibName.BOZORTH3), f"{first_xyt_template_path} {second_xyt_template_path}")
 
     # Parse the output to extract the matching score

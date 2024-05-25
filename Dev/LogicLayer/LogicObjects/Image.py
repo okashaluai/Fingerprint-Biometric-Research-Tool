@@ -23,7 +23,7 @@ class Image(Asset):
             raise Exception(f'"{image_path}" path does not describe an image location.')
 
     def to_dto(self) -> ImageDTO:
-        raise NotImplementedError
+        return ImageDTO(id=0, path=self.path, date=self.date)
 
     def to_dao(self) -> ImageDAO:
         raise NotImplementedError

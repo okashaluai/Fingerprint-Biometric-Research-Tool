@@ -1,11 +1,15 @@
 from Dev.DTOs import TemplateDTO
 from Dev.DataAccessLayer.DAOs import TemplateDAO
 from Dev.LogicLayer.LogicObjects.Asset import Asset
+from Dev.LogicLayer.LogicObjects.Image import Image
 
 
 class Template(Asset):
     def __init__(self, path):
         super().__init__(path)
+
+    def convert_to_image(self) -> Image:
+        raise NotImplementedError
 
     def to_dto(self) -> TemplateDTO:
         return TemplateDTO(id=0, path=self.path, date=self.date)

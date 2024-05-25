@@ -10,13 +10,27 @@ from Dev.Utils import Singleton
 class ConvertorController(metaclass=Singleton):
 
     @staticmethod
+    def convert_template_to_image(experiment_name: str, template_path: str) -> Image:
+        template = Template(template_path)
+        image = template.convert_to_image()
+
+        # Add this operation to the experiment
+        new_operation = ExperimentController().add_operation(
+            Operation(experiment_name, OperationType.TMP2IMG, template, image))
+
+        # Update to the new path
+        image.path = new_operation.output.path
+
+        return image
+
+    @staticmethod
     def convert_image_to_template(experiment_name: str, image_path: str) -> Template:
         image = Image(image_path)
         template = image.convert_to_template()
 
         # Add this operation to the experiment
         new_operation = ExperimentController().add_operation(
-            Operation(experiment_name, OperationType.TMP2IMG, image, template))
+            Operation(experiment_name, OperationType.IMG2TMP, image, template))
 
         # Update to the new path
         template.path = new_operation.output.path

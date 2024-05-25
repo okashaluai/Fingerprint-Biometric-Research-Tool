@@ -9,7 +9,7 @@ from Dev.LogicLayer.LogicObjects.ILogicObject import ILogicObject
 class Asset(ILogicObject):
     def __init__(self, path: str):
         self.path = path
-        self.date = time.time()
+        self.date = time.time()  # TODO: this will be in the dal layer only.
 
     @abstractmethod
     def to_dto(self) -> AssetDTO:
