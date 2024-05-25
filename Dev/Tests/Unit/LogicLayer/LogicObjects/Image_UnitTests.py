@@ -1,10 +1,10 @@
 import os
 import unittest
+
 from Dev.LogicLayer.LogicObjects.Image import Image
 from Dev.LogicLayer.LogicObjects.Template import Template
-from Dev.Playground import PLAYGROUND
 from Dev.Tests.TestUtils import Image2Template_path
-from parameterized import parameterized
+
 
 class ImageToTemplateTests(unittest.TestCase):
     @classmethod
@@ -15,9 +15,8 @@ class ImageToTemplateTests(unittest.TestCase):
         template1 = Template(os.path.join(os.path.join(Image2Template_path, 'TestCase1'), 'i1'))
         template2 = Template(os.path.join(os.path.join(Image2Template_path, 'TestCase2'), 'i2'))
         template3 = Template(os.path.join(os.path.join(Image2Template_path, 'TestCase3'), 'i3'))
-    
-    def test_convert_to_template(self):
 
+    def test_convert_to_template(self):
         result_template_path1 = self.image1.convert_to_template()
         result_template1 = Template(result_template_path1)
         self.assertEqual(result_template1, self.template1)
