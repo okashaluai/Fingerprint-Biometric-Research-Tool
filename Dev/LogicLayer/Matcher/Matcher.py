@@ -6,7 +6,6 @@ class Matcher(metaclass=Singleton):
 
     @staticmethod
     def match_one_to_one(template1_path: str, template2_path: str) -> int:
-        print(template1_path)
         matching_score = match_templates(template1_path, template2_path)
         return matching_score
 
