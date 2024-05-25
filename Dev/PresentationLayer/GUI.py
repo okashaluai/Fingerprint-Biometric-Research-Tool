@@ -4,6 +4,7 @@ from datetime import datetime
 
 import customtkinter
 import open3d as o3d
+from CTkMessagebox import CTkMessagebox
 from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
@@ -597,10 +598,15 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.frame.grid_columnconfigure((0, 3), weight=1)
         self.frame.grid_rowconfigure((0, 6), weight=1)
 
+        self.results_frame = None
+
         self.f1_is_selected = False
         self.f2_is_selected = False
         self.dir1_is_selected = False
         self.dir2_is_selected = False
+
+        self.path_set1 = None
+        self.path_set2 = None
 
         def handle_reset1():
             self.f1_is_selected = False
@@ -612,17 +618,26 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             self.dir2_is_selected = False
             self.match_button.configure(state=customtkinter.DISABLED)
 
+        def dir_to_path_set(path):
+            templates_set = []
+
+            for t in os.listdir(path):
+                t_path = os.path.join(path, t)
+                templates_set.append(t_path)
+
+            return tuple(templates_set)
+
         def handle_choose_file1(path):
             self.f1_is_selected = True
             if self.f2_is_selected or self.dir2_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            print(f"works = {path}")
+            self.path_set1 = (path,)
 
         def handle_choose_directory1(path):
             self.dir1_is_selected = True
             if self.f2_is_selected or self.dir2_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            print(f"works = {path}")
+            self.path_set1 = dir_to_path_set(path)
 
         font = customtkinter.CTkFont(size=16, weight="bold")
         customtkinter.CTkLabel(self.frame, text="First Set", font=font).grid(row=2, column=1, padx=(20, 20),
@@ -645,13 +660,13 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             self.f2_is_selected = True
             if self.f1_is_selected or self.dir1_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            print(f"works = {path}")
+            self.path_set2 = (path,)
 
         def handle_choose_directory2(path):
             self.dir2_is_selected = True
             if self.f1_is_selected or self.dir1_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            print(f"works = {path}")
+            self.path_set2 = dir_to_path_set(path)
 
         self.dnd2 = build_drag_n_drop(
             self.frame,
@@ -675,7 +690,37 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.match_button.configure(state=customtkinter.DISABLED)
 
     def handle_match_templates_button(self):
-        pass
+        response = service.match("Yazan", self.path_set1, self.path_set2)
+        if response.success:
+            self.build_results_frame()
+        else:
+            CTkMessagebox(icon="cancel", title="Matching Error", message=response.error)
+
+    def build_results_frame(self):
+        self.results_frame = customtkinter.CTkFrame(self)
+        self.results_frame.grid_columnconfigure((0), weight=1)
+        self.results_frame.grid_rowconfigure((0, 6), weight=1)
+        self.results_frame.grid(
+            row=0,
+            column=0,
+            sticky=customtkinter.NS + customtkinter.EW,
+            padx=(20, 20),
+            pady=(20, 20),
+        )
+        title = customtkinter.CTkLabel(self.results_frame, text="Matching Results",
+                                       font=customtkinter.CTkFont(size=20, weight="bold"))
+        title.grid(row=0, column=0, padx=(20, 20), sticky=customtkinter.EW, pady=5)
+
+        def handle_back_button():
+            self.results_frame.destroy()
+
+        back_button = customtkinter.CTkButton(self.results_frame, text="Back", command=handle_back_button)
+        back_button.grid(
+            row=1,
+            columnspan=2,
+            padx=(20, 20),
+            pady=(40, 5)
+        )
 
 
 class ExperimentsFrame(customtkinter.CTkFrame):
@@ -945,8 +990,12 @@ class NewExperimentFrame(customtkinter.CTkFrame):
 
 
 class App(Tk):
-    def __init__(self, service: IService, *args, **kwargs):
+    def __init__(self, _service: IService, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Set system service
+        global service
+        service = _service
 
         # Configure app window
         app_width = 900

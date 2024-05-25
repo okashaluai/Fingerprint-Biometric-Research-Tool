@@ -16,6 +16,9 @@ class MatcherController(metaclass=Singleton):
         elif len(first_set_path) == 1 and len(second_set_path) > 1:
             return self.matcher.match_one_to_many(first_set_path[0], second_set_path)
 
+        elif len(second_set_path) == 1 and len(first_set_path) > 1:
+            return self.matcher.match_one_to_many(second_set_path[0], first_set_path)
+
         elif len(first_set_path) > 1 and len(second_set_path) > 1:
             return self.matcher.match_many_to_many(first_set_path, second_set_path)
 
