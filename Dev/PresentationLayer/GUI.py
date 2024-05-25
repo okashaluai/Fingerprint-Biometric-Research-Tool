@@ -1,6 +1,7 @@
 import os
 import time
 from datetime import datetime
+from pathlib import Path
 
 import customtkinter
 import open3d as o3d
@@ -692,11 +693,11 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
     def handle_match_templates_button(self):
         response = service.match("Yazan", self.path_set1, self.path_set2)
         if response.success:
-            self.build_results_frame()
+            self.build_results_frame(response.data)
         else:
             CTkMessagebox(icon="cancel", title="Matching Error", message=response.error)
 
-    def build_results_frame(self):
+    def build_results_frame(self, results):
         self.results_frame = customtkinter.CTkFrame(self)
         self.results_frame.grid_columnconfigure((0), weight=1)
         self.results_frame.grid_rowconfigure((0, 6), weight=1)
@@ -711,13 +712,42 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
                                        font=customtkinter.CTkFont(size=20, weight="bold"))
         title.grid(row=0, column=0, padx=(20, 20), sticky=customtkinter.EW, pady=5)
 
+        if len(self.path_set1) == 1 and len(self.path_set2) == 1:
+            t1_name = Path(self.path_set1[0]).stem
+            t2_name = Path(self.path_set2[0]).stem
+            res_text = f"Score: {results}"
+        elif len(self.path_set1) == 1 and len(self.path_set2) > 1:
+            t1_name = Path(self.path_set1[0]).stem
+            res_text = f"Matching [{t1_name}] with:\n\n"
+            for t2 in self.path_set2:
+                t2_name = Path(self.path_set2[0]).stem
+                res_text += f"{t2_name} - Score: {results[t2]}\n"
+        elif len(self.path_set2) == 1 and len(self.path_set1) > 1:
+            t2_name = Path(self.path_set2[0]).stem
+            res_text = f"Matching [{t2_name}] with:\n\n"
+            for t1 in self.path_set1:
+                t1_name = Path(self.path_set2[0]).stem
+                res_text += f"{t1_name} - Score: {results[t1]}\n"
+        elif len(self.path_set1) > 1 and len(self.path_set2) > 1:
+            res_text = ""
+            for t1 in self.path_set1:
+                t1_name = Path(t1).stem
+                res_text += f"\nMatching [{t1_name}] with:\n\n"
+                for t2 in self.path_set2:
+                    t2_name = Path(t2).stem
+                    res_text += f"{t2_name} - Score: {results[t1][t2]}\n"
+
+        results_label = customtkinter.CTkLabel(self.results_frame, text=res_text,
+                                               font=customtkinter.CTkFont(size=16, weight="bold"))
+        results_label.grid(row=1, column=0, padx=(20, 20), sticky=customtkinter.EW, pady=10)
+
         def handle_back_button():
             self.results_frame.destroy()
 
         back_button = customtkinter.CTkButton(self.results_frame, text="Back", command=handle_back_button)
         back_button.grid(
-            row=1,
-            columnspan=2,
+            row=2,
+            column=0,
             padx=(20, 20),
             pady=(40, 5)
         )
