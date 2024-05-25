@@ -1,0 +1,2 @@
+class PLAYGROUND:
+    PATH = ''

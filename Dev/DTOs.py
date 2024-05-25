@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TextIO
+
 from Dev.Enums import OperationType
 from Dev.Utils import Interface
 
@@ -17,7 +17,6 @@ class Response:
     :param object|None data: Can be any object when we return value, else None.
     :param str|None error: Non-empty error message upon failure, else None.
     """
-
     success: bool
     data: object | None
     error: str | None
@@ -32,9 +31,7 @@ class AssetDTO(IDto):
 
 @dataclass(frozen=True)
 class TemplateDTO(AssetDTO):
-    # TODO: we may need to use data structure instead of text file
-    min_file: TextIO
-    xyt_file: TextIO
+    pass
 
 
 @dataclass(frozen=True)
@@ -67,4 +64,3 @@ class ExperimentDTO(IDto):
     name: str
     date: float
     operations: tuple[OperationDTO]
-
