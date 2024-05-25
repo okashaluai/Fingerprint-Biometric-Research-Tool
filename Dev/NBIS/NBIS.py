@@ -1,8 +1,7 @@
-import stat
-import subprocess
 import os
-from enum import Enum
 import platform
+import subprocess
+from enum import Enum
 
 
 class LibName(Enum):
@@ -27,14 +26,18 @@ def get_exe_lib_path(lib_name: LibName) -> str:
 
 
 def detect_minutiae(image_path: str, working_dir_path: str, template_name: str) -> None:
-    template_path = os.path.join(working_dir_path, template_name)
+    # Create template dir with the same template name
+    template_dir_path = os.path.join(working_dir_path, template_name)
+    os.mkdir(template_dir_path)
+
+    template_path = os.path.join(template_dir_path, template_name)
 
     run_process(get_exe_lib_path(LibName.MINDTCT), f"{image_path} {template_path}")
 
     # Keep only .min and .xyt files
-    for template in os.listdir(working_dir_path):
+    for template in os.listdir(template_dir_path):
         if not (template.lower().endswith('.min') or template.lower().endswith('.xyt')):
-            os.remove(os.path.join(working_dir_path, template))
+            os.remove(os.path.join(template_dir_path, template))
 
 
 def match_templates(first_xyt_template_path, second_xyt_template_path) -> int:

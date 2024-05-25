@@ -1,7 +1,6 @@
 import unittest
 
 
-
 class ImageToTemplateTests(unittest.TestCase):
     def setUp(self):
         pass

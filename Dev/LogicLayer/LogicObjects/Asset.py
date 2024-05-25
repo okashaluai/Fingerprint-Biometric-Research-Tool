@@ -1,17 +1,19 @@
+import time
 from abc import abstractmethod
+
 from Dev.DTOs import AssetDTO
 from Dev.DataAccessLayer.DAOs import AssetDAO
 from Dev.LogicLayer.LogicObjects.ILogicObject import ILogicObject
-from datetime import datetime
+
 
 class Asset(ILogicObject):
-    def __init__(self, path):
-        self.__path = path
-        self.__date = datetime.now()
+    def __init__(self, path: str):
+        self.path = path
+        self.date = time.time()
 
     @abstractmethod
     def to_dto(self) -> AssetDTO:
-        return AssetDTO(0, self.__path, self.__date)
+        return AssetDTO(0, self.path, self.date)
 
     @abstractmethod
     def to_dao(self) -> AssetDAO:
