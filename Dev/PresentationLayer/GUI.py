@@ -720,13 +720,13 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             t1_name = Path(self.path_set1[0]).stem
             res_text = f"Matching [{t1_name}] with:\n\n"
             for t2 in self.path_set2:
-                t2_name = Path(self.path_set2[0]).stem
+                t2_name = Path(t2).stem
                 res_text += f"{t2_name} - Score: {results[t2]}\n"
         elif len(self.path_set2) == 1 and len(self.path_set1) > 1:
             t2_name = Path(self.path_set2[0]).stem
             res_text = f"Matching [{t2_name}] with:\n\n"
             for t1 in self.path_set1:
-                t1_name = Path(self.path_set2[0]).stem
+                t1_name = Path(t1).stem
                 res_text += f"{t1_name} - Score: {results[t1]}\n"
         elif len(self.path_set1) > 1 and len(self.path_set2) > 1:
             res_text = ""
