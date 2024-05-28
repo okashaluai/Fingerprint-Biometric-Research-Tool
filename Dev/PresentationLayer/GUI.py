@@ -1,7 +1,9 @@
 import os
+import shutil
 import time
 from datetime import datetime
 from pathlib import Path
+from tkinter import filedialog
 
 import customtkinter
 import open3d as o3d
@@ -156,7 +158,6 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
         choose_directory_label.grid(row=4, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
 
         def handle_choose_file_event(e):
-            from tkinter import filedialog
             file_path = filedialog.askopenfilename(title=choose_file_title, filetypes=file_types)
             if file_path:
                 dnd_frame.destroy()
@@ -164,7 +165,6 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
                 handle_choose_file(file_path)
 
         def handle_choose_directory_event(e):
-            from tkinter import filedialog
             directory_path = filedialog.askdirectory(title=choose_directory_title)
             if directory_path:
                 dnd_frame.destroy()
@@ -445,7 +445,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 printing_object_export_frame.tkraise()
 
             class TemplateExportFrame(customtkinter.CTkFrame):
-                def __init__(self, parent_tab):
+                def __init__(self, parent_tab, path):
                     super().__init__(
                         master=parent_tab.frame,
                         bg_color="transparent",
@@ -455,14 +455,46 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.grid_columnconfigure((0, 2), weight=1)
                     self.grid_rowconfigure((0, 3), weight=1)
 
-                    self.export_button = customtkinter.CTkButton(self, text="Export")
-                    self.export_button.grid(row=1, column=1, padx=(20, 20), pady=5)
+                    self.template_path = path
 
-                    self.back_button = customtkinter.CTkButton(self, text="Back", command=self.handle_back_button)
-                    self.back_button.grid(row=2, column=1, padx=(20, 20), pady=5)
+                    self.title = customtkinter.CTkLabel(self, text="Template",
+                                                        font=customtkinter.CTkFont(size=20, weight="bold"))
+                    self.title.grid(row=1, column=1, padx=(20, 20), pady=(0, 20))
+
+                    self.name = customtkinter.CTkLabel(self, text=f"[ {os.path.basename(path)} ]",
+                                                       font=customtkinter.CTkFont(size=14))
+                    self.name.grid(row=2, column=1, padx=(20, 20), pady=(20, 5))
+
+                    self.view_label = customtkinter.CTkLabel(
+                        self,
+                        text="View",
+                        cursor="hand2",
+                        text_color="dodger blue"
+                    )
+                    self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
+                    self.view_label.bind('<Button-1>', self.view_template)
+
+                    self.export_button = customtkinter.CTkButton(self, text="Export", command=self.handle_export_button)
+                    self.export_button.grid(row=4, column=1, padx=(20, 20), pady=5)
+
+                    self.back_button = customtkinter.CTkButton(
+                        self, text="Back", command=self.handle_back_button
+                    )
+                    self.back_button.grid(row=5, column=1, padx=(20, 20), pady=5)
 
                 def handle_back_button(self):
+                    self.destroy()
                     self.parent_tab.image_import_frame.tkraise()
+
+                def view_template(self, e):
+                    pass
+
+                def handle_export_button(self):
+                    file_path = filedialog.asksaveasfilename(title="Export Template",
+                                                             filetypes=(("All Files", "*.*"),),
+                                                             initialdir=Path(self.template_path).stem)
+                    if file_path:
+                        shutil.copy(self.template_path, file_path)
 
             class PrintingObjectExportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab, path):
@@ -494,7 +526,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_stl)
 
-                    self.export_button = customtkinter.CTkButton(self, text="Export")
+                    self.export_button = customtkinter.CTkButton(self, text="Export", command=self.handle_export_button)
                     self.export_button.grid(row=4, column=1, padx=(20, 20), pady=5)
 
                     self.back_button = customtkinter.CTkButton(
@@ -511,7 +543,16 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     mesh = mesh.compute_vertex_normals()
 
                     o3d.visualization.draw_geometries([mesh], window_name="Converted STL",
-                                                      width=self.winfo_screenwidth(), height=self.winfo_screenheight())
+                                                      width=800, height=800,
+                                                      left=int((Tk().winfo_screenwidth() - 800) / 2),
+                                                      top=int((Tk().winfo_screenheight() - 800) / 2))
+
+                def handle_export_button(self):
+                    file_path = filedialog.asksaveasfilename(title="Export STL",
+                                                             filetypes=(("STL Files", ".stl"),),
+                                                             initialfile=Path(self.stl_path).stem)
+                    if file_path:
+                        shutil.copy(self.stl_path, f"{file_path}.stl")
 
             class ImageImportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab):
@@ -1073,9 +1114,9 @@ class App(Tk):
         frm_width = self.winfo_rootx() - self.winfo_x()
         win_width = self.winfo_width() + 2 * frm_width
         titlebar_height = self.winfo_rooty() - self.winfo_y()
-        win_height = self.winfo_height() + titlebar_height + frm_width
-        x = self.winfo_screenwidth() // 2 - win_width // 2
-        y = self.winfo_screenheight() // 2 - win_height // 2
+        # win_height = self.winfo_height() + titlebar_height + frm_width
+        x = self.winfo_screenwidth() // 2 - app_width // 2
+        y = self.winfo_screenheight() // 2 - app_height // 2
         self.geometry("{}x{}+{}+{}".format(app_width, app_height, x, y))
         self.deiconify()
 
