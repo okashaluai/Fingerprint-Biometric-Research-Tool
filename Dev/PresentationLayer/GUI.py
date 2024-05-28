@@ -11,7 +11,7 @@ from CTkMessagebox import CTkMessagebox
 from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-from Dev.DTOs import ImageDTO
+from Dev.DTOs import ImageDTO, TemplateDTO
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 
@@ -429,10 +429,6 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 self.image_import_frame = self.ImageImportFrame(parent_tab=self)
                 main_frame_grid_config(self.image_import_frame)
 
-                # Template export frame
-                self.template_export_frame = self.TemplateExportFrame(parent_tab=self)
-                main_frame_grid_config(self.template_export_frame)
-
                 # Default frame
                 self.image_import_frame.tkraise()
 
@@ -444,6 +440,14 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 )
                 printing_object_export_frame.tkraise()
 
+            def build_template_export_frame(self, path):
+                # Template export frame
+                template_export_frame = self.TemplateExportFrame(parent_tab=self, path=path)
+                template_export_frame.grid(
+                    row=0, column=0, sticky=customtkinter.NS + customtkinter.EW
+                )
+                template_export_frame.tkraise()
+
             class TemplateExportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab, path):
                     super().__init__(
@@ -453,7 +457,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     )
                     self.parent_tab = parent_tab
                     self.grid_columnconfigure((0, 2), weight=1)
-                    self.grid_rowconfigure((0, 3), weight=1)
+                    self.grid_rowconfigure((0, 6), weight=1)
 
                     self.template_path = path
 
@@ -492,9 +496,10 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 def handle_export_button(self):
                     file_path = filedialog.asksaveasfilename(title="Export Template",
                                                              filetypes=(("All Files", "*.*"),),
-                                                             initialdir=Path(self.template_path).stem)
+                                                             initialfile=Path(self.template_path).stem)
+                    print(os.path.dirname(file_path))
                     if file_path:
-                        shutil.copy(self.template_path, file_path)
+                        shutil.copytree(self.template_path, os.path.dirname(file_path), dirs_exist_ok=True)
 
             class PrintingObjectExportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab, path):
@@ -566,6 +571,8 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.grid_rowconfigure((0, 5), weight=1)
 
                     self.image_path = None
+                    self.template_path = None
+
                     # def view_image(path):
                     #     image = Image.open(path)
                     #
@@ -645,7 +652,12 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.image_path = path
 
                 def handle_convert_to_template_button(self):
-                    self.parent_tab.template_export_frame.tkraise()
+                    image_dto = ImageDTO(0, self.image_path, time.time())
+                    response = service.convert_image_to_template("experiment_name", image_dto)
+                    if response.success:
+                        self.parent_tab.build_template_export_frame(response.data.path)
+                    else:
+                        CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
                 def handle_convert_to_printing_object_button(self):
                     image_dto = ImageDTO(0, self.image_path, time.time())
