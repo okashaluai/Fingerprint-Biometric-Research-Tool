@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import TextIO
 
 from Dev.Enums import OperationType
 from Dev.Utils import Interface
@@ -32,9 +31,7 @@ class AssetDTO(IDto):
 
 @dataclass(frozen=True)
 class TemplateDTO(AssetDTO):
-    # TODO: we may need to use data structure instead of text file
-    min_file: TextIO
-    xyt_file: TextIO
+    pass
 
 
 @dataclass(frozen=True)

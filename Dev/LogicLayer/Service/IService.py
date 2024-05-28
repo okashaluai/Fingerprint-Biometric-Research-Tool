@@ -1,46 +1,49 @@
 from abc import abstractmethod
 
-from Dev.DTOs import OperationDTO, Response
-from Dev.Utils import Interface
+from Dev.DTOs import Response, ImageDTO, TemplateDTO
 
 
-class IService(Interface):
+class IService:
     """ SYSTEM INTERFACE """
 
     @abstractmethod
-    def convert_template_to_image(self, template_path: str) -> Response:
+    def convert_template_to_image(self, experiment_name: str, template_dto: TemplateDTO) -> Response:
         """
         This function converts imported fingerprint template to image.
-        :param str template_path: Template path.
+        :param str experiment_name: Experiment's name.
+                :param str template_dto: Template dto.
         :returns Response(success:bool, data:ImageDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def convert_image_to_template(self, image_path: str) -> Response:
+    def convert_image_to_template(self, experiment_name: str, image_dto: ImageDTO) -> Response:
         """
         This function converts imported fingerprint image to template.
-        :param str image_path: Image path.
+        :param str experiment_name: Experiment's name.
+        :param str image_dto: Image dto.
         :returns Response(success:bool, data:TemplateDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def convert_image_to_3d_object(self, image_path: str) -> Response:
+    def convert_image_to_printing_object(self, experiment_name: str, image_dto: ImageDTO) -> Response:
         """
         This function converts imported fingerprint image to 3D object.
-        :param str image_path: Image path.
-        :returns Response(success:bool, data:3dObjectDTO|None, errors:str|None)
+        :param str experiment_name: Experiment's name.
+        :param str image_dto: Image dto.
+        :returns Response(success:bool, data:PrintingObjectDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def match(self, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
+    def match(self, experiment_name: str, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
         """
         This function matches 2 groups of imported templates and returns comparison statistics.
+                :param str experiment_name: Experiment's name.
         :param tuple[str] templates_path1: First imported template group.
         :param tuple[str] templates_path2: Second imported template group.
-        :returns Response(success:bool, data:str|None, errors:str|None)
+        :returns Response(success:bool, data:int|dict[str, int]|dict[str, dict[str, int]]|None, errors:str|None)
         """
         pass
 
@@ -86,15 +89,5 @@ class IService(Interface):
         This function creates a new experiment and returns it.
         :param int name: Experiment name.
         :returns Response(success:bool, data:ExperimentDTO|None, errors:str|None)
-        """
-        pass
-
-    @abstractmethod
-    def add_operation(self, experiment_id: int, operation: OperationDTO) -> Response:
-        """
-        This function creates a new operation and returns it.
-        :param int experiment_id: Experiment id that will contain the created operation.
-        :param OperationDTO operation: The operation that will be added.
-        :returns Response(success:bool, data:OperationDTO|None, errors:str|None)
         """
         pass
