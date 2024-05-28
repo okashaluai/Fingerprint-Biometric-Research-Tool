@@ -1,5 +1,6 @@
 from Dev.DTOs import Response, TemplateDTO, ImageDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
+from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.Controllers.MatcherController import MatcherController
 from Dev.LogicLayer.Service.IService import IService
 from Dev.Utils import Singleton
@@ -9,6 +10,7 @@ class Service(IService, metaclass=Singleton):
     def __init__(self):
         self.__converter_controller = ConvertorController()
         self.__matcher_controller = MatcherController()
+        self.__experiment_controller = ExperimentController()
 
     def convert_template_to_image(self, experiment_name: str, template_dto: TemplateDTO) -> Response:
         try:
@@ -48,25 +50,31 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def delete_experiment(self, experiment_id: int) -> Response:
+    def delete_experiment(self, experiment_name: str) -> Response:
         try:
             raise NotImplementedError
         except Exception as error:
             return Response(False, None, str(error))
 
-    def export_experiment(self, experiment_id: int) -> Response:
+    def export_experiment(self, experiment_name: str) -> Response:
         try:
             raise NotImplementedError
         except Exception as error:
             return Response(False, None, str(error))
 
-    def rename_experiment(self, experiment_id: int, name: str) -> Response:
+    def rename_experiment(self, experiment_name: str, new_name: str) -> Response:
         try:
             raise NotImplementedError
         except Exception as error:
             return Response(False, None, str(error))
 
-    def create_experiment(self, name: str) -> Response:
+    def create_experiment(self, experiment_name: str) -> Response:
+        try:
+            raise NotImplementedError
+        except Exception as error:
+            return Response(False, None, str(error))
+
+    def set_current_experiment(self, experiment_name: str) -> Response:
         try:
             raise NotImplementedError
         except Exception as error:
