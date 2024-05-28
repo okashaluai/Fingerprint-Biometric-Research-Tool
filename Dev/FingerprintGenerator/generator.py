@@ -29,10 +29,10 @@ See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-a
 import ntpath
 import os
 
-from Dev.FingerprintGenerator.util import util
 from Dev.FingerprintGenerator.data import create_dataset
 from Dev.FingerprintGenerator.models import create_model
 from Dev.FingerprintGenerator.options.test_options import TestOptions
+from Dev.FingerprintGenerator.util import util
 
 try:
     import wandb
@@ -73,9 +73,3 @@ def generate(input_images_dir: str, output_images_dir: str):
             image_name = '%s_%s.png' % (name, label)
             save_path = os.path.join(output_images_dir, image_name)
             util.save_image(im, save_path, aspect_ratio=opt.aspect_ratio)
-
-
-
-
-# Testing
-# generate(r'temp', r'temp')
