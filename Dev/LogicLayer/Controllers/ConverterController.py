@@ -10,14 +10,14 @@ from Dev.Utils import Singleton
 class ConvertorController(metaclass=Singleton):
 
     def __init__(self):
-        self.experiment_controller = ExperimentController()
+        self.__experiment_controller = ExperimentController()
 
     def convert_template_to_image(self, experiment_name: str, template_path: str) -> Image:
         template = Template(template_path)
         image = template.convert_to_image()
 
         # Add this operation to the experiment
-        new_operation = self.experiment_controller.add_operation(
+        new_operation = self.__experiment_controller.add_operation(
             Operation(experiment_name, OperationType.TMP2IMG, template, image))
 
         # Update to the new path
@@ -30,7 +30,7 @@ class ConvertorController(metaclass=Singleton):
         template = image.convert_to_template()
 
         # Add this operation to the experiment
-        new_operation = self.experiment_controller.add_operation(
+        new_operation = self.__experiment_controller.add_operation(
             Operation(experiment_name, OperationType.IMG2TMP, image, template))
 
         # Update to the new path
@@ -43,7 +43,7 @@ class ConvertorController(metaclass=Singleton):
         printing_object = image.convert_to_printing_object()
 
         # Add this operation to the experiment
-        new_operation = self.experiment_controller.add_operation(
+        new_operation = self.__experiment_controller.add_operation(
             Operation(experiment_name, OperationType.IMG2POBJ, image, printing_object))
 
         # Update to the new path

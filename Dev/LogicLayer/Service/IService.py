@@ -56,38 +56,47 @@ class IService:
         pass
 
     @abstractmethod
-    def delete_experiment(self, experiment_id: int) -> Response:
+    def delete_experiment(self, experiment_name: str) -> Response:
         """
         This function deletes an experiment.
-        :param int experiment_id: Experiment id to be deleted.
+        :param str experiment_name: Experiment that will be deleted.
         :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def export_experiment(self, experiment_id: int) -> Response:
+    def export_experiment(self, experiment_name: str) -> Response:
         """
         This function exports an experiment as text file.
-        :param int experiment_id: Experiment id to be exported.
+        :param str experiment_name: Experiment that will be exported.
         :returns Response(success:bool, data:TextIO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def rename_experiment(self, experiment_id: int, name: str) -> Response:
+    def rename_experiment(self, experiment_name: str, new_name: str) -> Response:
         """
         This function renames an experiment and returns the new renamed experiment.
-        :param int experiment_id: Experiment id to be renames.
-        :param str name: New experiment name.
+        :param str experiment_name: Experiment to be renamed.
+        :param str new_name: New experiment name.
         :returns Response(success:bool, data:ExperimentDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def create_experiment(self, name: str) -> Response:
+    def create_experiment(self, experiment_name: str) -> Response:
         """
         This function creates a new experiment and returns it.
-        :param int name: Experiment name.
+        :param str experiment_name: Experiment name.
         :returns Response(success:bool, data:ExperimentDTO|None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
+    def set_current_experiment(self, experiment_name: str) -> Response:
+        """
+        This function creates a new experiment and returns it.
+        :param str experiment_name: Existing experiment name to be the current experiment.
+        :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
