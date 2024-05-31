@@ -11,7 +11,7 @@ from CTkMessagebox import CTkMessagebox
 from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-from Dev.DTOs import ImageDTO, TemplateDTO
+from Dev.DTOs import ImageDTO, ExperimentDTO
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 
@@ -250,6 +250,7 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
     def handle_experiments_button(self):
         self.master.experiments_frame.tkraise()
+        self.master.experiments_frame.load_experiments()
 
     def handle_new_experiment_button(self):
         self.master.new_experiment_frame.tkraise()
@@ -893,23 +894,32 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         )
         self.scrollable_frame.columnconfigure(0, weight=1)
 
-        self.experiments_frames = []
-        for i in range(8):
-            if i == 6:
-                row_frame = self.ExperimentRowFrame(
-                    self.scrollable_frame, index=i
-                )
-            else:
-                row_frame = self.ExperimentRowFrame(self.scrollable_frame, index=i)
+        self.experiment_dtos = None
 
-            row_frame.grid(
-                row=i,
-                column=0,
-                sticky=customtkinter.NS + customtkinter.EW,
-                padx=(20, 20),
-                pady=(0, 20),
-            )
-            self.experiments_frames.append(row_frame)
+        self.experiments_frames = []
+
+    def load_experiments(self):
+        response = service.get_experiments()
+        if response:
+            for ef in self.experiments_frames:
+                ef.destroy()
+
+            experiments_dtos: list[ExperimentDTO] = response.data
+
+            for i, e in enumerate(experiments_dtos):
+                row_frame = self.ExperimentRowFrame(
+                    self.scrollable_frame, index=i, experiment_name=e.name, experiment_date=e.date
+                )
+                row_frame.grid(
+                    row=i,
+                    column=0,
+                    sticky=customtkinter.NS + customtkinter.EW,
+                    padx=(20, 20),
+                    pady=(0, 20),
+                )
+                self.experiments_frames.append(row_frame)
+        else:
+            CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 
     def search(self):
         ef = self.experiments_frames[6]
@@ -953,7 +963,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             )
 
     class ExperimentRowFrame(customtkinter.CTkFrame):
-        def __init__(self, master, index, ):
+        def __init__(self, master, index, experiment_name, experiment_date):
             super().__init__(
                 master=master, corner_radius=10, border_width=2,
             )
@@ -961,8 +971,8 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.columnconfigure((0), weight=1)
             self.rowconfigure(3, weight=1)
 
-            experiment_name = "Yazan's Experiment"
-            experiment_date = datetime.fromtimestamp(time.time()).strftime("%d/%m/%Y    %H:%M:%S")
+            experiment_name = experiment_name
+            experiment_date = datetime.fromtimestamp(experiment_date).strftime("%d/%m/%Y    %H:%M:%S")
             self.experiment_info = customtkinter.CTkLabel(self, text=f"{experiment_name}    {experiment_date}")
             self.experiment_info.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
 
