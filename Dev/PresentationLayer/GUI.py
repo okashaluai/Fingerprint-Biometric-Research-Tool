@@ -1021,7 +1021,12 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             pass
 
         def handle_continue_experiment(self, e):
-            pass
+            response = service.set_current_experiment(self.experiment_name)
+            if response.success:
+                CTkMessagebox(icon="check", title="Experiment",
+                              message=f"Current experiment is set to {self.experiment_name} successfully!")
+            else:
+                CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 
         def handle_delete_experiment(self, event=None):
             response = service.delete_experiment(self.experiment_name)
@@ -1031,7 +1036,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                     if self.experiment_name == e.name:
                         experiments_frame.experiment_dtos.remove(e)
                         experiments_frame.show_experiments_on_frame(experiments_frame.experiment_dtos)
-                print(len(experiments_frame.experiment_dtos))
+
                 CTkMessagebox(icon="check", title="Experiment",
                               message=f"Experiment {self.experiment_name} deleted successfully!")
             else:
