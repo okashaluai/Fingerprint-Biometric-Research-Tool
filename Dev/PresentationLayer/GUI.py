@@ -899,9 +899,13 @@ class ExperimentsFrame(customtkinter.CTkFrame):
 
         self.experiments_frames = []
 
+        global experiments_frame
+        experiments_frame = self
+
     def show_experiments_on_frame(self, experiment_dtos: list[ExperimentDTO]):
         # Delete old experiment frames
         for ef in self.experiments_frames:
+            ef.destroy_tooltips()
             ef.destroy()
 
         # Build new frames
@@ -958,13 +962,10 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.columnconfigure((0), weight=1)
             self.rowconfigure(3, weight=1)
 
-            experiment_name = experiment_name
-            experiment_date = datetime.fromtimestamp(experiment_date).strftime("%d/%m/%Y    %H:%M:%S")
+            self.experiment_name = experiment_name
+            self.experiment_date = datetime.fromtimestamp(experiment_date).strftime("%d/%m/%Y    %H:%M:%S")
             self.experiment_info = customtkinter.CTkLabel(self, text=f"{experiment_name}    {experiment_date}")
             self.experiment_info.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
-
-            def f(e):
-                pass
 
             self.continue_experiment = customtkinter.CTkLabel(
                 self,
@@ -975,11 +976,11 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                     size=(25, 25)
                 ),
             )
-            self.continue_experiment.bind('<Button-1>', command=f)
+            self.continue_experiment.bind('<Button-1>', command=self.handle_continue_experiment)
             self.continue_experiment.grid(
                 row=0, column=1, padx=(20, 10), pady=10
             )
-            ToolTip(self.continue_experiment, msg="Continue Experiment", delay=1.0)
+            self.tp1 = ToolTip(self.continue_experiment, msg="Continue Experiment", delay=1.0)
 
             self.edit_experiment = customtkinter.CTkLabel(
                 self,
@@ -990,11 +991,11 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                     size=(25, 25)
                 ),
             )
-            self.edit_experiment.bind('<Button-1>', command=f)
+            self.edit_experiment.bind('<Button-1>', command=self.handle_edit_experiment)
             self.edit_experiment.grid(
                 row=0, column=2, padx=(10, 10), pady=10
             )
-            ToolTip(self.edit_experiment, msg="Edit Experiment", delay=1.0)
+            self.tp2 = ToolTip(self.edit_experiment, msg="Edit Experiment", delay=1.0)
 
             self.delete_button = customtkinter.CTkLabel(
                 self,
@@ -1005,34 +1006,36 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                     size=(25, 25)
                 ),
             )
-            self.delete_button.bind('<Button-1>', command=f)
+            self.delete_button.bind('<Button-1>', command=self.handle_delete_experiment)
             self.delete_button.grid(
                 row=0, column=3, padx=(10, 25), pady=10
             )
-            ToolTip(self.delete_button, msg="Delete Experiment", delay=1.0)
+            self.tp3 = ToolTip(self.delete_button, msg="Delete Experiment", delay=1.0)
 
-            # self.scrollable_frame = customtkinter.CTkScrollableFrame(
-            #     self, label_text="Operations"
-            # )
-            # self.scrollable_frame.grid(
-            #     row=1,
-            #     column=0,
-            #     columnspan=4,
-            #     sticky=customtkinter.NS + customtkinter.EW,
-            #     padx=(20, 20),
-            #     pady=(0, 20),
-            # )
-            # self.scrollable_frame.columnconfigure(0, weight=1)
-            #
-            # for i in range(10):
-            #     row_frame = self.OperationRowFrame(self.scrollable_frame)
-            #     row_frame.grid(
-            #         row=i,
-            #         column=0,
-            #         sticky=customtkinter.NS + customtkinter.EW,
-            #         padx=(20, 20),
-            #         pady=5,
-            #     )
+        def destroy_tooltips(self):
+            self.tp1.destroy()
+            self.tp2.destroy()
+            self.tp3.destroy()
+
+        def handle_edit_experiment(self, e):
+            pass
+
+        def handle_continue_experiment(self, e):
+            pass
+
+        def handle_delete_experiment(self, event=None):
+            response = service.delete_experiment(self.experiment_name)
+            if response.success:
+
+                for e in experiments_frame.experiment_dtos:
+                    if self.experiment_name == e.name:
+                        experiments_frame.experiment_dtos.remove(e)
+                        experiments_frame.show_experiments_on_frame(experiments_frame.experiment_dtos)
+                print(len(experiments_frame.experiment_dtos))
+                CTkMessagebox(icon="check", title="Experiment",
+                              message=f"Experiment {self.experiment_name} deleted successfully!")
+            else:
+                CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 
         class OperationRowFrame(customtkinter.CTkFrame):
             def __init__(self, master):
@@ -1113,12 +1116,13 @@ class App(Tk):
 
         # Current experiment name
         global experiment_name
+        experiment_name = "Demo Experiment"
 
         # Configure app window
         app_width = 900
         app_height = 500
         self.minsize(width=app_width, height=app_height)
-        self.title("Fingerprint Biometrics Research Tool")
+        self.title(f"Fingerprint Biometrics Research Tool - [ {experiment_name} ]")
         self.update_idletasks()
         frm_width = self.winfo_rootx() - self.winfo_x()
         win_width = self.winfo_width() + 2 * frm_width
