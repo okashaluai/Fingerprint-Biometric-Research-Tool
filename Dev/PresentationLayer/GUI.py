@@ -869,6 +869,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             padx=(20, 20),
             pady=(20, 20),
         )
+        self.search_entry.bind('<Key>', self.search)
 
         self.search_button = customtkinter.CTkButton(
             self.frame, text="Search", command=self.search
@@ -898,69 +899,55 @@ class ExperimentsFrame(customtkinter.CTkFrame):
 
         self.experiments_frames = []
 
-    def load_experiments(self):
-        response = service.get_experiments()
-        if response:
-            for ef in self.experiments_frames:
-                ef.destroy()
+    def show_experiments_on_frame(self, experiment_dtos: list[ExperimentDTO]):
+        # Delete old experiment frames
+        for ef in self.experiments_frames:
+            ef.destroy()
 
-            experiments_dtos: list[ExperimentDTO] = response.data
-
-            for i, e in enumerate(experiments_dtos):
-                row_frame = self.ExperimentRowFrame(
-                    self.scrollable_frame, index=i, experiment_name=e.name, experiment_date=e.date
-                )
-                row_frame.grid(
-                    row=i,
-                    column=0,
-                    sticky=customtkinter.NS + customtkinter.EW,
-                    padx=(20, 20),
-                    pady=(0, 20),
-                )
-                self.experiments_frames.append(row_frame)
-        else:
-            CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
-
-    def search(self):
-        ef = self.experiments_frames[6]
-
-        for e in self.experiments_frames:
-            e.destroy()
-
-        # self.experiments_frames.remove(ef)
-        # self.experiments_frames.append(ef)
-        self.experiments_frames[0].index = ef.index
-        ef.index = 0
-
-        self.scrollable_frame.destroy()
-
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(
-            self.frame, label_text="Experiments"
-        )
-        self.scrollable_frame.grid(
-            row=1,
-            column=0,
-            columnspan=2,
-            sticky=customtkinter.NS + customtkinter.EW,
-            padx=(20, 20),
-            pady=(0, 20),
-        )
-        self.scrollable_frame.columnconfigure(0, weight=1)
-
-        for e in self.experiments_frames:
-            print("hi")
-            # if i == 1:
-            #     row_frame = self.ExperimentRowFrame(self.scrollable_frame, fg_color="red")
-            # else:
-            #     row_frame = self.ExperimentRowFrame(self.scrollable_frame)
-
-            e.grid(
-                row=e.index,
+        # Build new frames
+        for i, e in enumerate(experiment_dtos):
+            row_frame = self.ExperimentRowFrame(
+                self.scrollable_frame, index=i, experiment_name=e.name, experiment_date=e.date
+            )
+            row_frame.grid(
+                row=i,
                 column=0,
                 sticky=customtkinter.NS + customtkinter.EW,
                 padx=(20, 20),
                 pady=(0, 20),
             )
+            self.experiments_frames.append(row_frame)
+
+    def load_experiments(self):
+        response = service.get_experiments()
+        if response:
+            self.experiment_dtos = response.data
+            self.show_experiments_on_frame(self.experiment_dtos)
+        else:
+            CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
+
+    def search(self, e=None):
+        def get_searchable_string(string: str):
+            ignore_chars = [" ", "'", "!", ".", ",", "-", "_", "(", ")", "*", "@", "%", "#", "^", "&", "+", "~"]
+
+            searchable_string = string
+            for ic in ignore_chars:
+                searchable_string = searchable_string.replace(ic, "")
+
+            return searchable_string
+
+        keyword = self.search_entry.get()
+
+        filtered_experiments_list: list[ExperimentDTO] = []
+
+        for e in self.experiment_dtos:
+            # filter experiments according to its name
+            k = get_searchable_string(keyword)
+            en = get_searchable_string(e.name)
+            if k in en:
+                filtered_experiments_list.append(e)
+
+        self.show_experiments_on_frame(filtered_experiments_list)
 
     class ExperimentRowFrame(customtkinter.CTkFrame):
         def __init__(self, master, index, experiment_name, experiment_date):
