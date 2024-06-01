@@ -30,4 +30,7 @@ class ExperimentController(metaclass=Singleton):
         raise NotImplementedError
 
     def set_current_experiment(self, experiment_name: str):
-        self.current_experiment_name = experiment_name
+        if experiment_name in self.experiments.keys():
+            self.current_experiment_name = experiment_name
+        else:
+            raise Exception(f"Experiment with the name {experiment_name} doesn't exist!")

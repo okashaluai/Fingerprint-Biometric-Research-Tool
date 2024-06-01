@@ -1,4 +1,6 @@
-from Dev.DTOs import Response, TemplateDTO, ImageDTO
+import time
+
+from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.Controllers.MatcherController import MatcherController
@@ -46,13 +48,17 @@ class Service(IService, metaclass=Singleton):
 
     def get_experiments(self) -> Response:
         try:
-            raise NotImplementedError
+            experiments = []
+            for i in range(10):
+                e = ExperimentDTO(id=i, name=f"experiment {i}", date=time.time(), operations=tuple())
+                experiments.append(e)
+            return Response(True, experiments, None)
         except Exception as error:
             return Response(False, None, str(error))
 
     def delete_experiment(self, experiment_name: str) -> Response:
         try:
-            raise NotImplementedError
+            return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
 
@@ -76,6 +82,14 @@ class Service(IService, metaclass=Singleton):
 
     def set_current_experiment(self, experiment_name: str) -> Response:
         try:
-            raise NotImplementedError
+            self.__experiment_controller.set_current_experiment(experiment_name)
+            return Response(True, None, None)
+        except Exception as error:
+            return Response(False, None, str(error))
+
+    def get_current_experiment_name(self) -> Response:
+        try:
+            current_experiment_name = self.__experiment_controller.current_experiment_name
+            return Response(True, current_experiment_name, None)
         except Exception as error:
             return Response(False, None, str(error))
