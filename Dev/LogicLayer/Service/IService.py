@@ -95,8 +95,16 @@ class IService:
     @abstractmethod
     def set_current_experiment(self, experiment_name: str) -> Response:
         """
-        This function creates a new experiment and returns it.
+        This function sets the experiment with this name to be the current experiment.
         :param str experiment_name: Existing experiment name to be the current experiment.
         :returns Response(success:bool, data:None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
+    def get_current_experiment_name(self) -> Response:
+        """
+        This function returns the current experiment.
+        :returns Response(success:bool, data:str, errors:str|None)
         """
         pass
