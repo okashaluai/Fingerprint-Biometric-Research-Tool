@@ -34,3 +34,9 @@ class ExperimentController(metaclass=Singleton):
             self.current_experiment_name = experiment_name
         else:
             raise Exception(f"Experiment with the name {experiment_name} doesn't exist!")
+
+    def get_current_experiment(self):
+        if self.current_experiment_name in self.experiments.keys():
+            return self.experiments[self.current_experiment_name]
+        else:
+            raise Exception(f"Experiment with the name {self.current_experiment_name} doesn't exist!")

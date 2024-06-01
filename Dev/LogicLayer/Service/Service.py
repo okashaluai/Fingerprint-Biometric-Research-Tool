@@ -89,7 +89,8 @@ class Service(IService, metaclass=Singleton):
 
     def get_current_experiment_name(self) -> Response:
         try:
-            current_experiment_name = self.__experiment_controller.current_experiment_name
-            return Response(True, current_experiment_name, None)
+            current_experiment = self.__experiment_controller.get_current_experiment()
+            current_experiment_dto = current_experiment.to_dto()
+            return Response(True, current_experiment_dto, None)
         except Exception as error:
             return Response(False, None, str(error))

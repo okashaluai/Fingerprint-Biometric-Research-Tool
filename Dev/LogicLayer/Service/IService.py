@@ -102,9 +102,9 @@ class IService:
         pass
 
     @abstractmethod
-    def get_current_experiment_name(self) -> Response:
+    def get_current_experiment(self) -> Response:
         """
         This function returns the current experiment.
-        :returns Response(success:bool, data:str, errors:str|None)
+        :returns Response(success:bool, data:ExperimentDTO, errors:str|None)
         """
         pass
