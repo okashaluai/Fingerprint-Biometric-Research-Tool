@@ -11,7 +11,7 @@ from CTkMessagebox import CTkMessagebox
 from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-from Dev.DTOs import ImageDTO, ExperimentDTO
+from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 
@@ -911,7 +911,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         # Build new frames
         for i, e in enumerate(experiment_dtos):
             row_frame = self.ExperimentRowFrame(
-                self.scrollable_frame, index=i, experiment_name=e.name, experiment_date=e.date
+                self.scrollable_frame, index=i, experiment_dto=e
             )
             row_frame.grid(
                 row=i,
@@ -954,7 +954,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         self.show_experiments_on_frame(filtered_experiments_list)
 
     class ExperimentRowFrame(customtkinter.CTkFrame):
-        def __init__(self, master, index, experiment_name, experiment_date):
+        def __init__(self, master, index: int, experiment_dto: ExperimentDTO):
             super().__init__(
                 master=master, corner_radius=10, border_width=2,
             )
@@ -962,9 +962,10 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.columnconfigure((0), weight=1)
             self.rowconfigure(3, weight=1)
 
-            self.experiment_name = experiment_name
-            self.experiment_date = datetime.fromtimestamp(experiment_date).strftime("%d/%m/%Y    %H:%M:%S")
-            self.experiment_info = customtkinter.CTkLabel(self, text=f"{experiment_name}    {experiment_date}")
+            self.experiment_dto = experiment_dto
+            self.experiment_name = experiment_dto.name
+            self.experiment_date = datetime.fromtimestamp(experiment_dto.date).strftime("%d/%m/%Y    %H:%M:%S")
+            self.experiment_info = customtkinter.CTkLabel(self, text=f"{experiment_name}    {self.experiment_date}")
             self.experiment_info.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
 
             self.continue_experiment = customtkinter.CTkLabel(
@@ -1041,6 +1042,147 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                               message=f"Experiment {self.experiment_name} deleted successfully!")
             else:
                 CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
+
+        class OperationRowFrame(customtkinter.CTkFrame):
+            def __init__(self, master):
+                super().__init__(
+                    master=master, corner_radius=10, fg_color="transparent"
+                )
+                self.columnconfigure((0, 1, 2), weight=1)
+
+                self.input_label = customtkinter.CTkLabel(
+                    self, text="Input: john template"
+                )
+                self.input_label.grid(
+                    row=0, column=0, sticky=customtkinter.EW, padx=(20, 20)
+                )
+
+                self.output_label = customtkinter.CTkLabel(self, text="Output: john 3D")
+                self.output_label.grid(
+                    row=0, column=1, sticky=customtkinter.EW, padx=(20, 20)
+                )
+
+                self.date_label = customtkinter.CTkLabel(
+                    self, text="Date: 27/10/2023 14:30:17"
+                )
+                self.date_label.grid(
+                    row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
+                )
+
+    class EditExperimentFrame(customtkinter.CTkFrame):
+        def __init__(self, master, experiment_dto: ExperimentDTO):
+            super().__init__(master=master, corner_radius=0)
+            self.columnconfigure(0, weight=1)
+            self.rowconfigure(0, weight=1)
+
+            # Subframe
+            self.frame = customtkinter.CTkFrame(self)
+            self.frame.grid(
+                row=0,
+                column=0,
+                sticky=customtkinter.NS + customtkinter.EW,
+                padx=(20, 20),
+                pady=(20, 20),
+            )
+            self.frame.columnconfigure(0, weight=1)
+            self.frame.rowconfigure(1, weight=1)
+
+            self.experiment_dto = experiment_dto
+
+            self.title = customtkinter.CTkLabel(self.frame, text=f"{experiment_dto.name}",
+                                                font=customtkinter.CTkFont(size=20, weight="bold"))
+            self.title.grid(row=0, column=0, padx=(20, 20), pady=(0, 20))
+
+            self.search_entry = customtkinter.CTkEntry(
+                self.frame, placeholder_text="Search file or directory names"
+            )
+            self.search_entry.grid(
+                row=1,
+                column=0,
+                sticky=customtkinter.NS + customtkinter.EW,
+                padx=(20, 20),
+                pady=(20, 20),
+            )
+            self.search_entry.bind('<Key>', self.search)
+
+            self.search_button = customtkinter.CTkButton(
+                self.frame, text="Search", command=self.search
+            )
+            self.search_button.grid(
+                row=1,
+                column=1,
+                sticky=customtkinter.NS + customtkinter.EW,
+                padx=(0, 20),
+                pady=(20, 20),
+            )
+
+            self.scrollable_frame = customtkinter.CTkScrollableFrame(
+                self.frame, label_text="Operations", label_font=customtkinter.CTkFont(weight="bold", size=16)
+            )
+            self.scrollable_frame.grid(
+                row=2,
+                column=0,
+                columnspan=2,
+                sticky=customtkinter.NS + customtkinter.EW,
+                padx=(20, 20),
+                pady=(0, 20),
+            )
+            self.scrollable_frame.columnconfigure(0, weight=1)
+
+            self.operations_dtos = None
+
+            self.operations_frames = []
+
+        def show_operations_on_frame(self, operations_dtos: list[OperationDTO]):
+            # Delete old operation frames
+            for ef in self.operations_frames:
+                ef.destroy_tooltips()
+                ef.destroy()
+
+            # Build new frames
+            for i, o in enumerate(self.operations_dtos):
+                row_frame = self.OperationRowFrame(
+                    self.scrollable_frame, index=i, operation_dto=o
+                )
+                row_frame.grid(
+                    row=i,
+                    column=0,
+                    sticky=customtkinter.NS + customtkinter.EW,
+                    padx=(20, 20),
+                    pady=(0, 20),
+                )
+                self.operations_frames.append(row_frame)
+
+        def load_operations(self):
+            response = service.get_current_experiment()
+            if response:
+                self.operations = response.data.operations
+                self.show_operations_on_frame(self.operations_dtos)
+            else:
+                CTkMessagebox(icon="cancel", title="Operations Error", message=response.error)
+
+        def search(self, e=None):
+            def get_searchable_string(string: str):
+                ignore_chars = [" ", "'", "!", ".", ",", "-", "_", "(", ")", "*", "@", "%", "#", "^", "&", "+", "~"]
+
+                searchable_string = string
+                for ic in ignore_chars:
+                    searchable_string = searchable_string.replace(ic, "")
+
+                return searchable_string
+
+            keyword = self.search_entry.get()
+
+            filtered_operations_list: list[OperationDTO] = []
+
+            for e in self.operations_dtos:
+                # filter operations according to its name
+                k = get_searchable_string(keyword)
+                en = get_searchable_string(e.name)
+                if k in en:
+                    filtered_operations_list.append(e)
+
+            self.show_operations_on_frame(filtered_operations_list)
 
         class OperationRowFrame(customtkinter.CTkFrame):
             def __init__(self, master):
