@@ -1066,7 +1066,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.save_experiment.grid(
                 row=0, column=2, padx=(10, 10), pady=10
             )
-            self.tp_save_experiment = ToolTip(self.edit_experiment, msg="Save", delay=1.0)
+            self.tp_save_experiment = ToolTip(self.save_experiment, msg="Save", delay=1.0)
 
             self.search_entry = customtkinter.CTkEntry(
                 self, placeholder_text="Search file or directory names"
@@ -1182,8 +1182,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                     of.destroy()
                 self.scrollable_frame.destroy()
                 self.scrollable_frame_wrapper.destroy()
-                self.save_experiment.destroy()
                 self.tp_save_experiment.destroy()
+                self.save_experiment.destroy()
+                self.tp2 = ToolTip(self.edit_experiment, msg="Edit Experiment", delay=1.0)
             else:
                 self.edit_mode = True
                 self.build_edit_experiment_frame()
