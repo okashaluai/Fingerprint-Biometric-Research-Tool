@@ -1,5 +1,3 @@
-import time
-
 from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
@@ -48,46 +46,54 @@ class Service(IService, metaclass=Singleton):
 
     def get_experiments(self) -> Response:
         try:
-            experiments = []
-            for i in range(10):
-                e = ExperimentDTO(id=i, name=f"experiment {i}", date=time.time(), operations=tuple())
-                experiments.append(e)
-            return Response(True, experiments, None)
+            experiments = self.__experiment_controller.get_sorted_experiments_by_date()
+            experiments_dtos = list()
+            for experiment in experiments:
+                experiment_dto = experiment.to_dto()
+                experiments_dtos.append(experiment_dto)
+            return Response(True, experiments_dtos, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def delete_experiment(self, experiment_name: str) -> Response:
+    def delete_experiment(self, experiment_id: int) -> Response:
         try:
+            self.__experiment_controller.delete_experiment(experiment_id)
             return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def export_experiment(self, experiment_name: str) -> Response:
+    def export_experiment(self, experiment_id: int, export_path: str) -> Response:
         try:
-            raise NotImplementedError
+            self.__experiment_controller.export_experiment(experiment_id, export_path)
+            return Response(True, export_path, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def rename_experiment(self, experiment_name: str, new_name: str) -> Response:
+    def rename_experiment(self, experiment_id: int, new_experiment_name: str) -> Response:
         try:
-            raise NotImplementedError
+            updated_experiment = self.__experiment_controller.rename_experiment(experiment_id, new_experiment_name)
+            updated_experiment_dto = updated_experiment.to_dto()
+            return Response(True, updated_experiment_dto, None)
         except Exception as error:
             return Response(False, None, str(error))
 
     def create_experiment(self, experiment_name: str) -> Response:
         try:
-            raise NotImplementedError
+            new_experiment = self.__experiment_controller.create_experiment(experiment_name)
+            new_experiment_dto = new_experiment.to_dto()
+            return Response(True, new_experiment_dto, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def set_current_experiment(self, experiment_name: str) -> Response:
+    def set_current_experiment(self, experiment_id: int) -> Response:
         try:
-            self.__experiment_controller.set_current_experiment(experiment_name)
-            return Response(True, None, None)
+            current_experiment = self.__experiment_controller.set_current_experiment(experiment_id)
+            current_experiment_dto = current_experiment.to_dto()
+            return Response(True, current_experiment_dto, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def get_current_experiment_name(self) -> Response:
+    def get_current_experiment(self) -> Response:
         try:
             current_experiment = self.__experiment_controller.get_current_experiment()
             current_experiment_dto = current_experiment.to_dto()

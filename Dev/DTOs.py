@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from datetime import datetime
 from Dev.Enums import OperationType
 from Dev.Utils import Interface
 
@@ -50,17 +50,16 @@ class PrintingObjectDTO(AssetDTO):
 
 @dataclass(frozen=True)
 class OperationDTO(IDto):
-    id: int
-    experiment_id: int
+    operation_id: int
     operation_type: OperationType
-    input: AssetDTO
-    output: AssetDTO
-    date: float
+    operation_input: AssetDTO
+    operation_output: AssetDTO
+    operation_date: datetime
 
 
 @dataclass(frozen=True)
 class ExperimentDTO(IDto):
-    id: int
-    name: str
-    date: float
-    operations: tuple[OperationDTO]
+    operations: list[OperationDTO]
+    experiment_id: int
+    experiment_name: str
+    experiment_date: datetime

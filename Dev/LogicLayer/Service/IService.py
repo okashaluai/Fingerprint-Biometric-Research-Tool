@@ -7,40 +7,40 @@ class IService:
     """ SYSTEM INTERFACE """
 
     @abstractmethod
-    def convert_template_to_image(self, experiment_name: str, template_dto: TemplateDTO) -> Response:
+    def convert_template_to_image(self, experiment_id: int, template_dto: TemplateDTO) -> Response:
         """
         This function converts imported fingerprint template to image.
-        :param str experiment_name: Experiment's name.
+        :param int experiment_id: Experiment's id.
                 :param str template_dto: Template dto.
         :returns Response(success:bool, data:ImageDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def convert_image_to_template(self, experiment_name: str, image_dto: ImageDTO) -> Response:
+    def convert_image_to_template(self, experiment_id: int, image_dto: ImageDTO) -> Response:
         """
         This function converts imported fingerprint image to template.
-        :param str experiment_name: Experiment's name.
+        :param int experiment_id: Experiment's id.
         :param str image_dto: Image dto.
         :returns Response(success:bool, data:TemplateDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def convert_image_to_printing_object(self, experiment_name: str, image_dto: ImageDTO) -> Response:
+    def convert_image_to_printing_object(self, experiment_id: int, image_dto: ImageDTO) -> Response:
         """
         This function converts imported fingerprint image to 3D object.
-        :param str experiment_name: Experiment's name.
+        :param int experiment_id: Experiment's id.
         :param str image_dto: Image dto.
         :returns Response(success:bool, data:PrintingObjectDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def match(self, experiment_name: str, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
+    def match(self, experiment_id: int, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
         """
         This function matches 2 groups of imported templates and returns comparison statistics.
-                :param str experiment_name: Experiment's name.
+                :param int experiment_id: Experiment's id.
         :param tuple[str] templates_path1: First imported template group.
         :param tuple[str] templates_path2: Second imported template group.
         :returns Response(success:bool, data:int|dict[str, int]|dict[str, dict[str, int]]|None, errors:str|None)
@@ -56,47 +56,47 @@ class IService:
         pass
 
     @abstractmethod
-    def delete_experiment(self, experiment_name: str) -> Response:
+    def delete_experiment(self, experiment_id: int) -> Response:
         """
         This function deletes an experiment.
-        :param str experiment_name: Experiment that will be deleted.
+        :param int experiment_id: Experiment that will be deleted.
         :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def export_experiment(self, experiment_name: str) -> Response:
+    def export_experiment(self, experiment_id: int, export_path: str) -> Response:
         """
         This function exports an experiment as text file.
-        :param str experiment_name: Experiment that will be exported.
+        :param int experiment_id: Experiment that will be exported.
         :returns Response(success:bool, data:TextIO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def rename_experiment(self, experiment_name: str, new_name: str) -> Response:
+    def rename_experiment(self, experiment_id: int, new_experiment_name: str) -> Response:
         """
         This function renames an experiment and returns the new renamed experiment.
-        :param str experiment_name: Experiment to be renamed.
-        :param str new_name: New experiment name.
+        :param int experiment_id: Experiment to be renamed.
+        :param str new_experiment_name: New experiment name.
         :returns Response(success:bool, data:ExperimentDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def create_experiment(self, experiment_name: str) -> Response:
+    def create_experiment(self, experiment_id: int) -> Response:
         """
         This function creates a new experiment and returns it.
-        :param str experiment_name: Experiment name.
+        :param int experiment_id: Experiment id.
         :returns Response(success:bool, data:ExperimentDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def set_current_experiment(self, experiment_name: str) -> Response:
+    def set_current_experiment(self, experiment_id: int) -> Response:
         """
-        This function sets the experiment with this name to be the current experiment.
-        :param str experiment_name: Existing experiment name to be the current experiment.
+        This function sets the experiment with this id to be the current experiment.
+        :param int experiment_id: Existing experiment id to be the current experiment.
         :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
