@@ -868,6 +868,35 @@ class OperationRowFrame(customtkinter.CTkFrame):
             row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
         )
 
+        self.delete_button = customtkinter.CTkLabel(
+            self,
+            text="",
+            cursor="hand2",
+            image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "icons8-remove-80.png")),
+                size=(25, 25)
+            ),
+        )
+        self.delete_button.bind('<Button-1>', command=self.handle_delete_operation)
+        self.delete_button.grid(
+            row=0, column=3, padx=(10, 25), pady=10
+        )
+        self.tp3 = ToolTip(self.delete_button, msg="Delete Operation", delay=1.0)
+
+        self.operation_dto = operation_dto
+
+    def handle_delete_operation(self, event=None):
+        pass
+        # response = service.(self.experiment_name)
+        # if response.success:
+
+
+
+        #     CTkMessagebox(icon="check", title="Experiment",
+        #                   message=f"Experiment {self.experiment_name} deleted successfully!")
+        # else:
+        #     CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
+
 
 class ExperimentsFrame(customtkinter.CTkFrame):
     def __init__(self, master):

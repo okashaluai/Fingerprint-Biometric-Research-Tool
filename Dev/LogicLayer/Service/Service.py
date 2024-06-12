@@ -1,9 +1,11 @@
 import time
 
-from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO
+from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO, OperationDTO, AssetDTO
+from Dev.Enums import OperationType
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.Controllers.MatcherController import MatcherController
+from Dev.LogicLayer.LogicObjects.Experiment import Experiment
 from Dev.LogicLayer.Service.IService import IService
 from Dev.Utils import Singleton
 
@@ -52,6 +54,7 @@ class Service(IService, metaclass=Singleton):
             for i in range(10):
                 e = ExperimentDTO(id=i, name=f"experiment {i}", date=time.time(), operations=tuple())
                 experiments.append(e)
+                self.__experiment_controller.experiments[f"experiment {i}"] = Experiment()
             return Response(True, experiments, None)
         except Exception as error:
             return Response(False, None, str(error))
@@ -87,10 +90,14 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def get_current_experiment_name(self) -> Response:
+    def get_current_experiment(self) -> Response:
         try:
-            current_experiment = self.__experiment_controller.get_current_experiment()
-            current_experiment_dto = current_experiment.to_dto()
-            return Response(True, current_experiment_dto, None)
+            l: list[OperationDTO] = []
+            for i in range(5):
+                l.append(OperationDTO(id=0, experiment_id=0, operation_type=OperationType.TMP2IMG,
+                                      input=AssetDTO(id=0, path="john template", date=time.time()),
+                                      output=AssetDTO(id=0, path="john Image", date=time.time()), date=time.time()))
+            current_experiment = ExperimentDTO(id=0, name=f"experiment 1", date=time.time(), operations=(*l,))
+            return Response(True, current_experiment, None)
         except Exception as error:
             return Response(False, None, str(error))
