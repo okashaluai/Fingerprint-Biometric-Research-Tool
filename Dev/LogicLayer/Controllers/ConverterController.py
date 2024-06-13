@@ -17,11 +17,11 @@ class ConvertorController(metaclass=Singleton):
         image = template.convert_to_image()
 
         # Add this operation to the experiment
-        new_operation = self.__experiment_controller.add_operation(
-            Operation(experiment_name, OperationType.TMP2IMG, template, image))
+        # new_operation = self.__experiment_controller.add_operation(
+        #     Operation(experiment_name, OperationType.TMP2IMG, template, image))
 
         # Update to the new path
-        image.path = new_operation.output.path
+        # image.path = new_operation.output.path
 
         return image
 
@@ -30,11 +30,11 @@ class ConvertorController(metaclass=Singleton):
         template = image.convert_to_template()
 
         # Add this operation to the experiment
-        new_operation = self.__experiment_controller.add_operation(
-            Operation(experiment_name, OperationType.IMG2TMP, image, template))
+        # new_operation = self.__experiment_controller.add_operation(
+        #     Operation(experiment_name, OperationType.IMG2TMP, image, template))
 
         # Update to the new path
-        template.path = new_operation.output.path
+        # template.path = new_operation.output.path
 
         return template
 
@@ -43,10 +43,10 @@ class ConvertorController(metaclass=Singleton):
         printing_object = image.convert_to_printing_object()
 
         # Add this operation to the experiment
-        new_operation = self.__experiment_controller.add_operation(
-            Operation(experiment_name, OperationType.IMG2POBJ, image, printing_object))
+        # new_operation = self.__experiment_controller.add_operation(
+        #     Operation(experiment_name, OperationType.IMG2POBJ, image, printing_object))
 
         # Update to the new path
-        printing_object.path = new_operation.output.path
+        # printing_object.path = new_operation.output.path
 
         return printing_object
