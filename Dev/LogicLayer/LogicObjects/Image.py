@@ -55,7 +55,7 @@ class Image(Asset):
 
         depth = 0.05
         stl = image2stl.convert_to_stl(255 - enhanced_image, printing_object_path, base=True, output_scale=depth)
-        f = open(printing_object_name, 'wb')
-        f.write(stl)
+        with open(printing_object_name, 'wb') as f:
+            f.write(stl)
 
         return PrintingObject(printing_object_path)
