@@ -6,37 +6,57 @@ from Dev.Utils import Singleton
 class ExperimentController(metaclass=Singleton):
 
     def __init__(self):
-        self.current_experiment_name = None
-        self.experiments: dict[str, Experiment] = dict()  # <Key: experiment_name, Value: Experiment>
+        self.current_experiment_id = None
+        self.next_experiment_id = 1  # to be loaded from the DAL when it is implemented.
+        self.experiments: dict[int, Experiment] = dict()  # <Key: experiment_id, Value: Experiment>
 
-    def add_operation(self, operation: Operation) -> Operation:
-        # TODO - need to save the added operation then return the new operation which contains the new input and
-        #  output paths.
-        return operation
+    def add_operation(self, experiment_id: int, operation: Operation):
+        if experiment_id in self.experiments:
+            self.experiments[experiment_id].add_operation(operation)
+        else:
+            raise Exception(f'Experiment with id {experiment_id} does not exist!')
 
     def get_experiments(self):
-        return self.experiments
+        return self.experiments.values()
 
-    def delete_experiment(self, experiment_name: str):
+    def delete_experiment(self, experiment_id: int):
+        if experiment_id in self.experiments:
+            del self.experiments[experiment_id]
+        else:
+            raise Exception(f'Experiment with id {experiment_id} does not exist!')
+
+    def get_sorted_experiments_by_date(self):
+        return sorted(self.experiments.values(), key=lambda experiment: experiment.experiment_date)
+
+    def export_experiment(self, experiment_id: int, export_path: str):
         raise NotImplementedError
 
-    def export_experiment(self, experiment_name: int):
+    def load_experiments(self):
         raise NotImplementedError
 
-    def rename_experiment(self, experiment_name: str, new_name: str):
-        raise NotImplementedError
+    def rename_experiment(self, experiment_id: int, new_experiment_name: str):
+        if experiment_id in self.experiments:
+            self.experiments[experiment_id].rename_experiment(new_experiment_name)
+            return self.experiments[experiment_id]
+        else:
+            raise Exception(f'Experiment with id {experiment_id} does not exist!')
 
     def create_experiment(self, experiment_name: str):
-        raise NotImplementedError
+        new_experiment_id = self.next_experiment_id
+        self.next_experiment_id += 1
+        current_experiment = Experiment(new_experiment_id, experiment_name)
+        self.experiments[new_experiment_id] = current_experiment
+        self.current_experiment_id = new_experiment_id
+        return self.experiments[new_experiment_id]
 
-    def set_current_experiment(self, experiment_name: str):
-        if experiment_name in self.experiments.keys():
-            self.current_experiment_name = experiment_name
+    def set_current_experiment(self, current_experiment_id: int):
+        if current_experiment_id in self.experiments:
+            self.current_experiment_id = current_experiment_id
         else:
-            raise Exception(f"Experiment with the name {experiment_name} doesn't exist!")
+            raise Exception(f'Experiment with id {current_experiment_id} does not exist!')
 
     def get_current_experiment(self):
-        if self.current_experiment_name in self.experiments.keys():
-            return self.experiments[self.current_experiment_name]
+        if self.current_experiment_id in self.experiments:
+            return self.experiments[self.current_experiment_id]
         else:
-            raise Exception(f"Experiment with the name {self.current_experiment_name} doesn't exist!")
+            raise Exception(f'Experiment with id {self.current_experiment_id} does not exist!')
