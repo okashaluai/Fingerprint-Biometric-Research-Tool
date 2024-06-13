@@ -54,6 +54,8 @@ class Image(Asset):
         enhanced_image = fingerprint_enhancer.enhance_Fingerprint(binary_image)
 
         depth = 0.05
-        image2stl.convert_to_stl(255 - enhanced_image, printing_object_path, base=True, output_scale=depth)
+        stl = image2stl.convert_to_stl(255 - enhanced_image, printing_object_path, base=True, output_scale=depth)
+        with open(printing_object_name, 'wb') as f:
+            f.write(stl)
 
         return PrintingObject(printing_object_path)
