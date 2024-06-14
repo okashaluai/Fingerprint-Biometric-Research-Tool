@@ -14,6 +14,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
+from Dev.Utils import Singleton
 
 absolute_path = os.path.dirname(__file__)
 assets_path = os.path.join(absolute_path, "Assets")
@@ -890,8 +891,6 @@ class OperationRowFrame(customtkinter.CTkFrame):
         # response = service.(self.experiment_name)
         # if response.success:
 
-
-
         #     CTkMessagebox(icon="check", title="Experiment",
         #                   message=f"Experiment {self.experiment_name} deleted successfully!")
         # else:
@@ -1278,13 +1277,32 @@ class NewExperimentFrame(customtkinter.CTkFrame):
         self.continue_experiment_button.bind('<Button-1>', self.handle_continue_experiment_button)
 
     def handle_create_new_experiment_button(self):
-        pass
+        response = service.create_experiment(self.new_experiment_entry.get())
+        if response.success:
+            c = CTkMessagebox(icon="check", title="Experiment", message=f"Experiment created successfully!")
+
+            if c.get() == "OK":
+                msg = CTkMessagebox(title="Experiment", message="Do you want to start with this experiment?",
+                                    icon="question", option_1="Yes", option_2="No")
+                msg_response = msg.get()
+
+                if msg_response == "Yes":
+                    response = service.set_current_experiment(response.data.experiment_id)
+                    if response.success:
+                        CTkMessagebox(icon="check", title="Experiment",
+                                      message=f"Current experiment is set to {response.data.experiment_name} successfully!")
+
+                        App(service).change_current_experiment_name(response.data.experiment_name)
+                    else:
+                        CTkMessagebox(icon="cancel", title="Experiment Error", message=response.error)
+        else:
+            CTkMessagebox(icon="cancel", title="Experiment Error", message=response.error)
 
     def handle_continue_experiment_button(self, e):
         self.master.experiments_frame.tkraise()
 
 
-class App(Tk):
+class App(Tk, metaclass=Singleton):
     def __init__(self, _service: IService, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1300,7 +1318,8 @@ class App(Tk):
         app_width = 900
         app_height = 500
         self.minsize(width=app_width, height=app_height)
-        self.title(f"Fingerprint Biometrics Research Tool - [ {experiment_name} ]")
+        self.app_name = "Fingerprint Biometrics Research Tool"
+        self.title(f"{self.app_name} - [ {experiment_name} ]")
         self.update_idletasks()
         frm_width = self.winfo_rootx() - self.winfo_x()
         win_width = self.winfo_width() + 2 * frm_width
@@ -1353,3 +1372,6 @@ class App(Tk):
 
         # Default home frame
         self.home_frame.tkraise()
+
+    def change_current_experiment_name(self, experiment_name: str):
+        self.title(f"{self.app_name} - [ {experiment_name} ]")

@@ -12,14 +12,6 @@ class Experiment(ILogicObject):
         self.experiment_name = experiment_name
         self.experiment_date = datetime.datetime.now()
 
-    def __init__(self, experiment_dto: ExperimentDTO):
-        self.operations = list()
-        for operation in experiment_dto.operations:
-            self.operations.append(operation)
-        self.experiment_id = experiment_dto.experiment_id
-        self.experiment_name = experiment_dto.experiment_name
-        self.experiment_date = experiment_dto.experiment_date
-
     def add_operation(self, operation):
         self.operations.append(operation)
 

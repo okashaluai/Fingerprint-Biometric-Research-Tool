@@ -42,16 +42,22 @@ class ExperimentController(metaclass=Singleton):
             raise Exception(f'Experiment with id {experiment_id} does not exist!')
 
     def create_experiment(self, experiment_name: str):
+        for experiment in self.experiments.values():
+            if experiment.experiment_name == experiment_name:
+                raise Exception(f'Experiment with name {experiment_name} already exist!')
+
         new_experiment_id = self.next_experiment_id
         self.next_experiment_id += 1
-        current_experiment = Experiment(new_experiment_id, experiment_name)
-        self.experiments[new_experiment_id] = current_experiment
-        self.current_experiment_id = new_experiment_id
+
+        new_experiment = Experiment(new_experiment_id, experiment_name)
+        self.experiments[new_experiment_id] = new_experiment
+
         return self.experiments[new_experiment_id]
 
     def set_current_experiment(self, current_experiment_id: int):
         if current_experiment_id in self.experiments:
             self.current_experiment_id = current_experiment_id
+            return self.experiments[self.current_experiment_id]
         else:
             raise Exception(f'Experiment with id {current_experiment_id} does not exist!')
 

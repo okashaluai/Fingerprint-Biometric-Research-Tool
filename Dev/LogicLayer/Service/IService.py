@@ -84,10 +84,10 @@ class IService:
         pass
 
     @abstractmethod
-    def create_experiment(self, experiment_id: int) -> Response:
+    def create_experiment(self, experiment_name: int) -> Response:
         """
         This function creates a new experiment and returns it.
-        :param int experiment_id: Experiment id.
+        :param int experiment_name: Experiment name.
         :returns Response(success:bool, data:ExperimentDTO|None, errors:str|None)
         """
         pass
