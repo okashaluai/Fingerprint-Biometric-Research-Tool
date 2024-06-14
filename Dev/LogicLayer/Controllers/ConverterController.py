@@ -12,7 +12,7 @@ class ConvertorController(metaclass=Singleton):
     def __init__(self):
         self.__experiment_controller = ExperimentController()
 
-    def convert_template_to_image(self, experiment_name: str, template_path: str) -> Image:
+    def convert_template_to_image(self, template_path: str) -> Image:
         template = Template(template_path)
         image = template.convert_to_image()
 
@@ -25,7 +25,7 @@ class ConvertorController(metaclass=Singleton):
 
         return image
 
-    def convert_image_to_template(self, experiment_name: str, image_path: str) -> Template:
+    def convert_image_to_template(self, image_path: str) -> Template:
         image = Image(image_path)
         template = image.convert_to_template()
 
@@ -38,7 +38,7 @@ class ConvertorController(metaclass=Singleton):
 
         return template
 
-    def convert_image_to_printing_object(self, experiment_name: str, image_path: str) -> PrintingObject:
+    def convert_image_to_printing_object(self, image_path: str) -> PrintingObject:
         image = Image(image_path)
         printing_object = image.convert_to_printing_object()
 

@@ -11,7 +11,7 @@ from CTkMessagebox import CTkMessagebox
 from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO
+from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO, TemplateDTO
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 from Dev.Utils import Singleton
@@ -180,6 +180,21 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
     return main_frame
 
 
+def view_stl_open3d(stl_path: str):
+    mesh = o3d.io.read_triangle_mesh(stl_path)
+    mesh = mesh.compute_vertex_normals()
+
+    o3d.visualization.draw_geometries([mesh], window_name="Converted STL",
+                                      width=800, height=800,
+                                      left=int((Tk().winfo_screenwidth() - 800) / 2),
+                                      top=int((Tk().winfo_screenheight() - 800) / 2))
+
+
+def view_image(image_path: str):
+    image = Image.open(image_path)
+    image.show()
+
+
 class SideMenuFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master=master, corner_radius=0)
@@ -292,31 +307,36 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 self.frame.grid_columnconfigure(0, weight=1)
                 self.frame.grid_rowconfigure(0, weight=1)
 
-                # Uniform main frame grid config
-                def main_frame_grid_config(frame):
-                    frame.grid(
-                        row=0, column=0, sticky=customtkinter.NS + customtkinter.EW
-                    )
-
                 # Template import frame
                 self.template_import_frame = self.TemplateImportFrame(parent_tab=self)
-                main_frame_grid_config(self.template_import_frame)
-
-                # Image export frame
-                self.image_export_frame = self.ImageExportFrame(parent_tab=self)
-                main_frame_grid_config(self.image_export_frame)
-
-                # Printing object export frame
-                self.printing_object_export_frame = self.PrintingObjectExportFrame(
-                    parent_tab=self
+                self.template_import_frame.grid(
+                    row=0, column=0, sticky=customtkinter.NS + customtkinter.EW
                 )
-                main_frame_grid_config(self.printing_object_export_frame)
+
+                self.image_export_frame = None
+                self.printing_object_export_frame = None
 
                 # Default frame
                 self.template_import_frame.tkraise()
 
+            def build_printing_object_export_frame(self, path):
+                # Printing object export frame
+                self.printing_object_export_frame = self.PrintingObjectExportFrame(parent_tab=self, path=path)
+                self.printing_object_export_frame.grid(
+                    row=0, column=0, sticky=customtkinter.NS + customtkinter.EW
+                )
+                self.printing_object_export_frame.tkraise()
+
+            def build_image_export_frame(self, path):
+                # Image export frame
+                self.image_export_frame = self.ImageExportFrame(parent_tab=self, path=path)
+                self.image_export_frame.grid(
+                    row=0, column=0, sticky=customtkinter.NS + customtkinter.EW
+                )
+                self.image_export_frame.tkraise()
+
             class ImageExportFrame(customtkinter.CTkFrame):
-                def __init__(self, parent_tab):
+                def __init__(self, parent_tab, path):
                     super().__init__(
                         master=parent_tab.frame,
                         bg_color="transparent",
@@ -324,31 +344,58 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     )
                     self.parent_tab = parent_tab
                     self.grid_columnconfigure((0, 2), weight=1)
-                    self.grid_rowconfigure((0, 4), weight=1)
+                    self.grid_rowconfigure((0, 7), weight=1)
+
+                    self.image_path = path
+
+                    self.title = customtkinter.CTkLabel(self, text="Image",
+                                                        font=customtkinter.CTkFont(size=20, weight="bold"))
+                    self.title.grid(row=1, column=1, padx=(20, 20), pady=(0, 20))
+
+                    self.name = customtkinter.CTkLabel(self, text=f"[ {os.path.basename(path)} ]",
+                                                       font=customtkinter.CTkFont(size=14))
+                    self.name.grid(row=2, column=1, padx=(20, 20), pady=(20, 5))
+
+                    self.view_label = customtkinter.CTkLabel(
+                        self,
+                        text="View",
+                        cursor="hand2",
+                        text_color="dodger blue"
+                    )
+                    self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
+                    self.view_label.bind('<Button-1>', self.view_image)
 
                     self.export_button = customtkinter.CTkButton(self, text="Export")
-                    self.export_button.grid(row=1, column=1, padx=(20, 20), pady=5)
+                    self.export_button.grid(row=4, column=1, padx=(20, 20), pady=5)
 
                     self.export_button = customtkinter.CTkButton(
                         self,
                         text="Convert to 3D Object",
                         command=self.handle_convert_to_printing_object_button,
                     )
-                    self.export_button.grid(row=2, column=1, padx=(20, 20), pady=5)
+                    self.export_button.grid(row=5, column=1, padx=(20, 20), pady=5)
 
                     self.back_button = customtkinter.CTkButton(
                         self, text="Back", command=self.handle_back_button
                     )
-                    self.back_button.grid(row=3, column=1, padx=(20, 20), pady=5)
+                    self.back_button.grid(row=6, column=1, padx=(20, 20), pady=5)
 
                 def handle_convert_to_printing_object_button(self):
-                    self.parent_tab.printing_object_export_frame.tkraise()
+                    image_dto = ImageDTO(None, self.image_path, datetime.now())
+                    response = service.convert_image_to_printing_object(image_dto)
+                    if response.success:
+                        self.parent_tab.build_printing_object_export_frame(path=response.data.path)
+                    else:
+                        CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
+
+                def view_image(self, event=None):
+                    view_image(self.image_path)
 
                 def handle_back_button(self):
                     self.parent_tab.template_import_frame.tkraise()
 
             class PrintingObjectExportFrame(customtkinter.CTkFrame):
-                def __init__(self, parent_tab):
+                def __init__(self, parent_tab, path):
                     super().__init__(
                         master=parent_tab.frame,
                         bg_color="transparent",
@@ -356,15 +403,37 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     )
                     self.parent_tab = parent_tab
                     self.grid_columnconfigure((0, 2), weight=1)
-                    self.grid_rowconfigure((0, 3), weight=1)
+                    self.grid_rowconfigure((0, 6), weight=1)
+
+                    self.stl_path = path
+
+                    self.title = customtkinter.CTkLabel(self, text="Printing Object",
+                                                        font=customtkinter.CTkFont(size=20, weight="bold"))
+                    self.title.grid(row=1, column=1, padx=(20, 20), pady=(0, 20))
+
+                    self.name = customtkinter.CTkLabel(self, text=f"[ {os.path.basename(path)} ]",
+                                                       font=customtkinter.CTkFont(size=14))
+                    self.name.grid(row=2, column=1, padx=(20, 20), pady=(20, 5))
+
+                    self.view_label = customtkinter.CTkLabel(
+                        self,
+                        text="View",
+                        cursor="hand2",
+                        text_color="dodger blue"
+                    )
+                    self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
+                    self.view_label.bind('<Button-1>', self.view_stl)
 
                     self.export_button = customtkinter.CTkButton(self, text="Export")
-                    self.export_button.grid(row=1, column=1, padx=(20, 20), pady=5)
+                    self.export_button.grid(row=4, column=1, padx=(20, 20), pady=5)
 
                     self.back_button = customtkinter.CTkButton(
                         self, text="Back", command=self.handle_back_button
                     )
-                    self.back_button.grid(row=2, column=1, padx=(20, 20), pady=5)
+                    self.back_button.grid(row=5, column=1, padx=(20, 20), pady=5)
+
+                def view_stl(self, event=None):
+                    view_stl_open3d(self.stl_path)
 
                 def handle_back_button(self):
                     self.parent_tab.image_export_frame.tkraise()
@@ -379,6 +448,8 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.parent_tab = parent_tab
                     self.grid_columnconfigure((0, 2), weight=1)
                     self.grid_rowconfigure((0, 4), weight=1)
+
+                    self.template_path = None
 
                     self.dnd = build_drag_n_drop(
                         self,
@@ -406,14 +477,19 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                 def handle_choose_file(self, path):
                     self.convert_to_image_button.configure(state=customtkinter.NORMAL)
-                    print(f"works = {path}")
+                    self.template_path = path
 
                 def handle_choose_directory(self, path):
                     self.convert_to_image_button.configure(state=customtkinter.NORMAL)
-                    print(f"works = {path}")
+                    self.template_path = path
 
                 def handle_convert_to_image_button(self):
-                    self.parent_tab.image_export_frame.tkraise()
+                    template_dto = TemplateDTO(None, self.template_path, datetime.now())
+                    response = service.convert_template_to_image(template_dto)
+                    if response.success:
+                        self.parent_tab.build_image_export_frame(response.data.path)
+                    else:
+                        CTkMessagebox(icon="cancel", title="Template Converter Error", message=response.error)
 
         class ImageTab:
             def __init__(self, master):
@@ -421,15 +497,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 self.frame.grid_columnconfigure(0, weight=1)
                 self.frame.grid_rowconfigure(0, weight=1)
 
-                # Uniform main frame grid config
-                def main_frame_grid_config(frame):
-                    frame.grid(
-                        row=0, column=0, sticky=customtkinter.NS + customtkinter.EW
-                    )
-
                 # Image import frame
                 self.image_import_frame = self.ImageImportFrame(parent_tab=self)
-                main_frame_grid_config(self.image_import_frame)
+                self.image_import_frame.grid(
+                    row=0, column=0, sticky=customtkinter.NS + customtkinter.EW
+                )
 
                 # Default frame
                 self.image_import_frame.tkraise()
@@ -546,13 +618,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.parent_tab.image_import_frame.tkraise()
 
                 def view_stl(self, e):
-                    mesh = o3d.io.read_triangle_mesh(self.stl_path)
-                    mesh = mesh.compute_vertex_normals()
-
-                    o3d.visualization.draw_geometries([mesh], window_name="Converted STL",
-                                                      width=800, height=800,
-                                                      left=int((Tk().winfo_screenwidth() - 800) / 2),
-                                                      top=int((Tk().winfo_screenheight() - 800) / 2))
+                    view_stl_open3d(self.stl_path)
 
                 def handle_export_button(self):
                     file_path = filedialog.asksaveasfilename(title="Export STL",
@@ -573,39 +639,6 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.grid_rowconfigure((0, 5), weight=1)
 
                     self.image_path = None
-                    self.template_path = None
-
-                    # def view_image(path):
-                    #     image = Image.open(path)
-                    #
-                    #     # default_width = 800
-                    #     # default_height = 800
-                    #     # max_val = max(image.width, image.height)
-                    #     # scale_factor = default_width / max_val
-                    #     # image = image.resize(
-                    #     #     (
-                    #     #         int(image.width * scale_factor),
-                    #     #         int(image.height * scale_factor),
-                    #     #     ),
-                    #     #     Image.Resampling.LANCZOS,
-                    #     # )
-                    #     # # image = image.resize((300,300), Image.Resampling.LANCZOS)
-                    #     # pic = ImageTk.PhotoImage(image)
-                    #     # Orignial image: 800 x 600 => (800 x 0.25) x (600 x 0.25)  =  (200 x 150)
-                    #     # Initial Canvas: 200 x 200
-                    #
-                    #     self.dnd.destroy()
-                    #
-                    #     # self.canvas = customtkinter.CTkCanvas(
-                    #     #     self, width=image.width, height=image.height
-                    #     # )
-                    #     # self.image_id = self.canvas.create_image(
-                    #     #     0, 0, image=pic, anchor="nw"
-                    #     # )
-                    #     # self.canvas.image = pic
-                    #     # self.canvas.grid(row=0, column=1, padx=(20, 20), pady=5)
-                    #     #
-                    #     # self.reset_button.configure(state=tkinter.NORMAL)
 
                     self.convert_to_template_button = customtkinter.CTkButton(
                         self,
@@ -654,16 +687,16 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.image_path = path
 
                 def handle_convert_to_template_button(self):
-                    image_dto = ImageDTO(0, self.image_path, time.time())
-                    response = service.convert_image_to_template("experiment_name", image_dto)
+                    image_dto = ImageDTO(None, self.image_path, datetime.now())
+                    response = service.convert_image_to_template(image_dto)
                     if response.success:
                         self.parent_tab.build_template_export_frame(response.data.path)
                     else:
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(0, self.image_path, time.time())
-                    response = service.convert_image_to_printing_object("experiment_name", image_dto)
+                    image_dto = ImageDTO(None, self.image_path, datetime.now())
+                    response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(response.data.path)
                     else:
@@ -1222,7 +1255,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             response = service.set_current_experiment(self.experiment_name)
             if response.success:
                 CTkMessagebox(icon="check", title="Experiment",
-                              message=f"Current experiment is set to {self.experiment_name} successfully!")
+                              message=f"Current experiment is set to {self.experiment_name} !")
             else:
                 CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 

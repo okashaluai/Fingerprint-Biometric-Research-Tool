@@ -12,26 +12,25 @@ class Service(IService, metaclass=Singleton):
         self.__matcher_controller = MatcherController()
         self.__experiment_controller = ExperimentController()
 
-    def convert_template_to_image(self, experiment_name: str, template_dto: TemplateDTO) -> Response:
+    def convert_template_to_image(self, template_dto: TemplateDTO) -> Response:
         try:
-            image = self.__converter_controller.convert_template_to_image(experiment_name, template_dto.path)
+            image = self.__converter_controller.convert_template_to_image(template_dto.path)
             image_dto = image.to_dto()
             return Response(True, image_dto, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def convert_image_to_template(self, experiment_name: str, image_dto: ImageDTO) -> Response:
+    def convert_image_to_template(self, image_dto: ImageDTO) -> Response:
         try:
-            template = self.__converter_controller.convert_image_to_template(experiment_name, image_dto.path)
+            template = self.__converter_controller.convert_image_to_template(image_dto.path)
             template_dto = template.to_dto()
             return Response(True, template_dto, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def convert_image_to_printing_object(self, experiment_name: str, image_dto: ImageDTO) -> Response:
+    def convert_image_to_printing_object(self, image_dto: ImageDTO) -> Response:
         try:
-            printing_object = self.__converter_controller.convert_image_to_printing_object(experiment_name,
-                                                                                           image_dto.path)
+            printing_object = self.__converter_controller.convert_image_to_printing_object(image_dto.path)
             printing_object_dto = printing_object.to_dto()
             return Response(True, printing_object_dto, None)
         except Exception as error:

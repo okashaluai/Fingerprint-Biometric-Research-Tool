@@ -7,30 +7,27 @@ class IService:
     """ SYSTEM INTERFACE """
 
     @abstractmethod
-    def convert_template_to_image(self, experiment_id: int, template_dto: TemplateDTO) -> Response:
+    def convert_template_to_image(self, template_dto: TemplateDTO) -> Response:
         """
         This function converts imported fingerprint template to image.
-        :param int experiment_id: Experiment's id.
-                :param str template_dto: Template dto.
+        :param str template_dto: Template dto.
         :returns Response(success:bool, data:ImageDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def convert_image_to_template(self, experiment_id: int, image_dto: ImageDTO) -> Response:
+    def convert_image_to_template(self, image_dto: ImageDTO) -> Response:
         """
         This function converts imported fingerprint image to template.
-        :param int experiment_id: Experiment's id.
         :param str image_dto: Image dto.
         :returns Response(success:bool, data:TemplateDTO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def convert_image_to_printing_object(self, experiment_id: int, image_dto: ImageDTO) -> Response:
+    def convert_image_to_printing_object(self, image_dto: ImageDTO) -> Response:
         """
         This function converts imported fingerprint image to 3D object.
-        :param int experiment_id: Experiment's id.
         :param str image_dto: Image dto.
         :returns Response(success:bool, data:PrintingObjectDTO|None, errors:str|None)
         """
