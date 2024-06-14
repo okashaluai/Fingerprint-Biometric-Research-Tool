@@ -2,7 +2,10 @@ import datetime
 
 from Dev.DTOs import ExperimentDTO
 from Dev.DataAccessLayer.DAOs import ExperimentDAO
+from Dev.Enums import OperationType
+from Dev.LogicLayer.LogicObjects.Asset import Asset
 from Dev.LogicLayer.LogicObjects.ILogicObject import ILogicObject
+from Dev.LogicLayer.LogicObjects.Operation import Operation
 
 
 class Experiment(ILogicObject):
@@ -11,9 +14,19 @@ class Experiment(ILogicObject):
         self.experiment_id = experiment_id
         self.experiment_name = experiment_name
         self.experiment_date = datetime.datetime.now()
+        self.next_operation_id = 1  # to be loaded from the DAL when it is implemented.
 
-    def add_operation(self, operation):
+    def add_convert_operation(
+            self,
+            operation_type: OperationType,
+            operation_input_path: str,
+            operation_output_path: str
+    ):
+        input = Asset(operation_input_path)
+        output = Asset(operation_output_path)
+        operation = Operation(self.next_operation_id, operation_type, input, output)
         self.operations.append(operation)
+        return operation
 
     def remove_operation(self, operation):
         self.operations.remove(operation)

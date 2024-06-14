@@ -266,6 +266,21 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
     def handle_experiments_button(self):
         self.master.experiments_frame.tkraise()
+
+        # add 10 experiments for mock
+        for i in range(10):
+            response = service.create_experiment(f"experiment {time.time()}")
+            if response.success:
+                service.set_current_experiment(response.data.experiment_id)
+                convert_response = service.convert_image_to_template(
+                    ImageDTO(None, r"C:\Users\Yazan\Desktop\109_1_8bit.png", datetime.now())
+                )
+                if not convert_response.success:
+                    print(convert_response.error)
+                print(f"{response.data.experiment_name}")
+            else:
+                print(response.error)
+
         self.master.experiments_frame.load_experiments()
 
     def handle_new_experiment_button(self):
@@ -1015,6 +1030,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         response = service.get_experiments()
         if response.success:
             self.experiment_dtos = response.data
+            print(self.experiment_dtos)
             self.show_experiments_on_frame(self.experiment_dtos)
         else:
             CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
@@ -1052,9 +1068,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.rowconfigure(3, weight=1)
 
             self.experiment_dto = experiment_dto
-            self.experiment_name = experiment_dto.name
-            self.experiment_date = datetime.fromtimestamp(experiment_dto.date).strftime("%d/%m/%Y    %H:%M:%S")
-            self.experiment_info = customtkinter.CTkLabel(self, text=f"{experiment_name}    {self.experiment_date}")
+            self.experiment_name = experiment_dto.experiment_name
+            self.experiment_date = experiment_dto.experiment_date.strftime("%d/%m/%Y    %H:%M:%S")
+            self.experiment_info = customtkinter.CTkLabel(self, text=f"{self.experiment_name}    {self.experiment_date}")
             self.experiment_info.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
 
             self.continue_experiment = customtkinter.CTkLabel(
@@ -1198,7 +1214,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             response = service.get_current_experiment()
             if response.success:
                 print(response.success)
-                print(response.data.name)
+                print(response.data.operation_name)
                 self.operations_dtos = response.data.operations
                 print(self.operations_dtos)
                 self.show_operations_on_frame(self.operations_dtos)

@@ -1,5 +1,5 @@
+from Dev.Enums import OperationType
 from Dev.LogicLayer.LogicObjects.Experiment import Experiment
-from Dev.LogicLayer.LogicObjects.Operation import Operation
 from Dev.Utils import Singleton
 
 
@@ -10,11 +10,14 @@ class ExperimentController(metaclass=Singleton):
         self.next_experiment_id = 1  # to be loaded from the DAL when it is implemented.
         self.experiments: dict[int, Experiment] = dict()  # <Key: experiment_id, Value: Experiment>
 
-    def add_operation(self, experiment_id: int, operation: Operation):
-        if experiment_id in self.experiments:
-            self.experiments[experiment_id].add_operation(operation)
-        else:
-            raise Exception(f'Experiment with id {experiment_id} does not exist!')
+    def add_operation(
+            self,
+            operation_type: OperationType,
+            operation_input_path: str,
+            operation_output_path: str
+    ):
+        return self.experiments[self.current_experiment_id].add_convert_operation(operation_type, operation_input_path,
+                                                                           operation_output_path)
 
     def get_experiments(self):
         return self.experiments.values()
