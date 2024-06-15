@@ -1,6 +1,7 @@
 import os
 import shutil
 import time
+import uuid
 from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
@@ -269,22 +270,28 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
         # add 10 experiments for mock
         for i in range(10):
-            response = service.create_experiment(f"experiment {time.time()}")
+            response = service.create_experiment(f"experiment {uuid.uuid1()}")
             if response.success:
+                print(f"{response.data.experiment_name}")
                 service.set_current_experiment(response.data.experiment_id)
                 if i % 2 == 0:
-                    convert_response = service.convert_image_to_template(
+                    convert_response1 = service.convert_image_to_template(
                         ImageDTO(None, r"C:\Users\Yazan\Desktop\109_1_8bit.png", datetime.now())
                     )
-                else:
-                    convert_response = service.convert_image_to_template(
+                    convert_response2 = service.convert_image_to_template(
                         ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
                                  datetime.now())
                     )
-                print(convert_response.data.path)
-                if not convert_response.success:
-                    print(convert_response.error)
-                print(f"{response.data.experiment_name}")
+                    if convert_response1.success and convert_response2.success:
+                        print(convert_response1.data.path)
+                        print(convert_response2.data.path)
+                    print(len(service.get_current_experiment().data.operations))
+                # else:
+                #     convert_response = service.convert_image_to_template(
+                #         ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                #                  datetime.now())
+                #     )
+
             else:
                 print(response.error)
 

@@ -16,8 +16,9 @@ class ExperimentController(metaclass=Singleton):
             operation_input_path: str,
             operation_output_path: str
     ):
-        return self.experiments[self.current_experiment_id].add_convert_operation(operation_type, operation_input_path,
-                                                                                  operation_output_path)
+        return self.experiments[self.current_experiment_id].add_convert_operation(operation_type,
+                                                                                       operation_input_path,
+                                                                                       operation_output_path)
 
     def get_experiments(self):
         return self.experiments.values()

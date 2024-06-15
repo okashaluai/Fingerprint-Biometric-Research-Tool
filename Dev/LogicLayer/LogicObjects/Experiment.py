@@ -26,6 +26,7 @@ class Experiment(ILogicObject):
         output = Asset(operation_output_path)
         operation = Operation(self.next_operation_id, operation_type, input, output)
         self.operations[self.next_operation_id] = operation
+        self.next_operation_id += 1
         return operation
 
     def remove_operation(self, operation_id: int):
