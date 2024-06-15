@@ -966,8 +966,6 @@ class OperationRowFrame(customtkinter.CTkFrame):
             self.destroy_tooltips()
             self.destroy()
 
-            self.experiment_frame.load_operations()
-
             CTkMessagebox(icon="check", title="Operation",
                           message=f"Operation deleted successfully!")
         else:
@@ -1304,13 +1302,12 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         def handle_delete_experiment(self, event=None):
             delete_response = service.delete_experiment(self.experiment_dto.experiment_id)
             if delete_response.success:
+                for e in experiments_frame.experiment_dtos:
+                    if e.experiment_id == self.experiment_dto.experiment_id:
+                        experiments_frame.experiment_dtos.remove(e)
 
-                get_response = service.get_experiments()
-                if get_response.success:
-                    experiments_frame.experiment_dtos = get_response.data
-                    experiments_frame.load_experiments()
-                else:
-                    CTkMessagebox(icon="cancel", title="Experiments Error", message=get_response.error)
+                self.destroy_tooltips()
+                self.destroy()
 
                 CTkMessagebox(icon="check", title="Experiment",
                               message=f"Experiment {self.experiment_name} deleted successfully!")
