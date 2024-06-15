@@ -1081,7 +1081,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         for e in self.experiment_dtos:
             # filter experiments according to its name
             k = get_searchable_string(keyword)
-            en = get_searchable_string(e.name)
+            en = get_searchable_string(e.experiment_name)
             if k in en:
                 filtered_experiments_list.append(e)
 
@@ -1262,8 +1262,8 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             for o in self.operations_dtos:
                 # filter operations according to its name
                 k = get_searchable_string(keyword)
-                on1 = get_searchable_string(o.input.path)
-                on2 = get_searchable_string(o.output.path)
+                on1 = get_searchable_string(o.operation_input.path)
+                on2 = get_searchable_string(o.operation_output.path)
                 if k in on1 or on2:
                     filtered_operations_list.append(o)
 
