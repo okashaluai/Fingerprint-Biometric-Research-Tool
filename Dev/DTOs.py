@@ -45,7 +45,7 @@ class PrintingObjectDTO(AssetDTO):
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class OperationDTO(IDto):
     operation_id: int | None
     operation_type: OperationType
@@ -54,7 +54,7 @@ class OperationDTO(IDto):
     operation_date: datetime
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class ExperimentDTO(IDto):
     operations: list[OperationDTO]
     experiment_id: int | None

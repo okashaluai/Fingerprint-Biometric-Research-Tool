@@ -17,7 +17,7 @@ class ExperimentController(metaclass=Singleton):
             operation_output_path: str
     ):
         return self.experiments[self.current_experiment_id].add_convert_operation(operation_type, operation_input_path,
-                                                                           operation_output_path)
+                                                                                  operation_output_path)
 
     def get_experiments(self):
         return self.experiments.values()
@@ -70,8 +70,10 @@ class ExperimentController(metaclass=Singleton):
         else:
             raise Exception(f'Experiment with id {self.current_experiment_id} does not exist!')
 
-    def delete_operation(self, operation_id: int):
-        if operation_id in self.experiments[self.current_experiment_id].operations.keys():
-            self.experiments[self.current_experiment_id].remove_operation(operation_id)
-        else:
+    def delete_operation(self, experiment_id: int, operation_id: int):
+        if experiment_id not in self.experiments.keys():
             raise Exception(f'Experiment with id {self.current_experiment_id} does not exist!')
+        if operation_id not in self.experiments[experiment_id].operations.keys():
+            raise Exception(f'Operation with id {self.current_experiment_id} does not exist!')
+        else:
+            self.experiments[experiment_id].remove_operation(operation_id)

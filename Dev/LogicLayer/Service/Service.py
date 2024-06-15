@@ -100,9 +100,9 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def delete_operation(self, operation_id: int) -> Response:
+    def delete_operation(self, experiment_id:int, operation_id: int) -> Response:
         try:
-            self.__experiment_controller.delete_operation(operation_id)
+            self.__experiment_controller.delete_operation(experiment_id, operation_id)
             return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))

@@ -948,19 +948,18 @@ class OperationRowFrame(customtkinter.CTkFrame):
         self.tp1.destroy()
 
     def handle_delete_operation(self, event=None):
-        response = service.delete_operation(self.operation_dto.operation_id)
+        response = service.delete_operation(
+            self.experiment_frame.experiment_dto.experiment_id,
+                                            self.operation_dto.operation_id)
         if response.success:
-            # for o in self.experiment_frame.operations_dtos:
-            #     if self.operation_dto.operation_id == o.operation_id:
-            #         self.experiment_frame.operations_dtos.remove(o)
-            #         self.experiment_frame.show_operations_on_frame()
+            for o in self.experiment_frame.experiment_dto.operations:
+                if o.operation_id == self.operation_dto.operation_id:
+                    self.experiment_frame.experiment_dto.operations.remove(o)
 
-            get_response = service.get_experiments()
-            if get_response.success:
-                experiments_frame.load_experiments()
-                self.experiment_frame.experiment_dto = get_response.data[self.experiment_frame.experiment_dto.experiment_id]
-            else:
-                CTkMessagebox(icon="cancel", title="Experiments Error", message=get_response.error)
+            self.destroy_tooltips()
+            self.destroy()
+
+            self.experiment_frame.load_operations()
 
             CTkMessagebox(icon="check", title="Operation",
                           message=f"Operation deleted successfully!")
@@ -1033,6 +1032,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         # Delete old experiment frames
         for ef in self.experiments_frames:
             ef.destroy_tooltips()
+            for of in ef.operations_frames:
+                of.destroy_tooltips()
+                of.destroy()
             ef.destroy()
 
         # Build new frames

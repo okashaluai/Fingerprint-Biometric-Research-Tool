@@ -107,7 +107,7 @@ class IService:
         pass
 
     @abstractmethod
-    def delete_operation(self, operation_id: int) -> Response:
+    def delete_operation(self, experiment_id: int, operation_id: int) -> Response:
         """
         This function deletes an operation with the given id.
         :returns Response(success:bool, data:None, errors:str|None)
