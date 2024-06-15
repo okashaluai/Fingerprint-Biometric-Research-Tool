@@ -272,9 +272,16 @@ class SideMenuFrame(customtkinter.CTkFrame):
             response = service.create_experiment(f"experiment {time.time()}")
             if response.success:
                 service.set_current_experiment(response.data.experiment_id)
-                convert_response = service.convert_image_to_template(
-                    ImageDTO(None, r"C:\Users\Yazan\Desktop\109_1_8bit.png", datetime.now())
-                )
+                if i % 2 == 0:
+                    convert_response = service.convert_image_to_template(
+                        ImageDTO(None, r"C:\Users\Yazan\Desktop\109_1_8bit.png", datetime.now())
+                    )
+                else:
+                    convert_response = service.convert_image_to_template(
+                        ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                                 datetime.now())
+                    )
+                print(convert_response.data.path)
                 if not convert_response.success:
                     print(convert_response.error)
                 print(f"{response.data.experiment_name}")
@@ -891,25 +898,28 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
 
 
 class OperationRowFrame(customtkinter.CTkFrame):
-    def __init__(self, master, index: int, operation_dto: OperationDTO):
+    def __init__(self, master, index: int, operation_dto: OperationDTO, experiment_frame: customtkinter.CTkFrame):
         super().__init__(
             master=master, corner_radius=10, fg_color="transparent"
         )
         self.columnconfigure((0, 1, 2), weight=1)
 
+        self.index = index
+        self.experiment_frame = experiment_frame
+
         self.input_label = customtkinter.CTkLabel(
-            self, text=f"Input: {operation_dto.input.path}"
+            self, text=f"Input: {operation_dto.operation_input.path}"
         )
         self.input_label.grid(
             row=0, column=0, sticky=customtkinter.EW, padx=(20, 20)
         )
 
-        self.output_label = customtkinter.CTkLabel(self, text=f"Output: {operation_dto.output.path}")
+        self.output_label = customtkinter.CTkLabel(self, text=f"Output: {operation_dto.operation_output.path}")
         self.output_label.grid(
             row=0, column=1, sticky=customtkinter.EW, padx=(20, 20)
         )
 
-        formatted_date = datetime.fromtimestamp(operation_dto.date).strftime("%d/%m/%Y    %H:%M:%S")
+        formatted_date = operation_dto.operation_date.strftime("%d/%m/%Y    %H:%M:%S")
         self.date_label = customtkinter.CTkLabel(
             self, text=f"Date: {formatted_date})"
         )
@@ -930,19 +940,32 @@ class OperationRowFrame(customtkinter.CTkFrame):
         self.delete_button.grid(
             row=0, column=3, padx=(10, 25), pady=10
         )
-        self.tp3 = ToolTip(self.delete_button, msg="Delete Operation", delay=1.0)
+        self.tp1 = ToolTip(self.delete_button, msg="Delete Operation", delay=1.0)
 
         self.operation_dto = operation_dto
 
-    def handle_delete_operation(self, event=None):
-        pass
-        # response = service.(self.experiment_name)
-        # if response.success:
+    def destroy_tooltips(self):
+        self.tp1.destroy()
 
-        #     CTkMessagebox(icon="check", title="Experiment",
-        #                   message=f"Experiment {self.experiment_name} deleted successfully!")
-        # else:
-        #     CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
+    def handle_delete_operation(self, event=None):
+        response = service.delete_operation(self.operation_dto.operation_id)
+        if response.success:
+            # for o in self.experiment_frame.operations_dtos:
+            #     if self.operation_dto.operation_id == o.operation_id:
+            #         self.experiment_frame.operations_dtos.remove(o)
+            #         self.experiment_frame.show_operations_on_frame()
+
+            get_response = service.get_experiments()
+            if get_response.success:
+                experiments_frame.load_experiments()
+                self.experiment_frame.experiment_dto = get_response.data[self.experiment_frame.experiment_dto.experiment_id]
+            else:
+                CTkMessagebox(icon="cancel", title="Experiments Error", message=get_response.error)
+
+            CTkMessagebox(icon="check", title="Operation",
+                          message=f"Operation deleted successfully!")
+        else:
+            CTkMessagebox(icon="cancel", title="Operations Error", message=response.error)
 
 
 class ExperimentsFrame(customtkinter.CTkFrame):
@@ -1030,7 +1053,6 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         response = service.get_experiments()
         if response.success:
             self.experiment_dtos = response.data
-            print(self.experiment_dtos)
             self.show_experiments_on_frame(self.experiment_dtos)
         else:
             CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
@@ -1070,7 +1092,8 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.experiment_dto = experiment_dto
             self.experiment_name = experiment_dto.experiment_name
             self.experiment_date = experiment_dto.experiment_date.strftime("%d/%m/%Y    %H:%M:%S")
-            self.experiment_info = customtkinter.CTkLabel(self, text=f"{self.experiment_name}    {self.experiment_date}")
+            self.experiment_info = customtkinter.CTkLabel(self,
+                                                          text=f"{self.experiment_name}    {self.experiment_date}")
             self.experiment_info.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
 
             self.continue_experiment = customtkinter.CTkLabel(
@@ -1193,13 +1216,13 @@ class ExperimentsFrame(customtkinter.CTkFrame):
         def show_operations_on_frame(self, operations_dtos: list[OperationDTO]):
             # Delete old operation frames
             for of in self.operations_frames:
-                # of.destroy_tooltips()
+                of.destroy_tooltips()
                 of.destroy()
 
             # Build new frames
             for i, o in enumerate(operations_dtos):
                 row_frame = OperationRowFrame(
-                    self.scrollable_frame, index=i, operation_dto=o
+                    self.scrollable_frame, index=i, operation_dto=o, experiment_frame=self,
                 )
                 row_frame.grid(
                     row=i,
@@ -1211,15 +1234,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.operations_frames.append(row_frame)
 
         def load_operations(self):
-            response = service.get_current_experiment()
-            if response.success:
-                print(response.success)
-                print(response.data.operation_name)
-                self.operations_dtos = response.data.operations
-                print(self.operations_dtos)
-                self.show_operations_on_frame(self.operations_dtos)
-            else:
-                CTkMessagebox(icon="cancel", title="Operations Error", message=response.error)
+            self.operations_dtos = self.experiment_dto.operations
+            print(self.operations_dtos)
+            self.show_operations_on_frame(self.operations_dtos)
 
         def search(self, event=None):
             def get_searchable_string(string: str):
@@ -1276,18 +1293,20 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 
         def handle_delete_experiment(self, event=None):
-            response = service.delete_experiment(self.experiment_name)
-            if response.success:
+            delete_response = service.delete_experiment(self.experiment_dto.experiment_id)
+            if delete_response.success:
 
-                for e in experiments_frame.experiment_dtos:
-                    if self.experiment_name == e.name:
-                        experiments_frame.experiment_dtos.remove(e)
-                        experiments_frame.show_experiments_on_frame(experiments_frame.experiment_dtos)
+                get_response = service.get_experiments()
+                if get_response.success:
+                    experiments_frame.experiment_dtos = get_response.data
+                    experiments_frame.load_experiments()
+                else:
+                    CTkMessagebox(icon="cancel", title="Experiments Error", message=get_response.error)
 
                 CTkMessagebox(icon="check", title="Experiment",
                               message=f"Experiment {self.experiment_name} deleted successfully!")
             else:
-                CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
+                CTkMessagebox(icon="cancel", title="Experiments Error", message=delete_response.error)
 
 
 class NewExperimentFrame(customtkinter.CTkFrame):

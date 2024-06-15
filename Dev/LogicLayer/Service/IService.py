@@ -105,3 +105,11 @@ class IService:
         :returns Response(success:bool, data:ExperimentDTO, errors:str|None)
         """
         pass
+
+    @abstractmethod
+    def delete_operation(self, operation_id: int) -> Response:
+        """
+        This function deletes an operation with the given id.
+        :returns Response(success:bool, data:None, errors:str|None)
+        """
+        pass

@@ -10,7 +10,7 @@ from Dev.LogicLayer.LogicObjects.Operation import Operation
 
 class Experiment(ILogicObject):
     def __init__(self, experiment_id, experiment_name):
-        self.operations = list()
+        self.operations = dict()
         self.experiment_id = experiment_id
         self.experiment_name = experiment_name
         self.experiment_date = datetime.datetime.now()
@@ -25,17 +25,17 @@ class Experiment(ILogicObject):
         input = Asset(operation_input_path)
         output = Asset(operation_output_path)
         operation = Operation(self.next_operation_id, operation_type, input, output)
-        self.operations.append(operation)
+        self.operations[self.next_operation_id] = operation
         return operation
 
-    def remove_operation(self, operation):
-        self.operations.remove(operation)
+    def remove_operation(self, operation_id: int):
+        del self.operations[operation_id]
 
     def rename_experiment(self, new_experiment_name):
         self.experiment_name = new_experiment_name
 
     def to_dto(self) -> ExperimentDTO:
-        return ExperimentDTO(operations=self.operations, experiment_id=self.experiment_id,
+        return ExperimentDTO(operations=list(self.operations.values()), experiment_id=self.experiment_id,
                              experiment_name=self.experiment_name, experiment_date=self.experiment_date)
 
     def to_dao(self) -> ExperimentDAO:

@@ -69,3 +69,9 @@ class ExperimentController(metaclass=Singleton):
             return self.experiments[self.current_experiment_id]
         else:
             raise Exception(f'Experiment with id {self.current_experiment_id} does not exist!')
+
+    def delete_operation(self, operation_id: int):
+        if operation_id in self.experiments[self.current_experiment_id].operations.keys():
+            self.experiments[self.current_experiment_id].remove_operation(operation_id)
+        else:
+            raise Exception(f'Experiment with id {self.current_experiment_id} does not exist!')
