@@ -1,6 +1,5 @@
 import os
 import shutil
-import time
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -757,39 +756,32 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.dir1_is_selected = False
         self.dir2_is_selected = False
 
-        self.path_set1 = None
-        self.path_set2 = None
+        self.path1 = None
+        self.path2 = None
 
         def handle_reset1():
             self.f1_is_selected = False
             self.dir1_is_selected = False
+            self.path1 = None
             self.match_button.configure(state=customtkinter.DISABLED)
 
         def handle_reset2():
             self.f2_is_selected = False
             self.dir2_is_selected = False
+            self.path2 = None
             self.match_button.configure(state=customtkinter.DISABLED)
-
-        def dir_to_path_set(path):
-            templates_set = []
-
-            for t in os.listdir(path):
-                t_path = os.path.join(path, t)
-                templates_set.append(t_path)
-
-            return tuple(templates_set)
 
         def handle_choose_file1(path):
             self.f1_is_selected = True
+            self.path1 = path
             if self.f2_is_selected or self.dir2_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set1 = (path,)
 
         def handle_choose_directory1(path):
             self.dir1_is_selected = True
+            self.path1 = path
             if self.f2_is_selected or self.dir2_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set1 = dir_to_path_set(path)
 
         font = customtkinter.CTkFont(size=16, weight="bold")
         customtkinter.CTkLabel(self.frame, text="First Set", font=font).grid(row=2, column=1, padx=(20, 20),
@@ -810,15 +802,15 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
 
         def handle_choose_file2(path):
             self.f2_is_selected = True
+            self.path2 = path
             if self.f1_is_selected or self.dir1_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set2 = (path,)
 
         def handle_choose_directory2(path):
             self.dir2_is_selected = True
+            self.path2 = path
             if self.f1_is_selected or self.dir1_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set2 = dir_to_path_set(path)
 
         self.dnd2 = build_drag_n_drop(
             self.frame,
@@ -842,7 +834,17 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.match_button.configure(state=customtkinter.DISABLED)
 
     def handle_match_templates_button(self):
-        response = service.match("Yazan", self.path_set1, self.path_set2)
+        if self.f1_is_selected and self.f2_is_selected:
+            response = service.match_one_to_one(self.path1, self.path2)
+        elif self.f1_is_selected and self.dir2_is_selected:
+            response = service.match_one_to_many(self.path1, self.path2)
+        elif self.dir1_is_selected and self.f2_is_selected:
+            response = service.match_one_to_many(self.path2, self.path1)
+        elif self.dir1_is_selected and self.dir2_is_selected:
+            response = service.match_many_to_many(self.path1, self.path2)
+        else:
+            CTkMessagebox(icon="cancel", title="Matching Error", message="Unexpected Matching GUI Error")
+
         if response.success:
             self.build_results_frame(response.data)
         else:
@@ -957,7 +959,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
     def handle_delete_operation(self, event=None):
         response = service.delete_operation(
             self.experiment_frame.experiment_dto.experiment_id,
-                                            self.operation_dto.operation_id)
+            self.operation_dto.operation_id)
         if response.success:
             for o in self.experiment_frame.experiment_dto.operations:
                 if o.operation_id == self.operation_dto.operation_id:
