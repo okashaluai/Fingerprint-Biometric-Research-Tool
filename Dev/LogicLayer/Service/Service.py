@@ -36,7 +36,7 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def match(self, experiment_name: str, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
+    def match(self, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
         try:
             score = self.__matcher_controller.match_templates(templates_path1, templates_path2)
             return Response(True, score, None)

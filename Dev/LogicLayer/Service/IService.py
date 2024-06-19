@@ -34,10 +34,9 @@ class IService:
         pass
 
     @abstractmethod
-    def match(self, experiment_id: int, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
+    def match(self, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
         """
         This function matches 2 groups of imported templates and returns comparison statistics.
-                :param int experiment_id: Experiment's id.
         :param tuple[str] templates_path1: First imported template group.
         :param tuple[str] templates_path2: Second imported template group.
         :returns Response(success:bool, data:int|dict[str, int]|dict[str, dict[str, int]]|None, errors:str|None)

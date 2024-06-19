@@ -1,6 +1,5 @@
 import os
 import shutil
-import time
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -842,7 +841,7 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.match_button.configure(state=customtkinter.DISABLED)
 
     def handle_match_templates_button(self):
-        response = service.match("Yazan", self.path_set1, self.path_set2)
+        response = service.match(self.path_set1, self.path_set2)
         if response.success:
             self.build_results_frame(response.data)
         else:
@@ -851,7 +850,7 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
     def build_results_frame(self, results):
         self.results_frame = customtkinter.CTkFrame(self)
         self.results_frame.grid_columnconfigure((0), weight=1)
-        self.results_frame.grid_rowconfigure((0, 6), weight=1)
+        self.results_frame.grid_rowconfigure((0, 4), weight=1)
         self.results_frame.grid(
             row=0,
             column=0,
@@ -892,15 +891,26 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
                                                font=customtkinter.CTkFont(size=16, weight="bold"))
         results_label.grid(row=1, column=0, padx=(20, 20), sticky=customtkinter.EW, pady=10)
 
+        def handle_export_results():
+            pass
+
+        export_button = customtkinter.CTkButton(self.results_frame, text="Export CSV", command=handle_export_results)
+        export_button.grid(
+            row=2,
+            column=0,
+            padx=(20, 20),
+            pady=(40, 5)
+        )
+
         def handle_back_button():
             self.results_frame.destroy()
 
         back_button = customtkinter.CTkButton(self.results_frame, text="Back", command=handle_back_button)
         back_button.grid(
-            row=2,
+            row=3,
             column=0,
             padx=(20, 20),
-            pady=(40, 5)
+            pady=(5, 5)
         )
 
 
@@ -957,7 +967,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
     def handle_delete_operation(self, event=None):
         response = service.delete_operation(
             self.experiment_frame.experiment_dto.experiment_id,
-                                            self.operation_dto.operation_id)
+            self.operation_dto.operation_id)
         if response.success:
             for o in self.experiment_frame.experiment_dto.operations:
                 if o.operation_id == self.operation_dto.operation_id:
