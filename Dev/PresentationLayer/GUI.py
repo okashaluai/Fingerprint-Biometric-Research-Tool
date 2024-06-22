@@ -599,7 +599,6 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     file_path = filedialog.asksaveasfilename(title="Export Template",
                                                              filetypes=(("All Files", "*.*"),),
                                                              initialfile=Path(self.template_path).stem)
-                    print(os.path.dirname(file_path))
                     if file_path:
                         shutil.copytree(self.template_path, os.path.dirname(file_path), dirs_exist_ok=True)
 
@@ -762,33 +761,26 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         def handle_reset1():
             self.f1_is_selected = False
             self.dir1_is_selected = False
+            self.path_set1 = None
             self.match_button.configure(state=customtkinter.DISABLED)
 
         def handle_reset2():
             self.f2_is_selected = False
             self.dir2_is_selected = False
+            self.path_set2 = None
             self.match_button.configure(state=customtkinter.DISABLED)
-
-        def dir_to_path_set(path):
-            templates_set = []
-
-            for t in os.listdir(path):
-                t_path = os.path.join(path, t)
-                templates_set.append(t_path)
-
-            return tuple(templates_set)
 
         def handle_choose_file1(path):
             self.f1_is_selected = True
             if self.f2_is_selected or self.dir2_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set1 = (path,)
+            self.path_set1 = path
 
         def handle_choose_directory1(path):
             self.dir1_is_selected = True
             if self.f2_is_selected or self.dir2_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set1 = dir_to_path_set(path)
+            self.path_set1 = path
 
         font = customtkinter.CTkFont(size=16, weight="bold")
         customtkinter.CTkLabel(self.frame, text="First Set", font=font).grid(row=2, column=1, padx=(20, 20),
@@ -811,13 +803,13 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             self.f2_is_selected = True
             if self.f1_is_selected or self.dir1_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set2 = (path,)
+            self.path_set2 = path
 
         def handle_choose_directory2(path):
             self.dir2_is_selected = True
             if self.f1_is_selected or self.dir1_is_selected:
                 self.match_button.configure(state=customtkinter.NORMAL)
-            self.path_set2 = dir_to_path_set(path)
+            self.path_set2 = path
 
         self.dnd2 = build_drag_n_drop(
             self.frame,
@@ -841,7 +833,17 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.match_button.configure(state=customtkinter.DISABLED)
 
     def handle_match_templates_button(self):
-        response = service.match(self.path_set1, self.path_set2)
+        if self.f1_is_selected and self.f2_is_selected:
+            response = service.match_one_to_one(self.path_set1, self.path_set2)
+        elif self.f1_is_selected and self.dir2_is_selected:
+            response = service.match_one_to_many(self.path_set1, self.path_set2)
+        elif self.f2_is_selected and self.dir1_is_selected:
+            response = service.match_one_to_many(self.path_set2, self.path_set1)
+        elif self.dir1_is_selected and self.dir2_is_selected:
+            response = service.match_many_to_many(self.path_set1, self.path_set2)
+        else:
+            CTkMessagebox(icon="cancel", title="Unexpected Error", message="Unexpected GUI Error")
+
         if response.success:
             self.build_results_frame(response.data)
         else:
@@ -862,37 +864,54 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
                                        font=customtkinter.CTkFont(size=20, weight="bold"))
         title.grid(row=0, column=0, padx=(20, 20), sticky=customtkinter.EW, pady=5)
 
-        if len(self.path_set1) == 1 and len(self.path_set2) == 1:
-            t1_name = Path(self.path_set1[0]).stem
-            t2_name = Path(self.path_set2[0]).stem
+        # if len(self.path_set1) == 1 and len(self.path_set2) == 1:
+        #     t1_name = Path(self.path_set1[0]).stem
+        #     t2_name = Path(self.path_set2[0]).stem
+        #     res_text = f"Score: {results}"
+        # elif len(self.path_set1) == 1 and len(self.path_set2) > 1:
+        #     t1_name = Path(self.path_set1[0]).stem
+        #     res_text = f"Matching [{t1_name}] with:\n\n"
+        #     for t2 in self.path_set2:
+        #         t2_name = Path(t2).stem
+        #         res_text += f"{t2_name} - Score: {results[t2]}\n"
+        # elif len(self.path_set2) == 1 and len(self.path_set1) > 1:
+        #     t2_name = Path(self.path_set2[0]).stem
+        #     res_text = f"Matching [{t2_name}] with:\n\n"
+        #     for t1 in self.path_set1:
+        #         t1_name = Path(t1).stem
+        #         res_text += f"{t1_name} - Score: {results[t1]}\n"
+        # elif len(self.path_set1) > 1 and len(self.path_set2) > 1:
+        #     res_text = ""
+        #     for t1 in self.path_set1:
+        #         t1_name = Path(t1).stem
+        #         res_text += f"\nMatching [{t1_name}] with:\n\n"
+        #         for t2 in self.path_set2:
+        #             t2_name = Path(t2).stem
+        #             res_text += f"{t2_name} - Score: {results[t1][t2]}\n"
+        res_text = "Export to View Matching Results."
+        if self.f1_is_selected and self.f2_is_selected:
             res_text = f"Score: {results}"
-        elif len(self.path_set1) == 1 and len(self.path_set2) > 1:
-            t1_name = Path(self.path_set1[0]).stem
-            res_text = f"Matching [{t1_name}] with:\n\n"
-            for t2 in self.path_set2:
-                t2_name = Path(t2).stem
-                res_text += f"{t2_name} - Score: {results[t2]}\n"
-        elif len(self.path_set2) == 1 and len(self.path_set1) > 1:
-            t2_name = Path(self.path_set2[0]).stem
-            res_text = f"Matching [{t2_name}] with:\n\n"
-            for t1 in self.path_set1:
-                t1_name = Path(t1).stem
-                res_text += f"{t1_name} - Score: {results[t1]}\n"
-        elif len(self.path_set1) > 1 and len(self.path_set2) > 1:
-            res_text = ""
-            for t1 in self.path_set1:
-                t1_name = Path(t1).stem
-                res_text += f"\nMatching [{t1_name}] with:\n\n"
-                for t2 in self.path_set2:
-                    t2_name = Path(t2).stem
-                    res_text += f"{t2_name} - Score: {results[t1][t2]}\n"
-
         results_label = customtkinter.CTkLabel(self.results_frame, text=res_text,
                                                font=customtkinter.CTkFont(size=16, weight="bold"))
         results_label.grid(row=1, column=0, padx=(20, 20), sticky=customtkinter.EW, pady=10)
 
         def handle_export_results():
-            pass
+            export_full_path = filedialog.asksaveasfilename(title="Export Matching Results",
+                                                            filetypes=(("All Files", "*.*"),),
+                                                            initialfile="MatchingScores.csv")
+            if export_full_path == "" or None:
+                return
+
+            if self.f1_is_selected and self.f2_is_selected:
+                response = service.export_matching_one_to_one_csv(self.path_set1, self.path_set2, results,
+                                                                  export_full_path)
+            else:
+                response = service.export_matching_matrix_csv(results, export_full_path)
+
+            if response.success:
+                CTkMessagebox(icon="check", title="Export Successful", message="Matching scores exported successfully!")
+            else:
+                CTkMessagebox(icon="cancel", title="Export Error", message=response.error)
 
         export_button = customtkinter.CTkButton(self.results_frame, text="Export CSV", command=handle_export_results)
         export_button.grid(
