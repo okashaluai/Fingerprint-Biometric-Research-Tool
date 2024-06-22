@@ -66,17 +66,3 @@ class MatcherController(metaclass=Singleton):
         matrix[template1_path][template2_path] = score
 
         self.export_matrix_score_as_csv(matrix, export_full_path)
-
-
-if __name__ == '__main__':
-    mc = MatcherController()
-    score = mc.match_one_to_one(
-        r"C:\Users\Yazan\Desktop\t1\109_1_8bit_template.xyt",
-        r"C:\Users\Yazan\Desktop\t1\109_2_8bit_template.xyt",
-    )
-    print(score)
-    mc.export_one_to_one_score_as_csv(
-        r"C:\Users\Yazan\Desktop\t1\109_1_8bit_template.xyt",
-        r"C:\Users\Yazan\Desktop\t1\109_2_8bit_template.xyt",
-        score,
-        r"C:\Users\Yazan\Desktop\myscores.csv")
