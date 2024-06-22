@@ -74,13 +74,27 @@ class IService:
         pass
 
     @abstractmethod
-    def export_matching_csv(self, matching_results, export_full_path: str) -> Response:
+    def export_matching_one_to_one_csv(self, template1_path: str, template2_path: str, score,
+                                       export_full_path: str) -> Response:
         """
         This function writes the results into csv file and return it
-        :param dict[str, dict[str, int]] matching_results: the matching results that is
+        :param str template1_path: first template (.xyt) file path
+        :param str template2_path: second template (.xyt) file path
+        :param int score: the matching results that is
         :param str export_full_path: where csv file will be created with the same name at the ending of the path
         returned from match function.
-        :returns Response(success:bool, data:Csv|None, errors:str|None)
+        :returns Response(success:bool, data:None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
+    def export_matching_matrix_csv(self, score_matrix, export_full_path: str) -> Response:
+        """
+        This function writes the results into csv file and return it
+        :param dict[str, dict[str, int]] score_matrix: the matching results that is
+        :param str export_full_path: where csv file will be created with the same name at the ending of the path
+        returned from match function.
+        :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
 

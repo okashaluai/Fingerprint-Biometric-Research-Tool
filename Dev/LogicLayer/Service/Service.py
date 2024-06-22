@@ -57,10 +57,19 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def export_matching_csv(self, matching_results, export_full_path: str) -> Response:
+    def export_matching_matrix_csv(self, score_matrix, export_full_path: str) -> Response:
         try:
-            score = self.__matcher_controller.export_matrix_score_as_csv(matching_results, export_full_path)
-            return Response(True, score, None)
+            self.__matcher_controller.export_matrix_score_as_csv(score_matrix, export_full_path)
+            return Response(True, None, None)
+        except Exception as error:
+            return Response(False, None, str(error))
+
+    def export_matching_one_to_one_csv(self, template1_path, template2_path, score,
+                                       export_full_path: str) -> Response:
+        try:
+            self.__matcher_controller.export_one_to_one_score_as_csv(template1_path, template2_path, score,
+                                                                     export_full_path)
+            return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
 

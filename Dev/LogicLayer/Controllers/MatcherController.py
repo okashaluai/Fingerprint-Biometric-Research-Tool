@@ -35,36 +35,48 @@ class MatcherController(metaclass=Singleton):
         matching_score = self.matcher.match_many_to_many(templates1_path, templates2_path)
         return matching_score
 
-    def export_matrix_score_as_csv(self, score, export_full_path: str):
+    def export_matrix_score_as_csv(self, score_matrix, export_full_path: str) -> None:
         with open(export_full_path, 'w', encoding='UTF8', newline='') as f:
             writer = csv.writer(f)
 
             scores_row_entry = dict()
 
-            for i, t1_path in enumerate(score.keys()):
+            for i, t1_path in enumerate(score_matrix.keys()):
                 row_entry = []
                 scores_row_entry[i + 1] = []
 
-                for t2_path in score[t1_path].keys():
+                for t2_path in score_matrix[t1_path].keys():
                     row_entry.append(Path(t2_path).stem)
-                    scores_row_entry[i + 1].append(score[t1_path][t2_path])
+                    scores_row_entry[i + 1].append(score_matrix[t1_path][t2_path])
 
                 if i == 0:
                     row_entry = [''] + row_entry
-                elif i < len(score.keys()):
-                    row_entry = [Path(list(score.keys())[i - 1]).stem] + scores_row_entry[i]
+                elif i < len(score_matrix.keys()):
+                    row_entry = [Path(list(score_matrix.keys())[i - 1]).stem] + scores_row_entry[i]
 
                 writer.writerow(row_entry)
 
-            last_row = [Path(list(score.keys())[i]).stem] + scores_row_entry[i + 1]
+            last_row = [Path(list(score_matrix.keys())[i]).stem] + scores_row_entry[i + 1]
             writer.writerow(last_row)
+
+    def export_one_to_one_score_as_csv(self, template1_path: str, template2_path: str, score: int,
+                                       export_full_path: str) -> None:
+        matrix = dict()
+        matrix[template1_path] = dict()
+        matrix[template1_path][template2_path] = score
+
+        self.export_matrix_score_as_csv(matrix, export_full_path)
 
 
 if __name__ == '__main__':
     mc = MatcherController()
-    score = mc.match_many_to_many(
-        r"C:\Users\Yazan\Desktop\t1",
-        r"C:\Users\Yazan\Desktop\t1"
+    score = mc.match_one_to_one(
+        r"C:\Users\Yazan\Desktop\t1\109_1_8bit_template.xyt",
+        r"C:\Users\Yazan\Desktop\t1\109_2_8bit_template.xyt",
     )
     print(score)
-    mc.export_matrix_score_as_csv(score, r"C:\Users\Yazan\Desktop\myscores.csv")
+    mc.export_one_to_one_score_as_csv(
+        r"C:\Users\Yazan\Desktop\t1\109_1_8bit_template.xyt",
+        r"C:\Users\Yazan\Desktop\t1\109_2_8bit_template.xyt",
+        score,
+        r"C:\Users\Yazan\Desktop\myscores.csv")
