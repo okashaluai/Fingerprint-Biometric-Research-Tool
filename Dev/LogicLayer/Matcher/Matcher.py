@@ -9,13 +9,17 @@ class Matcher(IMatcher, metaclass=Singleton):
         matching_score = match_templates(template1_path, template2_path)
         return matching_score
 
-    def match_one_to_many(self, template_path: str, templates_path: tuple[str]) -> dict[str, int]:
-        scores_dic = dict()  # <Key: other_template_path, Value: score>
-        for tp in templates_path:
-            scores_dic[tp] = match_templates(template_path, tp)
-        return scores_dic
+    def match_one_to_many(self, template_path: str, templates_path: list[str]) -> dict[str, dict[str, int]]:
+        matrix_score = dict()  # <Key: template1_path, Value: <Key: template2_path, Value: score>>
 
-    def match_many_to_many(self, templates1_path: tuple[str], templates2_path: tuple[str]) -> dict[str, dict[str, int]]:
+        scores_dic = dict()  # <Key: template2_path, Value: score>
+        for tp2 in templates_path:
+            scores_dic[tp2] = match_templates(template_path, tp2)
+        matrix_score[template_path] = scores_dic
+
+        return matrix_score
+
+    def match_many_to_many(self, templates1_path: list[str], templates2_path: list[str]) -> dict[str, dict[str, int]]:
         matrix_score = dict()  # <Key: template1_path, Value: <Key: template2_path, Value: score>>
 
         for tp1 in templates1_path:
