@@ -29,7 +29,7 @@ class Tk(customtkinter.CTk, TkinterDnD.DnDWrapper):
 
 # Builds drag and drop / browse files widget
 def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose_file_title, file_types,
-                      choose_directory_title, invoke_reset_wrapper=None, width=240, height=80):
+                      choose_directory_title, invoke_reset_wrapper=None, width=240, height=80, view_function=None):
     main_frame = customtkinter.CTkFrame(
         master=frame,
         width=width,
@@ -98,6 +98,10 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
             text_color="dodger blue"
         )
         view_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10, pady=18)
+        if view_function is not None:
+            # def view(event):
+            #     view_function()
+            view_label.bind('<Button-1>', view_function)
 
         reset_label = customtkinter.CTkLabel(
             selected_frame,
@@ -695,9 +699,13 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         choose_file_title="Choose a template file",
                         file_types=[("Text files", "*.txt"), ("All files", "*.*")],
                         choose_directory_title="Choose a templates directory",
-                        invoke_reset_wrapper=self.handle_reset
+                        invoke_reset_wrapper=self.handle_reset,
+                        view_function=self.view_image_event,
                     )
                     self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
+
+                def view_image_event(self, event=None):
+                    view_image(self.image_path)
 
                 def handle_reset(self):
                     self.convert_to_template_button.configure(state=customtkinter.DISABLED)
@@ -864,30 +872,6 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
                                        font=customtkinter.CTkFont(size=20, weight="bold"))
         title.grid(row=0, column=0, padx=(20, 20), sticky=customtkinter.EW, pady=5)
 
-        # if len(self.path_set1) == 1 and len(self.path_set2) == 1:
-        #     t1_name = Path(self.path_set1[0]).stem
-        #     t2_name = Path(self.path_set2[0]).stem
-        #     res_text = f"Score: {results}"
-        # elif len(self.path_set1) == 1 and len(self.path_set2) > 1:
-        #     t1_name = Path(self.path_set1[0]).stem
-        #     res_text = f"Matching [{t1_name}] with:\n\n"
-        #     for t2 in self.path_set2:
-        #         t2_name = Path(t2).stem
-        #         res_text += f"{t2_name} - Score: {results[t2]}\n"
-        # elif len(self.path_set2) == 1 and len(self.path_set1) > 1:
-        #     t2_name = Path(self.path_set2[0]).stem
-        #     res_text = f"Matching [{t2_name}] with:\n\n"
-        #     for t1 in self.path_set1:
-        #         t1_name = Path(t1).stem
-        #         res_text += f"{t1_name} - Score: {results[t1]}\n"
-        # elif len(self.path_set1) > 1 and len(self.path_set2) > 1:
-        #     res_text = ""
-        #     for t1 in self.path_set1:
-        #         t1_name = Path(t1).stem
-        #         res_text += f"\nMatching [{t1_name}] with:\n\n"
-        #         for t2 in self.path_set2:
-        #             t2_name = Path(t2).stem
-        #             res_text += f"{t2_name} - Score: {results[t1][t2]}\n"
         res_text = "Export to View Matching Results."
         if self.f1_is_selected and self.f2_is_selected:
             res_text = f"Score: {results}"
