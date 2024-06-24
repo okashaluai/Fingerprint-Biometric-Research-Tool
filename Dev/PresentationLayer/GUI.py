@@ -27,6 +27,10 @@ class Tk(customtkinter.CTk, TkinterDnD.DnDWrapper):
         self.TkdndVersion = TkinterDnD._require(self)
 
 
+# Supported image formats
+supported_images_formats = ['png', 'gpeg', 'tiff', 'jpg']
+
+
 # Builds drag and drop / browse files widget
 def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose_file_title, file_types,
                       choose_directory_title, invoke_reset_wrapper=None, width=240, height=80, view_function=None):
@@ -488,7 +492,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         handle_choose_directory=self.handle_choose_directory,
                         handle_choose_file=self.handle_choose_file,
                         choose_file_title="Choose a template file",
-                        file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+                        file_types=[("Template files", "*.xyt")],
                         choose_directory_title="Choose a templates directory",
                         invoke_reset_wrapper=self.handle_reset
                     )
@@ -696,9 +700,9 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self,
                         handle_choose_directory=self.handle_choose_directory,
                         handle_choose_file=self.handle_choose_file,
-                        choose_file_title="Choose a template file",
-                        file_types=[("Text files", "*.txt"), ("All files", "*.*")],
-                        choose_directory_title="Choose a templates directory",
+                        choose_file_title="Choose an image file",
+                        file_types=[("Image files", supported_images_formats)],
+                        choose_directory_title="Choose an images directory",
                         invoke_reset_wrapper=self.handle_reset,
                         view_function=self.view_image_event,
                     )
@@ -798,7 +802,7 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             handle_choose_directory=handle_choose_directory1,
             handle_choose_file=handle_choose_file1,
             choose_file_title="Choose a template file",
-            file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+            file_types=[("Template files", "*.xyt")],
             choose_directory_title="Choose a templates directory",
             invoke_reset_wrapper=handle_reset1
         )
@@ -824,7 +828,7 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             handle_choose_directory=handle_choose_directory2,
             handle_choose_file=handle_choose_file2,
             choose_file_title="Choose a template file",
-            file_types=[("Text files", "*.txt"), ("All files", "*.*")],
+            file_types=[("Template files", "*.xyt")],
             choose_directory_title="Choose a templates directory",
             invoke_reset_wrapper=handle_reset2
         )
