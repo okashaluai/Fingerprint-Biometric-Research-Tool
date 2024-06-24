@@ -293,6 +293,12 @@ class SideMenuFrame(customtkinter.CTkFrame):
                         print(convert_response1.data.path)
                         print(convert_response2.data.path)
                     print(len(service.get_current_experiment().data.operations))
+
+                if i == 0:
+                    convert_response2 = service.convert_image_to_printing_object(
+                        ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                                 datetime.now())
+                    )
                 # else:
                 #     convert_response = service.convert_image_to_template(
                 #         ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
@@ -932,20 +938,25 @@ class OperationRowFrame(customtkinter.CTkFrame):
         self.experiment_frame = experiment_frame
 
         self.input_label = customtkinter.CTkLabel(
-            self, text=f"Input: {operation_dto.operation_input.path}"
+            self, text=f"Input: {os.path.basename(operation_dto.operation_input.path)}", cursor="hand2"
         )
         self.input_label.grid(
             row=0, column=0, sticky=customtkinter.EW, padx=(20, 20)
         )
+        self.input_label.bind('<Button-1>', lambda e: self.view_files(self.operation_dto.operation_input.path))
 
-        self.output_label = customtkinter.CTkLabel(self, text=f"Output: {operation_dto.operation_output.path}")
+        self.output_label = customtkinter.CTkLabel(
+            self,
+            text=f"Output: {os.path.basename(operation_dto.operation_output.path)}",
+            cursor="hand2")
         self.output_label.grid(
             row=0, column=1, sticky=customtkinter.EW, padx=(20, 20)
         )
+        self.output_label.bind('<Button-1>', lambda e: self.view_files(self.operation_dto.operation_output.path))
 
         formatted_date = operation_dto.operation_date.strftime("%d/%m/%Y    %H:%M:%S")
         self.date_label = customtkinter.CTkLabel(
-            self, text=f"Date: {formatted_date})"
+            self, text=f"Date: {formatted_date}"
         )
         self.date_label.grid(
             row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
@@ -967,6 +978,14 @@ class OperationRowFrame(customtkinter.CTkFrame):
         self.tp1 = ToolTip(self.delete_button, msg="Delete Operation", delay=1.0)
 
         self.operation_dto = operation_dto
+
+    def view_files(self, path: str):
+        if path.endswith('.xyt'):
+            pass
+        elif path.endswith('.png'):
+            view_image(self.operation_dto.operation_input.path)
+        elif path.endswith('.stl'):
+            view_stl_open3d(path)
 
     def destroy_tooltips(self):
         self.tp1.destroy()
