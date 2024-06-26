@@ -1,4 +1,4 @@
-from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO
+from Dev.DTOs import Response, TemplateDTO, ImageDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.Controllers.MatcherController import MatcherController
@@ -36,10 +36,40 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def match(self, experiment_name: str, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
+    def match_one_to_one(self, template1_path: str, template2_path: str) -> Response:
         try:
-            score = self.__matcher_controller.match_templates(templates_path1, templates_path2)
+            score = self.__matcher_controller.match_one_to_one(template1_path, template2_path)
             return Response(True, score, None)
+        except Exception as error:
+            return Response(False, None, str(error))
+
+    def match_one_to_many(self, template_path: str, templates_dir_path: str) -> Response:
+        try:
+            score = self.__matcher_controller.match_one_to_many(template_path, templates_dir_path)
+            return Response(True, score, None)
+        except Exception as error:
+            return Response(False, None, str(error))
+
+    def match_many_to_many(self, templates1_dir_path: str, templates2_dir_path: str) -> Response:
+        try:
+            score = self.__matcher_controller.match_many_to_many(templates1_dir_path, templates2_dir_path)
+            return Response(True, score, None)
+        except Exception as error:
+            return Response(False, None, str(error))
+
+    def export_matching_matrix_csv(self, score_matrix, export_full_path: str) -> Response:
+        try:
+            self.__matcher_controller.export_matrix_score_as_csv(score_matrix, export_full_path)
+            return Response(True, None, None)
+        except Exception as error:
+            return Response(False, None, str(error))
+
+    def export_matching_one_to_one_csv(self, template1_path, template2_path, score,
+                                       export_full_path: str) -> Response:
+        try:
+            self.__matcher_controller.export_one_to_one_score_as_csv(template1_path, template2_path, score,
+                                                                     export_full_path)
+            return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
 
@@ -100,7 +130,7 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def delete_operation(self, experiment_id:int, operation_id: int) -> Response:
+    def delete_operation(self, experiment_id: int, operation_id: int) -> Response:
         try:
             self.__experiment_controller.delete_operation(experiment_id, operation_id)
             return Response(True, None, None)

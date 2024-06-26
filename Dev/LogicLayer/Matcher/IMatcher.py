@@ -9,7 +9,7 @@ class IMatcher:
         pass
 
     @abstractmethod
-    def match_one_to_many(self, template_path: str, templates_path: tuple[str]) -> dict[str, int]:
+    def match_one_to_many(self, template_path: str, templates_path: tuple[str]) -> dict[str, dict[str, int]]:
         pass
 
     @abstractmethod

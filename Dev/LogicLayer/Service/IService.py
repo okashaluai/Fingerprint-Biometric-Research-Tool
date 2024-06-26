@@ -34,13 +34,57 @@ class IService:
         pass
 
     @abstractmethod
-    def match(self, experiment_id: int, templates_path1: tuple[str], templates_path2: tuple[str]) -> Response:
+    def match_one_to_one(self, template1_path: str, template2_path: str) -> Response:
         """
-        This function matches 2 groups of imported templates and returns comparison statistics.
-                :param int experiment_id: Experiment's id.
-        :param tuple[str] templates_path1: First imported template group.
-        :param tuple[str] templates_path2: Second imported template group.
-        :returns Response(success:bool, data:int|dict[str, int]|dict[str, dict[str, int]]|None, errors:str|None)
+        This function matches 2 single imported templates and returns comparison statistics.
+        :param tuple[str] template1_path: First imported template path.
+        :param tuple[str] template2_path: Second imported template path.
+        :returns Response(success:bool, data:int|None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
+    def match_one_to_many(self, template_path: str, templates_dir_path: str) -> Response:
+        """
+        This function matches 2 single imported templates and returns comparison statistics.
+        :param tuple[str] template_path: First imported template path.
+        :param tuple[str] templates_dir_path: Second imported template dir path.
+        :returns Response(success:bool, data:dict[str, dict[str, int]]|None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
+    def match_many_to_many(self, templates1_dir_path: str, templates2_dir_path: str) -> Response:
+        """
+        This function matches 2 single imported templates and returns comparison statistics.
+        :param tuple[str] templates1_dir_path: First imported template dir path.
+        :param tuple[str] templates2_dir_path: Second imported template dir path.
+        :returns Response(success:bool, data:dict[str, dict[str, int]]|None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
+    def export_matching_one_to_one_csv(self, template1_path: str, template2_path: str, score,
+                                       export_full_path: str) -> Response:
+        """
+        This function writes the results into csv file and return it
+        :param str template1_path: first template (.xyt) file path
+        :param str template2_path: second template (.xyt) file path
+        :param int score: the matching results that is
+        :param str export_full_path: where csv file will be created with the same name at the ending of the path
+        returned from match function.
+        :returns Response(success:bool, data:None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
+    def export_matching_matrix_csv(self, score_matrix, export_full_path: str) -> Response:
+        """
+        This function writes the results into csv file and return it
+        :param dict[str, dict[str, int]] score_matrix: the matching results that is
+        :param str export_full_path: where csv file will be created with the same name at the ending of the path
+        returned from match function.
+        :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
 
