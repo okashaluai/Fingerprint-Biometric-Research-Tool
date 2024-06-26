@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 from Dev.Enums import OperationType
 from Dev.Utils import Interface
@@ -24,9 +25,9 @@ class Response:
 
 @dataclass(frozen=True)
 class AssetDTO(IDto):
-    id: int
+    id: int | None
     path: str
-    date: float
+    date: datetime
 
 
 @dataclass(frozen=True)
@@ -36,31 +37,26 @@ class TemplateDTO(AssetDTO):
 
 @dataclass(frozen=True)
 class ImageDTO(AssetDTO):
-    # we only need the image path not the image itself.
-    # more params to add later here...
     pass
 
 
 @dataclass(frozen=True)
 class PrintingObjectDTO(AssetDTO):
-    # we only need the stl path not the file itself.
-    # more params to add later here...
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class OperationDTO(IDto):
-    id: int
-    experiment_id: int
+    operation_id: int | None
     operation_type: OperationType
-    input: AssetDTO
-    output: AssetDTO
-    date: float
+    operation_input: AssetDTO
+    operation_output: AssetDTO
+    operation_date: datetime
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class ExperimentDTO(IDto):
-    id: int
-    name: str
-    date: float
-    operations: tuple[OperationDTO]
+    operations: list[OperationDTO]
+    experiment_id: int | None
+    experiment_name: str
+    experiment_date: datetime
