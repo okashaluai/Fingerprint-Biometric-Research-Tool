@@ -1135,9 +1135,15 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.experiment_dto = experiment_dto
             self.experiment_name = experiment_dto.experiment_name
             self.experiment_date = experiment_dto.experiment_date.strftime("%d/%m/%Y    %H:%M:%S")
-            self.experiment_info = customtkinter.CTkLabel(self,
-                                                          text=f"{self.experiment_name}    {self.experiment_date}")
-            self.experiment_info.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
+
+            self.experiment_name_label = customtkinter.CTkLabel(self, text=f"{self.experiment_name}")
+            self.experiment_name_label.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
+
+            self.experiment_date_label = customtkinter.CTkLabel(self, text=f"{self.experiment_date}")
+            self.experiment_date_label.grid(row=0, column=1, sticky=customtkinter.EW, padx=(20, 10), pady=10)
+
+            self.experiment_name_text = None
+            self.name_var = None
 
             self.continue_experiment = customtkinter.CTkLabel(
                 self,
@@ -1196,6 +1202,11 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             self.edit_mode = False
 
         def build_edit_experiment_frame(self):
+            self.name_var = customtkinter.StringVar(self, self.experiment_name)
+            self.experiment_name_text = customtkinter.CTkEntry(master=self,
+                                                               textvariable=self.name_var)
+            self.experiment_name_text.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
+
             self.save_experiment = customtkinter.CTkLabel(
                 self,
                 text="",
@@ -1322,6 +1333,16 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.tp_save_experiment.destroy()
                 self.save_experiment.destroy()
                 self.tp2 = ToolTip(self.edit_experiment, msg="Edit Experiment", delay=1.0)
+                self.experiment_name_text.destroy()
+
+                response = service.rename_experiment(experiment_id=self.experiment_dto.experiment_id, new_experiment_name=self.name_var.get())
+                if response.success:
+                    experiments_frame.load_experiments()
+
+                    CTkMessagebox(icon="check", title="Experiment",
+                                  message=f"Experiment name changed successfully!")
+                else:
+                    CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
             else:
                 self.edit_mode = True
                 self.build_edit_experiment_frame()
