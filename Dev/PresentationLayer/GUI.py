@@ -1156,7 +1156,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             )
             self.continue_experiment.bind('<Button-1>', command=self.handle_continue_experiment)
             self.continue_experiment.grid(
-                row=0, column=1, padx=(20, 10), pady=10
+                row=0, column=2, padx=(20, 10), pady=10
             )
             self.tp1 = ToolTip(self.continue_experiment, msg="Continue Experiment", delay=1.0)
 
@@ -1171,7 +1171,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             )
             self.edit_experiment.bind('<Button-1>', command=self.handle_edit_experiment)
             self.edit_experiment.grid(
-                row=0, column=2, padx=(10, 10), pady=10
+                row=0, column=3, padx=(10, 10), pady=10
             )
             self.tp2 = ToolTip(self.edit_experiment, msg="Edit Experiment", delay=1.0)
 
@@ -1189,7 +1189,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             )
             self.delete_button.bind('<Button-1>', command=self.handle_delete_experiment)
             self.delete_button.grid(
-                row=0, column=3, padx=(10, 25), pady=10
+                row=0, column=4, padx=(10, 25), pady=10
             )
             self.tp3 = ToolTip(self.delete_button, msg="Delete Experiment", delay=1.0)
 
@@ -1218,7 +1218,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             )
             self.save_experiment.bind('<Button-1>', command=self.handle_edit_experiment)
             self.save_experiment.grid(
-                row=0, column=2, padx=(10, 10), pady=10
+                row=0, column=3, padx=(10, 10), pady=10
             )
             self.tp_save_experiment = ToolTip(self.save_experiment, msg="Save", delay=1.0)
 
@@ -1335,14 +1335,14 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.tp2 = ToolTip(self.edit_experiment, msg="Edit Experiment", delay=1.0)
                 self.experiment_name_text.destroy()
 
-                response = service.rename_experiment(experiment_id=self.experiment_dto.experiment_id, new_experiment_name=self.name_var.get())
-                if response.success:
-                    experiments_frame.load_experiments()
-
-                    CTkMessagebox(icon="check", title="Experiment",
-                                  message=f"Experiment name changed successfully!")
-                else:
-                    CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
+                if self.name_var.get() != self.experiment_dto.experiment_name:
+                    response = service.rename_experiment(experiment_id=self.experiment_dto.experiment_id, new_experiment_name=self.name_var.get())
+                    if response.success:
+                        experiments_frame.load_experiments()
+                        CTkMessagebox(icon="check", title="Experiment",
+                                      message=f"Experiment name changed successfully!")
+                    else:
+                        CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
             else:
                 self.edit_mode = True
                 self.build_edit_experiment_frame()
