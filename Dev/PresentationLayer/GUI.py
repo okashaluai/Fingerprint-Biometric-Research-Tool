@@ -1349,8 +1349,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.load_operations()
 
         def handle_continue_experiment(self, e):
-            response = service.set_current_experiment(self.experiment_name)
+            response = service.set_current_experiment(self.experiment_dto.experiment_id)
             if response.success:
+                App(_service=service).change_current_experiment_name(self.experiment_name)
                 CTkMessagebox(icon="check", title="Experiment",
                               message=f"Current experiment is set to {self.experiment_name} !")
             else:
