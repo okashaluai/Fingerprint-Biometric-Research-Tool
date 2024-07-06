@@ -203,6 +203,9 @@ def view_image(image_path: str):
     image.show()
 
 
+global side_menu_frame
+
+
 class SideMenuFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master=master, corner_radius=0)
@@ -242,14 +245,14 @@ class SideMenuFrame(customtkinter.CTkFrame):
         )
         self.experiments_button.grid(row=3, column=0, padx=20, pady=10, sticky=customtkinter.EW)
 
-        self.experiments_button = customtkinter.CTkButton(
+        self.new_experiment_button = customtkinter.CTkButton(
             self, text="New Experiment", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
                 Image.open(os.path.join(assets_path, "add.png")),
                 size=(25, 25)
             ), anchor='w',
             command=self.handle_new_experiment_button
         )
-        self.experiments_button.grid(row=4, column=0, padx=20, pady=10, sticky=customtkinter.EW)
+        self.new_experiment_button.grid(row=4, column=0, padx=20, pady=10, sticky=customtkinter.EW)
 
         self.is_light_mode = False
         self.appearance_mode_switch = customtkinter.CTkSwitch(
@@ -258,13 +261,8 @@ class SideMenuFrame(customtkinter.CTkFrame):
         self.appearance_mode_switch.grid(row=6, column=0, padx=20, pady=10)
         self.appearance_mode_switch.select()
 
-        self.experiments_button = customtkinter.CTkButton(
-            self, text="Info", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
-                Image.open(os.path.join(assets_path, "info.png")),
-                size=(25, 25)
-            ), command=self.handle_experiments_button
-        )
-        self.experiments_button.grid(row=7, column=0, padx=20, pady=(10, 10), sticky=customtkinter.EW)
+        global side_menu_frame
+        side_menu_frame = self
 
     def handle_convert_assets_button(self):
         self.master.convert_assets_frame.tkraise()
@@ -1336,7 +1334,8 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.experiment_name_text.destroy()
 
                 if self.name_var.get() != self.experiment_dto.experiment_name:
-                    response = service.rename_experiment(experiment_id=self.experiment_dto.experiment_id, new_experiment_name=self.name_var.get())
+                    response = service.rename_experiment(experiment_id=self.experiment_dto.experiment_id,
+                                                         new_experiment_name=self.name_var.get())
                     if response.success:
                         experiments_frame.load_experiments()
                         CTkMessagebox(icon="check", title="Experiment",
@@ -1413,20 +1412,34 @@ class NewExperimentFrame(customtkinter.CTkFrame):
         if response.success:
             c = CTkMessagebox(icon="check", title="Experiment", message=f"Experiment created successfully!")
 
+            exp_id = response.data.experiment_id
+
+            def set_curr_exp():
+                response = service.set_current_experiment(exp_id)
+                if response.success:
+                    CTkMessagebox(icon="check", title="Experiment",
+                                  message=f"Current experiment is set to {response.data.experiment_name} successfully!")
+
+                    App(service).change_current_experiment_name(response.data.experiment_name)
+                else:
+                    CTkMessagebox(icon="cancel", title="Experiment Error", message=response.error)
+
             if c.get() == "OK":
-                msg = CTkMessagebox(title="Experiment", message="Do you want to start with this experiment?",
-                                    icon="question", option_1="Yes", option_2="No")
-                msg_response = msg.get()
+                if not is_first_experiment:
+                    msg = CTkMessagebox(title="Experiment", message="Do you want to start with this experiment?",
+                                        icon="question", option_1="Yes", option_2="No")
+                    msg_response = msg.get()
 
-                if msg_response == "Yes":
-                    response = service.set_current_experiment(response.data.experiment_id)
-                    if response.success:
-                        CTkMessagebox(icon="check", title="Experiment",
-                                      message=f"Current experiment is set to {response.data.experiment_name} successfully!")
+                    if msg_response == "Yes":
+                        set_curr_exp()
+                else:
+                    set_curr_exp()
 
-                        App(service).change_current_experiment_name(response.data.experiment_name)
-                    else:
-                        CTkMessagebox(icon="cancel", title="Experiment Error", message=response.error)
+                    global side_menu_frame
+                    side_menu_frame.convert_assets_button.configure(state=customtkinter.NORMAL)
+                    side_menu_frame.match_templates_button.configure(state=customtkinter.NORMAL)
+                    side_menu_frame.experiments_button.configure(state=customtkinter.NORMAL)
+
         else:
             CTkMessagebox(icon="cancel", title="Experiment Error", message=response.error)
 
@@ -1498,12 +1511,28 @@ class App(Tk, metaclass=Singleton):
         self.new_experiment_frame = NewExperimentFrame(master=self)
         main_frame_grid_config(self.new_experiment_frame)
 
-        # Home main frame
-        self.home_frame = NewExperimentFrame(master=self)
-        main_frame_grid_config(self.home_frame)
-
         # Default home frame
-        self.home_frame.tkraise()
+        self.new_experiment_frame.tkraise()
+
+        response = service.get_experiments()
+        if response.success:
+            if not response.data:
+                global side_menu_frame
+                side_menu_frame.convert_assets_button.configure(state=customtkinter.DISABLED)
+                side_menu_frame.match_templates_button.configure(state=customtkinter.DISABLED)
+                side_menu_frame.experiments_button.configure(state=customtkinter.DISABLED)
+
+                CTkMessagebox(icon="warning", title="Warning",
+                              message="No previous experiments, please create new experiment!")
+            else:
+                global is_first_experiment
+                is_first_experiment = False
+        else:
+            CTkMessagebox(icon="cancel", title="Error", message=response.error)
 
     def change_current_experiment_name(self, experiment_name: str):
         self.title(f"{self.app_name} - [ {experiment_name} ]")
+
+
+global is_first_experiment
+is_first_experiment = True
