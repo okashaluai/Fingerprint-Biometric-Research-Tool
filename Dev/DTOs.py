@@ -25,15 +25,14 @@ class Response:
 
 @dataclass(frozen=True)
 class AssetDTO(IDto):
-    id: int | None
     path: str
     date: datetime
+    is_dir: bool
 
 
 @dataclass(frozen=True)
 class TemplateDTO(AssetDTO):
     pass
-
 
 @dataclass(frozen=True)
 class ImageDTO(AssetDTO):
@@ -47,7 +46,7 @@ class PrintingObjectDTO(AssetDTO):
 
 @dataclass(frozen=False)
 class OperationDTO(IDto):
-    operation_id: int | None
+    operation_id: str
     operation_type: OperationType
     operation_input: AssetDTO
     operation_output: AssetDTO
@@ -57,6 +56,5 @@ class OperationDTO(IDto):
 @dataclass(frozen=False)
 class ExperimentDTO(IDto):
     operations: list[OperationDTO]
-    experiment_id: int | None
     experiment_name: str
     experiment_date: datetime
