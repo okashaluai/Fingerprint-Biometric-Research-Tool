@@ -97,28 +97,28 @@ class IService:
         pass
 
     @abstractmethod
-    def delete_experiment(self, experiment_id: int) -> Response:
+    def delete_experiment(self, experiment_name: str) -> Response:
         """
         This function deletes an experiment.
-        :param int experiment_id: Experiment that will be deleted.
+        :param str experiment_name: Experiment that will be deleted.
         :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def export_experiment(self, experiment_id: int, export_path: str) -> Response:
+    def export_experiment(self, experiment_name: str, export_path: str) -> Response:
         """
         This function exports an experiment as text file.
-        :param int experiment_id: Experiment that will be exported.
+        :param str experiment_name: Experiment that will be exported.
         :returns Response(success:bool, data:TextIO|None, errors:str|None)
         """
         pass
 
     @abstractmethod
-    def rename_experiment(self, experiment_id: int, new_experiment_name: str) -> Response:
+    def rename_experiment(self, experiment_name: str, new_experiment_name: str) -> Response:
         """
         This function renames an experiment and returns the new renamed experiment.
-        :param int experiment_id: Experiment to be renamed.
+        :param str experiment_name: Experiment to be renamed.
         :param str new_experiment_name: New experiment name.
         :returns Response(success:bool, data:ExperimentDTO|None, errors:str|None)
         """
@@ -134,10 +134,10 @@ class IService:
         pass
 
     @abstractmethod
-    def set_current_experiment(self, experiment_id: int) -> Response:
+    def set_current_experiment(self, experiment_name: str) -> Response:
         """
-        This function sets the experiment with this id to be the current experiment.
-        :param int experiment_id: Existing experiment id to be the current experiment.
+        This function sets the experiment with this given name to be the current experiment.
+        :param str experiment_name: Existing experiment name to be the current experiment.
         :returns Response(success:bool, data:None, errors:str|None)
         """
         pass
@@ -151,7 +151,7 @@ class IService:
         pass
 
     @abstractmethod
-    def delete_operation(self, experiment_id: int, operation_id: int) -> Response:
+    def delete_operation(self, experiment_name: str, operation_id: int) -> Response:
         """
         This function deletes an operation with the given id.
         :returns Response(success:bool, data:None, errors:str|None)
