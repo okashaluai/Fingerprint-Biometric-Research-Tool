@@ -181,23 +181,3 @@ class Service(IService, metaclass=Singleton):
             return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
-
-# service
-# service = Service()
-# service.create_experiment('testing_experiment')
-# service.set_current_experiment('testing_experiment')
-# t1 = Template(
-#     '/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/LogicLayer/Controllers/templates/t1.min',
-#     False)
-#
-# t2 = Template(
-#     '/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/LogicLayer/Controllers/templates', True)
-# r1 = service.convert_template_to_image(t1.to_dto())
-# r2 = service.convert_template_to_image(t2.to_dto())
-#
-# exp : ExperimentDTO  = service.get_current_experiment().data
-# print(r1.error)
-# print(r2.error)
-# print(exp.operations[0].operation_type)
-# print(exp.operations[1].operation_type)
-#
