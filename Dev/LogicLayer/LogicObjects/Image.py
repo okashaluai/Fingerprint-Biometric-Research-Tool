@@ -47,7 +47,7 @@ class Image(Asset):
 
     def convert_to_printing_object(self) -> PrintingObject:
         printing_object_name = f"{Path(self.path).stem}.stl"
-        printing_object_path = os.path.join(PLAYGROUND.PATH, printing_object_name)
+        printing_object_path = os.path.join(PLAYGROUND().PATH, printing_object_name)
 
         image = cv.imread(self.path, cv.IMREAD_GRAYSCALE)
         _, binary_image = cv.threshold(image, 128, 255, cv.THRESH_BINARY)
@@ -59,4 +59,4 @@ class Image(Asset):
         with open(printing_object_name, 'wb') as f:
             f.write(stl)
 
-        return PrintingObject(printing_object_path)
+        return PrintingObject(printing_object_path, is_dir=self.is_dir)

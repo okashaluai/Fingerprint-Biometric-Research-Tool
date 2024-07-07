@@ -5,11 +5,11 @@ import os
 
 
 class PrintingObject(Asset):
-    def __init__(self, path: str):
-        super().__init__(path)
+    def __init__(self, path: str, is_dir):
+        super().__init__(path, is_dir)
 
     def to_dto(self) -> PrintingObjectDTO:
-        return PrintingObjectDTO(id=0, path=self.path, date=self.date)
+        return PrintingObjectDTO(path=self.path, date=self.date, is_dir=self.is_dir)
 
     def to_dao(self) -> PrintingObjectDAO:
         raise NotImplementedError
