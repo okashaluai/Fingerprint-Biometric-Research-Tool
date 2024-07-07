@@ -25,14 +25,32 @@ class Response:
 
 @dataclass(frozen=True)
 class AssetDTO(IDto):
-    id: int | None
     path: str
     date: datetime
+    is_dir: bool
 
 
 @dataclass(frozen=True)
 class TemplateDTO(AssetDTO):
-    pass
+    def __eq__(self, other):
+        f1_min_content = []
+        f1_xyt_content = []
+        f2_min_content = []
+        f2_xyt_content = []
+
+        with open(self.path.join('.min')) as f:
+            f1_min_content = f.readlines()
+
+        with open(self.path.join('.xyt')) as f:
+            f1_xyt_content = f.readlines()
+
+        with open(other.path.join('.min')) as f:
+            f2_min_content = f.readlines()
+
+        with open(other.path.join('.xyt')) as f:
+            f2_xyt_content = f.readlines()
+
+        return (f1_min_content.sort() == f2_min_content.sort()) and (f1_xyt_content.sort() == f2_xyt_content.sort())
 
 
 @dataclass(frozen=True)
@@ -47,7 +65,7 @@ class PrintingObjectDTO(AssetDTO):
 
 @dataclass(frozen=False)
 class OperationDTO(IDto):
-    operation_id: int | None
+    operation_id: str
     operation_type: OperationType
     operation_input: AssetDTO
     operation_output: AssetDTO
@@ -57,6 +75,5 @@ class OperationDTO(IDto):
 @dataclass(frozen=False)
 class ExperimentDTO(IDto):
     operations: list[OperationDTO]
-    experiment_id: int | None
     experiment_name: str
     experiment_date: datetime

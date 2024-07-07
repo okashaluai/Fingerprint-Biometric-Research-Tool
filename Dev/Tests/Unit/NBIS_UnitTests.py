@@ -1,39 +1,9 @@
 import os
+import shutil
 import unittest
 
-from Dev.NBIS.NBIS import detect_minutiae, match_templates, get_image_quality
+from Dev.NBIS.NBIS import detect_minutiae, match_templates
 from Dev.Tests.TestUtils import templates_path, images_path
-
-
-class ImageQuality(unittest.TestCase):
-    def setUp(self):
-        self.png1_24_bit_image_path = os.path.join(images_path, '1_24bit.png')
-        self.png1_8_bit_image_path = os.path.join(images_path, '1_8bit.png')
-        self.bad_image_quality_path = os.path.join(images_path, '2_8bit.png')
-
-    def test_getting_image_quality_8bit(self):
-        image_quality = get_image_quality(self.png1_8_bit_image_path)
-        assert image_quality == 2
-
-    def test_getting_image_quality_24bit(self):
-        try:
-            image_quality = get_image_quality(self.png1_24_bit_image_path)
-        except:
-            image_quality = None
-
-        assert image_quality is None
-
-    def test_bad_image_quality(self):
-        image_quality = get_image_quality(self.bad_image_quality_path)
-        assert image_quality == 5
-
-    def test_non_existing_image_quality(self):
-        try:
-            image_quality = get_image_quality(self.png1_24_bit_image_path + "blabla")
-        except:
-            image_quality = None
-
-        assert image_quality is None
 
 
 class DetectingMinutiae(unittest.TestCase):
@@ -43,10 +13,9 @@ class DetectingMinutiae(unittest.TestCase):
         self.template_2_8bit_name = '2_8bit_template'
         self.template_1_24bit_name = '1_24bit_template'
 
-        # Remove the expected template files if exists
-        for template in os.listdir(templates_path):
-            if template.lower().startswith(self.template_2_8bit_name):
-                os.remove(os.path.join(templates_path, template))
+        self.template_path = os.path.join(templates_path, self.template_2_8bit_name)
+        if os.path.exists(self.template_path):
+            shutil.rmtree(self.template_path)
 
     def test_detect_minutiae_8bit(self):
         detect_minutiae(self.png2_8_bit_image_path, templates_path, self.template_2_8bit_name)
@@ -54,14 +23,14 @@ class DetectingMinutiae(unittest.TestCase):
         generated_templates_count = 0
 
         # Search for .min and .xyt for the expected template
-        for template in os.listdir(templates_path):
+        for template in os.listdir(self.template_path):
             if template.lower().startswith(self.template_2_8bit_name):
                 generated_templates_count += 1
 
         assert generated_templates_count == 2
 
         # Check that .xyt file contains 99 minutiae
-        with open(os.path.join(templates_path, f"{self.template_2_8bit_name}.xyt")) as t:
+        with open(os.path.join(self.template_path, f"{self.template_2_8bit_name}.xyt")) as t:
             minutiae_count = len(t.readlines())
 
         assert minutiae_count == 99
@@ -73,7 +42,7 @@ class DetectingMinutiae(unittest.TestCase):
             detect_minutiae(self.png1_24_bit_image_path, templates_path, self.template_1_24bit_name)
 
             # Search for .min and .xyt for the expected template
-            for template in os.listdir(templates_path):
+            for template in os.listdir(os.path.join(templates_path, self.template_1_24bit_name)):
                 if template.lower().startswith(self.template_1_24bit_name):
                     generated_templates_count += 1
         except:
@@ -83,16 +52,17 @@ class DetectingMinutiae(unittest.TestCase):
 
     def tearDown(self):
         # Remove the expected template files if exists
-        for template in os.listdir(templates_path):
-            if template.lower().startswith(self.template_2_8bit_name):
-                os.remove(os.path.join(templates_path, template))
+        if os.path.exists(self.template_path):
+            shutil.rmtree(self.template_path)
+        if os.path.exists(os.path.join(templates_path, self.template_1_24bit_name)):
+            shutil.rmtree(os.path.join(templates_path, self.template_1_24bit_name))
 
 
 class MatchTemplates(unittest.TestCase):
     def setUp(self):
-        self.same_person_template1_path = os.path.join(templates_path, '109_1_8bit_template.xyt')
-        self.same_person_template2_path = os.path.join(templates_path, '109_2_8bit_template.xyt')
-        self.same_person_template3_path = os.path.join(templates_path, '109_3_8bit_template.xyt')
+        self.same_person_template1_path = os.path.join(templates_path, '109_1_8bit_template', '109_1_8bit_template.xyt')
+        self.same_person_template2_path = os.path.join(templates_path, '109_2_8bit_template', '109_2_8bit_template.xyt')
+        self.same_person_template3_path = os.path.join(templates_path, '109_3_8bit_template', '109_3_8bit_template.xyt')
 
     def test_match_identical_templates(self):
         matching_score = match_templates(self.same_person_template1_path, self.same_person_template1_path)

@@ -7,7 +7,7 @@ from Dev.LogicLayer.LogicObjects.ILogicObject import ILogicObject
 
 
 class Operation(ILogicObject):
-    def __init__(self, operation_id: int, operation_type: OperationType, operation_input: Asset,
+    def __init__(self, operation_id: str, operation_type: OperationType, operation_input: Asset,
                  operation_output: Asset):
         self.operation_id = operation_id
         self.operation_type = operation_type
