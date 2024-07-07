@@ -7,7 +7,7 @@ from Dev.LogicLayer.Service.Service import Service
 from TestUtils import images_path, templates_path
 
 
-class ConvertTemplateToImage(unittest.TestCase):
+class ConvertImageToTemplate(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.service = Service()
@@ -26,30 +26,38 @@ class ConvertTemplateToImage(unittest.TestCase):
         else:
             raise set_current_experiment_response.error
 
-    def test_convert_valid_template_to_image(self):
-        valid_template = TemplateDTO(
-            path=os.path.join(templates_path, '109_1_8bit_template', '109_1_8bit_template.min'),
+    def test_convert_valid_image_to_template(self):
+        valid_image = ImageDTO(
+            path=os.path.join(images_path, '109_1_8bit.png'),
             date=datetime.datetime.now(),
             is_dir=False
         )
 
-        response = self.service.convert_template_to_image(valid_template)
+        response = self.service.convert_image_to_template(valid_image)
         assert response.success
         assert response.data is not None
-        generated_image: ImageDTO = response.data
+        generated_template: TemplateDTO = response.data
 
-        # assert generated_image.path.endswith('109_1_8bit_template.png')
+        assert generated_template.path != ""
 
-        # assert os.path.exists(generated_image.path)
+        xyt_template_file = os.path.join(generated_template.path, f"{os.path.basename(generated_template.path)}.xyt")
+        min_template_file = os.path.join(generated_template.path, f"{os.path.basename(generated_template.path)}.xyt")
 
-    def test_convert_invalid_template_to_image(self):
-        invalid_template = TemplateDTO(
+        assert os.path.exists(xyt_template_file) and os.path.exists(min_template_file)
+
+        expected_template = TemplateDTO(path=os.path.join(templates_path, '109_1_8bit_template'),
+                                        date=datetime.datetime.now(), is_dir=False)
+
+        # assert generated_template == expected_template
+
+    def test_convert_invalid_image_to_template(self):
+        invalid_image = ImageDTO(
             path=os.path.join(images_path, 'bla.png'),
             date=datetime.datetime.now(),
             is_dir=False
         )
 
-        response = self.service.convert_template_to_image(invalid_template)
+        response = self.service.convert_image_to_template(invalid_image)
         assert not response.success
         assert response.data is None
 
