@@ -524,7 +524,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.template_path = path
 
                 def handle_convert_to_image_button(self):
-                    template_dto = TemplateDTO(None, self.template_path, datetime.now())
+                    template_dto = TemplateDTO(is_dir=False, path=self.template_path, date=datetime.now())
                     response = service.convert_template_to_image(template_dto)
                     if response.success:
                         self.parent_tab.build_image_export_frame(response.data.path)
