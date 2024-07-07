@@ -278,14 +278,14 @@ class SideMenuFrame(customtkinter.CTkFrame):
             response = service.create_experiment(f"experiment {uuid.uuid1()}")
             if response.success:
                 print(f"{response.data.experiment_name}")
-                service.set_current_experiment(response.data.experiment_id)
+                service.set_current_experiment(response.data.experiment_name)
                 if i % 2 == 0:
                     convert_response1 = service.convert_image_to_template(
-                        ImageDTO(None, r"C:\Users\Yazan\Desktop\109_1_8bit.png", datetime.now())
+                        ImageDTO(is_dir=False,  path=r"C:\Users\Yazan\Desktop\109_1_8bit.png", date=datetime.now())
                     )
                     convert_response2 = service.convert_image_to_template(
-                        ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
-                                 datetime.now())
+                        ImageDTO(is_dir=False,  path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                                 date=datetime.now())
                     )
                     if convert_response1.success and convert_response2.success:
                         print(convert_response1.data.path)
@@ -294,12 +294,12 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
                 if i == 0:
                     convert_response2 = service.convert_image_to_printing_object(
-                        ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
-                                 datetime.now())
+                        ImageDTO(is_dir=False,  path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                                 date=datetime.now())
                     )
                 # else:
                 #     convert_response = service.convert_image_to_template(
-                #         ImageDTO(None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                #         ImageDTO(is_dir=False,None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
                 #                  datetime.now())
                 #     )
 
@@ -421,7 +421,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.back_button.grid(row=6, column=1, padx=(20, 20), pady=5)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(None, self.image_path, datetime.now())
+                    image_dto = ImageDTO(is_dir=False,  path=self.image_path, date=datetime.now())
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(path=response.data.path)
@@ -730,7 +730,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.image_path = path
 
                 def handle_convert_to_template_button(self):
-                    image_dto = ImageDTO(None, self.image_path, datetime.now())
+                    image_dto = ImageDTO(is_dir=False, path=self.image_path, date=datetime.now())
                     response = service.convert_image_to_template(image_dto)
                     if response.success:
                         self.parent_tab.build_template_export_frame(response.data.path)
@@ -738,7 +738,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(None, self.image_path, datetime.now())
+                    image_dto = ImageDTO(is_dir=False, path=self.image_path, date=datetime.now())
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(response.data.path)
@@ -990,7 +990,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
 
     def handle_delete_operation(self, event=None):
         response = service.delete_operation(
-            self.experiment_frame.experiment_dto.experiment_id,
+            self.experiment_frame.experiment_dto.experiment_name,
             self.operation_dto.operation_id)
         if response.success:
             for o in self.experiment_frame.experiment_dto.operations:
@@ -1334,7 +1334,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.experiment_name_text.destroy()
 
                 if self.name_var.get() != self.experiment_dto.experiment_name:
-                    response = service.rename_experiment(experiment_id=self.experiment_dto.experiment_id,
+                    response = service.rename_experiment(experiment_name=self.experiment_dto.experiment_name,
                                                          new_experiment_name=self.name_var.get())
                     if response.success:
                         experiments_frame.load_experiments()
@@ -1348,7 +1348,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.load_operations()
 
         def handle_continue_experiment(self, e):
-            response = service.set_current_experiment(self.experiment_dto.experiment_id)
+            response = service.set_current_experiment(self.experiment_dto.experiment_name)
             if response.success:
                 App(_service=service).change_current_experiment_name(self.experiment_name)
                 CTkMessagebox(icon="check", title="Experiment",
@@ -1357,10 +1357,10 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 
         def handle_delete_experiment(self, event=None):
-            delete_response = service.delete_experiment(self.experiment_dto.experiment_id)
+            delete_response = service.delete_experiment(self.experiment_dto.experiment_name)
             if delete_response.success:
                 for e in experiments_frame.experiment_dtos:
-                    if e.experiment_id == self.experiment_dto.experiment_id:
+                    if e.experiment_name == self.experiment_dto.experiment_name:
                         experiments_frame.experiment_dtos.remove(e)
 
                 self.destroy_tooltips()
@@ -1412,7 +1412,7 @@ class NewExperimentFrame(customtkinter.CTkFrame):
         if response.success:
             c = CTkMessagebox(icon="check", title="Experiment", message=f"Experiment created successfully!")
 
-            exp_id = response.data.experiment_id
+            exp_id = response.data.experiment_name
 
             def set_curr_exp():
                 response = service.set_current_experiment(exp_id)
@@ -1425,6 +1425,7 @@ class NewExperimentFrame(customtkinter.CTkFrame):
                     CTkMessagebox(icon="cancel", title="Experiment Error", message=response.error)
 
             if c.get() == "OK":
+                global is_first_experiment
                 if not is_first_experiment:
                     msg = CTkMessagebox(title="Experiment", message="Do you want to start with this experiment?",
                                         icon="question", option_1="Yes", option_2="No")
@@ -1434,6 +1435,8 @@ class NewExperimentFrame(customtkinter.CTkFrame):
                         set_curr_exp()
                 else:
                     set_curr_exp()
+
+                    is_first_experiment = False
 
                     global side_menu_frame
                     side_menu_frame.convert_assets_button.configure(state=customtkinter.NORMAL)
