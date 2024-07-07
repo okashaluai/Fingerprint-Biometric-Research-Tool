@@ -32,7 +32,26 @@ class AssetDTO(IDto):
 
 @dataclass(frozen=True)
 class TemplateDTO(AssetDTO):
-    pass
+    def __eq__(self, other):
+        f1_min_content = []
+        f1_xyt_content = []
+        f2_min_content = []
+        f2_xyt_content = []
+
+        with open(self.path.join('.min')) as f:
+            f1_min_content = f.readlines()
+
+        with open(self.path.join('.xyt')) as f:
+            f1_xyt_content = f.readlines()
+
+        with open(other.path.join('.min')) as f:
+            f2_min_content = f.readlines()
+
+        with open(other.path.join('.xyt')) as f:
+            f2_xyt_content = f.readlines()
+
+        return (f1_min_content.sort() == f2_min_content.sort()) and (f1_xyt_content.sort() == f2_xyt_content.sort())
+
 
 @dataclass(frozen=True)
 class ImageDTO(AssetDTO):

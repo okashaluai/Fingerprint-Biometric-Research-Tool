@@ -13,6 +13,7 @@ from Dev.Utils import Singleton
 from Dev.Enums import OperationType
 from Dev.Playground import PLAYGROUND
 
+
 class Service(IService, metaclass=Singleton):
     def __init__(self):
         self.__converter_controller = ConvertorController()
