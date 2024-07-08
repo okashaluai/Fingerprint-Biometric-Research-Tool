@@ -42,6 +42,11 @@ class ConvertTemplateToImage(unittest.TestCase):
 
         # assert os.path.exists(generated_image.path)
 
+        response = self.service.convert_template_to_min_map_image(
+            TemplateDTO(path=valid_template.path, date=datetime.datetime.now(), is_dir=False))
+
+        print(response.success)
+
     def test_convert_invalid_template_to_image(self):
         invalid_template = TemplateDTO(
             path=os.path.join(images_path, 'bla.png'),
