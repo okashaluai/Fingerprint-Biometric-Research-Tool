@@ -30,9 +30,9 @@ def detect_minutiae(image_path: str, working_dir_path: str, template_name: str) 
     template_dir_path = os.path.join(working_dir_path, template_name)
     os.makedirs(template_dir_path, exist_ok=True)
 
-    template_path = os.path.join(template_dir_path, template_name)
+    template_path = f'{os.path.join(template_dir_path, template_name)}'
 
-    run_process(get_exe_lib_path(LibName.MINDTCT), f"{image_path} {template_path}")
+    run_process(get_exe_lib_path(LibName.MINDTCT), f'"{image_path}" "{template_path}"')
 
     # Keep only .min and .xyt files
     for template in os.listdir(template_dir_path):
@@ -41,6 +41,8 @@ def detect_minutiae(image_path: str, working_dir_path: str, template_name: str) 
 
 
 def match_templates(first_xyt_template_path, second_xyt_template_path) -> int:
+    first_xyt_template_path = f'"{first_xyt_template_path}"'
+    second_xyt_template_path = f'"{second_xyt_template_path}"'
     stdout = run_process(get_exe_lib_path(LibName.BOZORTH3), f"{first_xyt_template_path} {second_xyt_template_path}")
 
     # Parse the output to extract the matching score

@@ -58,7 +58,7 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
         dnd_frame.drop_target_register(DND_FILES)
 
         def handle_drop(e):
-            path = e.data
+            path = fr'{str(e.data)[1:-1]}'
             if os.path.isdir(path):
                 dnd_frame.destroy()
                 build_selected_labels(path)
