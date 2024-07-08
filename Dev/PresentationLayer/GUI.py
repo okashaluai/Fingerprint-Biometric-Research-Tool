@@ -12,6 +12,7 @@ from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO, TemplateDTO
+from Dev.Enums import OperationType
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 from Dev.Utils import Singleton
@@ -972,12 +973,33 @@ class OperationRowFrame(customtkinter.CTkFrame):
         )
         self.output_label.bind('<Button-1>', lambda e: self.view_files(self.operation_dto.operation_output.path))
 
+        # operation_type = operation_dto.operation_type
+        # if operation_type == OperationType.IMG2TMP:
+        #     type = "Image -> Template"
+        # elif operation_type.TMP2IMG.value == OperationType.IMG2TMP:
+        #     type = "Template -> Image"
+        # elif operation_type.IMG2POBJ.value == OperationType.IMG2TMP:
+        #     type = "Image -> Printing Object"
+        # elif operation_type.IMGs2TMPs == OperationType.IMG2TMP:
+        #     type = "[Image] -> [Template]"
+        # elif operation_type.TMPs2IMGs == OperationType.IMG2TMP:
+        #     type = "[Template] -> [Image]"
+        # elif operation_type.IMGs2POBJs == OperationType.IMG2TMP:
+        #     type = "[Image] -> [Printing Object]"
+
+        self.operation_type = customtkinter.CTkLabel(
+            self, text=f"Type: {operation_dto.operation_type}"
+        )
+        self.operation_type.grid(
+            row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
+        )
+
         formatted_date = operation_dto.operation_date.strftime("%d/%m/%Y    %H:%M:%S")
         self.date_label = customtkinter.CTkLabel(
             self, text=f"Date: {formatted_date}"
         )
         self.date_label.grid(
-            row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
+            row=0, column=3, sticky=customtkinter.EW, padx=(20, 20)
         )
 
         self.delete_button = customtkinter.CTkLabel(
@@ -991,7 +1013,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
         )
         self.delete_button.bind('<Button-1>', command=self.handle_delete_operation)
         self.delete_button.grid(
-            row=0, column=3, padx=(10, 25), pady=10
+            row=0, column=4, padx=(10, 25), pady=10
         )
         self.tp1 = ToolTip(self.delete_button, msg="Delete Operation", delay=1.0)
 
