@@ -5,6 +5,7 @@ import shutil
 class PLAYGROUND:
     def __init__(self):
         self.PATH = os.curdir
+        self.temp_dir = os.path.join(self.PATH, 'temp_dir')
 
     def create_experiment_dir(self, experiment_name: str) -> str:
         experiment_dir_path = os.path.join(self.PATH, experiment_name)
@@ -105,6 +106,25 @@ class PLAYGROUND:
                 raise Exception(f'Operation directory {operation_id} does not exist')
         else:
             raise Exception(f'Experiment directory {experiment_name} does not exist')
+
+    def get_temp_dir_path(self):
+        if not (os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir)):
+            os.makedirs(self.temp_dir)
+        return self.temp_dir
+
+    def get_temp_min_maps_dir_path(self):
+        temp_dir_path = self.get_temp_dir_path()
+        temp_min_maps_dir_path = os.path.join(temp_dir_path, 'temp_min_maps')
+        if not (os.path.exists(temp_min_maps_dir_path) and os.path.isdir(temp_min_maps_dir_path)):
+            os.makedirs(temp_min_maps_dir_path)
+        return temp_min_maps_dir_path
+
+    def import_temp_template(self, template_path):
+        if not os.path.exists(template_path):
+            raise Exception(f'Template path {template_path} does not exist')
+        temp_dir_path = self.get_temp_dir_path()
+        shutil.copy(template_path, temp_dir_path)
+        return os.path.join(temp_dir_path, os.path.basename(template_path))
 
     def import_template_into_dir(self, templates_path: str, experiment_name: str, operation_id: str) -> str:
         experiment_dir_path = os.path.join(self.PATH, experiment_name)
