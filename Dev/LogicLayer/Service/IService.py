@@ -64,6 +64,15 @@ class IService:
         pass
 
     @abstractmethod
+    def convert_template_to_min_map_image(self, template_dto: TemplateDTO) -> Response:
+        """
+        This function converts imported fingerprint template to minutae map image.
+        :param str template_dto: Template dto.
+        :returns Response(success:bool, data:ImageDTO|None, errors:str|None)
+        """
+        pass
+
+    @abstractmethod
     def export_matching_one_to_one_csv(self, template1_path: str, template2_path: str, score,
                                        export_full_path: str) -> Response:
         """

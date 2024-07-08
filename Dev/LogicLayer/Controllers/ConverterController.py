@@ -16,6 +16,17 @@ class ConvertorController(metaclass=Singleton):
     def __init__(self):
         self.__experiment_controller = ExperimentController()  # this behavior indicates high coupling and low cohesion (we should reconsider it).
         self._playground = PLAYGROUND()
+        self.__min_maps_cache: dict[str, str] = dict()
+
+    def convert_template_to_min_map_image(self, template: Template):
+        min_map_image_path = ''
+        if template.path in self.__min_maps_cache:
+            min_map_image_path = self.__min_maps_cache.get(template.path)
+        else:
+            min_map_image_path = template.convert_to_min_map_image()
+            self.__min_maps_cache[template.path] = min_map_image_path
+        min_map_image = Image(min_map_image_path, is_dir=False)
+        return min_map_image
 
     def convert_template_to_image(self, template: Template, experiment_name: str, operation_id: str) -> Image:
         generated_image_path = template.convert_to_image(experiment_name, operation_id)
