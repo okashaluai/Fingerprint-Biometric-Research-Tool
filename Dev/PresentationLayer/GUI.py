@@ -521,7 +521,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                 def handle_choose_file(self, path):
                     self.convert_to_image_button.configure(state=customtkinter.NORMAL)
-                    self.template_path = {path}
+                    self.template_path = path
 
                 def handle_choose_directory(self, path):
                     self.convert_to_image_button.configure(state=customtkinter.NORMAL)

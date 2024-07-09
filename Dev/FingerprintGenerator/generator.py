@@ -29,6 +29,7 @@ See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-a
 import ntpath
 import os
 import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.draw import line_nd, disk
@@ -207,6 +208,7 @@ def create_temp_minutiae_map_image(template_path: str, min_map_dir_path: str):
     map_filename = os.path.join(min_map_dir_path, f"{os.path.splitext(template_min_file_name)[0]}.png")
     plt.imsave(map_filename, min_map)
     return map_filename
+
 
 def generate_image(template_dir_path: str, min_map_dir_path: str, image_dir: str):
     create_minutiae_map_image(template_dir_path, min_map_dir_path)

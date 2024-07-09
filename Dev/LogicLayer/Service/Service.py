@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
@@ -42,6 +43,8 @@ class Service(IService, metaclass=Singleton):
             operation_id = f'{operation_type}_{str(round(datetime.datetime.now().timestamp() * 1000))}'
             template = Template(template_dto.path, template_dto.is_dir)
 
+
+            bool = os.path.exists(template.path)
             image = self.__converter_controller.convert_template_to_image(template,
                                                                           current_experiment.experiment_name,
                                                                           operation_id)
