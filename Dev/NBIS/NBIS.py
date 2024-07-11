@@ -25,19 +25,20 @@ def get_exe_lib_path(lib_name: LibName) -> str:
     return full_path
 
 
-def detect_minutiae(image_path: str, working_dir_path: str, template_name: str) -> None:
-    # Create template dir with the same template name
-    template_dir_path = os.path.join(working_dir_path, template_name)
-    os.makedirs(template_dir_path, exist_ok=True)
+def detect_minutiae(images_dir_path: str, templates_dir_path: str) -> None:
 
-    template_path = f'{os.path.join(template_dir_path, template_name)}'
-
-    run_process(get_exe_lib_path(LibName.MINDTCT), f'"{image_path}" "{template_path}"')
+    images_files_paths = os.listdir(images_dir_path)
+    for image_file_path in images_files_paths:
+        if not image_file_path.lower().endswith('.png'):
+            raise Exception('Image file should have .png extension!')
+        image_file_name = os.path.splitext(os.path.basename(image_file_path))[0]
+        template_file_path = os.path.join(templates_dir_path, image_file_name)
+        run_process(get_exe_lib_path(LibName.MINDTCT), f'"{image_file_path}" "{template_file_path}"')
 
     # Keep only .min and .xyt files
-    for template in os.listdir(template_dir_path):
-        if not (template.lower().endswith('.min') or template.lower().endswith('.xyt')):
-            os.remove(os.path.join(template_dir_path, template))
+    for template_file in os.listdir(templates_dir_path):
+        if not (template_file.lower().endswith('.min') or template_file.lower().endswith('.xyt')):
+            os.remove(os.path.join(templates_dir_path, template_file))
 
 
 def match_templates(first_xyt_template_path, second_xyt_template_path) -> int:
