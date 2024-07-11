@@ -4,7 +4,7 @@ import shutil
 
 class PLAYGROUND:
     def __init__(self):
-        self.PATH = os.curdir
+        self.PATH = os.path.join(os.curdir, 'experiments')
         self.temp_dir = os.path.join(self.PATH, 'temp_dir')
 
     def create_experiment_dir(self, experiment_name: str) -> str:
