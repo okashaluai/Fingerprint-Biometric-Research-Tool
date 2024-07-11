@@ -3,7 +3,7 @@ import os.path
 from Dev.DTOs import TemplateDTO
 from Dev.DataAccessLayer.DAOs import TemplateDAO
 from Dev.LogicLayer.LogicObjects.Asset import Asset
-from Dev.FingerprintGenerator.generator import generate_image, generate_images
+from Dev.FingerprintGenerator.generator import generate_image, generate_images, create_temp_minutiae_map_image
 from Dev.Playground import PLAYGROUND
 
 
@@ -65,6 +65,13 @@ class Template(Asset):
             f2_xyt_content = f.readlines()
 
         return (f1_min_content.sort() == f2_min_content.sort()) and (f1_xyt_content.sort() == f2_xyt_content.sort())
+
+    def convert_to_min_map_image(self):
+        template_path = self.__playground.import_temp_template(self.path)
+        min_map_dir_path = self.__playground.get_temp_min_maps_dir_path()
+        min_map_image_path = create_temp_minutiae_map_image(template_path, min_map_dir_path)
+        return min_map_image_path
+
 
 
 

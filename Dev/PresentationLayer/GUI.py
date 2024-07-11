@@ -12,6 +12,7 @@ from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO, TemplateDTO
+from Dev.Enums import OperationType
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 from Dev.Utils import Singleton
@@ -57,7 +58,7 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
         dnd_frame.drop_target_register(DND_FILES)
 
         def handle_drop(e):
-            path = e.data
+            path = fr'{str(e.data)[1:-1]}'
             if os.path.isdir(path):
                 dnd_frame.destroy()
                 build_selected_labels(path)
@@ -281,10 +282,11 @@ class SideMenuFrame(customtkinter.CTkFrame):
                 service.set_current_experiment(response.data.experiment_name)
                 if i % 2 == 0:
                     convert_response1 = service.convert_image_to_template(
-                        ImageDTO(is_dir=False,  path=r"C:\Users\Yazan\Desktop\109_1_8bit.png", date=datetime.now())
+                        ImageDTO(is_dir=False, path=r"C:\Users\Yazan\Desktop\109_1_8bit.png", date=datetime.now())
                     )
                     convert_response2 = service.convert_image_to_template(
-                        ImageDTO(is_dir=False,  path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                        ImageDTO(is_dir=False,
+                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
                                  date=datetime.now())
                     )
                     if convert_response1.success and convert_response2.success:
@@ -294,7 +296,8 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
                 if i == 0:
                     convert_response2 = service.convert_image_to_printing_object(
-                        ImageDTO(is_dir=False,  path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+                        ImageDTO(is_dir=False,
+                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
                                  date=datetime.now())
                     )
                 # else:
@@ -421,7 +424,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.back_button.grid(row=6, column=1, padx=(20, 20), pady=5)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(is_dir=False,  path=self.image_path, date=datetime.now())
+                    image_dto = ImageDTO(is_dir=False, path=self.image_path, date=datetime.now())
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(path=response.data.path)
@@ -496,9 +499,10 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         handle_choose_directory=self.handle_choose_directory,
                         handle_choose_file=self.handle_choose_file,
                         choose_file_title="Choose a template file",
-                        file_types=[("Template files", "*.xyt")],
+                        file_types=[("Template files", "*.min")],
                         choose_directory_title="Choose a templates directory",
-                        invoke_reset_wrapper=self.handle_reset
+                        invoke_reset_wrapper=self.handle_reset,
+                        view_function=self.view_template_event
                     )
                     self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
 
@@ -530,6 +534,16 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self.parent_tab.build_image_export_frame(response.data.path)
                     else:
                         CTkMessagebox(icon="cancel", title="Template Converter Error", message=response.error)
+
+                def view_template_event(self, event):
+                    response = service.convert_template_to_min_map_image(
+                        TemplateDTO(path=self.template_path, date=datetime.now(), is_dir=False)
+                    )
+                    if not response.success:
+                        CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+                    else:
+                        print(response.data.path)
+                        view_image(response.data.path)
 
         class ImageTab:
             def __init__(self, master):
@@ -605,7 +619,14 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.parent_tab.image_import_frame.tkraise()
 
                 def view_template(self, e):
-                    pass
+                    response = service.convert_template_to_min_map_image(
+                        TemplateDTO(path=self.template_path, date=datetime.now(), is_dir=False)
+                    )
+                    if not response.success:
+                        CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+                    else:
+                        print(response.data.path)
+                        view_image(response.data.path)
 
                 def handle_export_button(self):
                     file_path = filedialog.asksaveasfilename(title="Export Template",
@@ -952,12 +973,33 @@ class OperationRowFrame(customtkinter.CTkFrame):
         )
         self.output_label.bind('<Button-1>', lambda e: self.view_files(self.operation_dto.operation_output.path))
 
+        # operation_type = operation_dto.operation_type
+        # if operation_type == OperationType.IMG2TMP:
+        #     type = "Image -> Template"
+        # elif operation_type.TMP2IMG.value == OperationType.IMG2TMP:
+        #     type = "Template -> Image"
+        # elif operation_type.IMG2POBJ.value == OperationType.IMG2TMP:
+        #     type = "Image -> Printing Object"
+        # elif operation_type.IMGs2TMPs == OperationType.IMG2TMP:
+        #     type = "[Image] -> [Template]"
+        # elif operation_type.TMPs2IMGs == OperationType.IMG2TMP:
+        #     type = "[Template] -> [Image]"
+        # elif operation_type.IMGs2POBJs == OperationType.IMG2TMP:
+        #     type = "[Image] -> [Printing Object]"
+
+        self.operation_type = customtkinter.CTkLabel(
+            self, text=f"Type: {operation_dto.operation_type}"
+        )
+        self.operation_type.grid(
+            row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
+        )
+
         formatted_date = operation_dto.operation_date.strftime("%d/%m/%Y    %H:%M:%S")
         self.date_label = customtkinter.CTkLabel(
             self, text=f"Date: {formatted_date}"
         )
         self.date_label.grid(
-            row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
+            row=0, column=3, sticky=customtkinter.EW, padx=(20, 20)
         )
 
         self.delete_button = customtkinter.CTkLabel(
@@ -971,7 +1013,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
         )
         self.delete_button.bind('<Button-1>', command=self.handle_delete_operation)
         self.delete_button.grid(
-            row=0, column=3, padx=(10, 25), pady=10
+            row=0, column=4, padx=(10, 25), pady=10
         )
         self.tp1 = ToolTip(self.delete_button, msg="Delete Operation", delay=1.0)
 

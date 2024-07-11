@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
@@ -21,6 +22,15 @@ class Service(IService, metaclass=Singleton):
         self.__experiment_controller = ExperimentController()
         self.__playground: PLAYGROUND = PLAYGROUND()
 
+    def convert_template_to_min_map_image(self, template_dto: TemplateDTO) -> Response:
+        try:
+            template = Template(template_dto.path, template_dto.is_dir)
+            min_map_image = self.__converter_controller.convert_template_to_min_map_image(template)
+            min_map_image_dto = min_map_image.to_dto()
+            return Response(True, min_map_image_dto, None)
+        except Exception as error:
+            return Response(False, None, str(error))
+
     def convert_template_to_image(self, template_dto: TemplateDTO) -> Response:
         try:
             current_experiment = self.__experiment_controller.get_current_experiment()
@@ -33,6 +43,8 @@ class Service(IService, metaclass=Singleton):
             operation_id = f'{operation_type}_{str(round(datetime.datetime.now().timestamp() * 1000))}'
             template = Template(template_dto.path, template_dto.is_dir)
 
+
+            bool = os.path.exists(template.path)
             image = self.__converter_controller.convert_template_to_image(template,
                                                                           current_experiment.experiment_name,
                                                                           operation_id)
