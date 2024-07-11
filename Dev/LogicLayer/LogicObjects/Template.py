@@ -29,19 +29,9 @@ class Template(Asset):
             image_path = os.path.join(image_dir_path, template_file_name + '.png')
         return image_path
 
-    def finalize_path(self, final_destination_path: str):
-
-        template_file_name = os.path.basename(self.path)
-        if os.path.exists(final_destination_path) and os.path.isdir(final_destination_path):
-            if self.is_dir:
-                self.path = final_destination_path
-            else:
-                self.path = os.path.join(final_destination_path, template_file_name)
-        else:
-            raise Exception(f'Final Destination was not found {final_destination_path} does not exist')
 
     def to_dto(self) -> TemplateDTO:
-        return TemplateDTO(path=self.path, date=self.date, is_dir=self.is_dir)
+        return TemplateDTO(path=self.path, is_dir=self.is_dir)
 
     def to_dao(self) -> TemplateDAO:
         raise NotImplementedError
