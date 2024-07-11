@@ -26,7 +26,6 @@ class Response:
 @dataclass(frozen=True)
 class AssetDTO(IDto):
     path: str
-    date: datetime
     is_dir: bool
 
 
