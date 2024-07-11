@@ -66,15 +66,14 @@ class Service(IService, metaclass=Singleton):
             else:
                 operation_type = OperationType.IMG2TMP.value
 
-            image = Image(image_dto.path, image_dto.is_dir)
             operation_id = f'{operation_type}_{str(round(datetime.datetime.now().timestamp() * 1000))}'
+            image = Image(image_dto.path, image_dto.is_dir)
             template = self.__converter_controller.convert_image_to_template(image,
                                                                              current_experiment.experiment_name,
                                                                              operation_id)
             image.finalize_path(self.__playground.get_sub_images_dir_path(current_experiment.experiment_name,
                                                                           operation_id))
             template.finalize_path()
-
             operation = Operation(operation_id, operation_type, image, template)
             self.__experiment_controller.add_operation(operation)
             template_dto = template.to_dto()
@@ -84,17 +83,23 @@ class Service(IService, metaclass=Singleton):
 
     def convert_image_to_printing_object(self, image_dto: ImageDTO) -> Response:
         try:
-            image = Image(image_dto.path, image_dto.is_dir)
-            printing_object = self.__converter_controller.convert_image_to_printing_object(image)
+            current_experiment = self.__experiment_controller.get_current_experiment()
             operation_type = ''
             if image_dto.is_dir:
                 operation_type = OperationType.IMGs2POBJs.value
             else:
                 operation_type = OperationType.IMG2POBJ.value
             operation_id = f'{operation_type}_{str(round(datetime.datetime.now().timestamp() * 1000))}'
+
+            image = Image(image_dto.path, image_dto.is_dir)
+            printing_object = self.__converter_controller.convert_image_to_printing_object(image,
+                                                                                           current_experiment.experiment_name,
+                                                                                           operation_id)
+            image.finalize_path(self.__playground.get_sub_images_dir_path(current_experiment.experiment_name,
+                                                                                operation_id))
+            printing_object.finalize_path()
             operation = Operation(operation_id, operation_type, image, printing_object)
             self.__experiment_controller.add_operation(operation)
-
             printing_object_dto = printing_object.to_dto()
             return Response(True, printing_object_dto, None)
         except Exception as error:
@@ -201,13 +206,12 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-
 # service = Service()
 # e = service.create_experiment('911Julitesting_exp')
 # service.set_current_experiment('911Julitesting_exp')
 # img1 = ImageDTO('/home/z01x/Desktop/Images/109_1_8bit.png', is_dir=False)
 # img2 = ImageDTO('/home/z01x/Desktop/Images', is_dir=True)
-# t1 = service.convert_image_to_template(img1)
-# t2 = service.convert_image_to_template(img2)
+# t1 = service.convert_image_to_printing_object(img1)
+# t2 = service.convert_image_to_printing_object(img2)
 # cr = service.get_current_experiment()
 # print('DONE')

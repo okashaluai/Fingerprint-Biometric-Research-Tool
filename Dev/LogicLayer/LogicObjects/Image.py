@@ -45,18 +45,40 @@ class Image(Asset):
         detect_minutiae(images_dir_path=images_dir_path, templates_dir_path=templates_dir_path)
         return templates_dir_path
 
-    def convert_to_printing_object(self) -> PrintingObject:
-        printing_object_name = f"{Path(self.path).stem}.stl"
-        printing_object_path = os.path.join(PLAYGROUND().PATH, printing_object_name)
+    def convert_to_printing_object(self, experiment_name: str, operation_id: str) -> str:
+        self.__playground.prepare_image_to_printing_object_operation_dir(experiment_name, operation_id)
+        images_dir_path = self.__playground.get_sub_images_dir_path(experiment_name, operation_id)
+        printing_objects_dir_path = self.__playground.get_sub_printing_objects_dir_path(experiment_name, operation_id)
+        image_name = os.path.splitext(os.path.basename(self.path))[0]
 
-        image = cv.imread(self.path, cv.IMREAD_GRAYSCALE)
+        if self.is_dir:
+            self.__playground.import_images_dir(self.path, experiment_name, operation_id)
+
+        else:
+            self.__playground.import_image_into_dir(self.path, experiment_name, operation_id)
+
+        printing_objects_path = build_printing_objects(images_dir_path, printing_objects_dir_path)
+        return printing_objects_path
+
+
+def build_printing_objects(images_dir_path: str, printing_objects_dir_path: str) -> str:
+    image_files = os.listdir(images_dir_path)
+    printing_objects_path = ''
+    for image_file in image_files:
+        image_name = os.path.splitext(image_file)[0]
+        image_file_path = os.path.join(images_dir_path, image_file)
+        image = cv.imread(image_file_path, cv.IMREAD_GRAYSCALE)
         _, binary_image = cv.threshold(image, 128, 255, cv.THRESH_BINARY)
-
         enhanced_image = fingerprint_enhancer.enhance_Fingerprint(binary_image)
-
         depth = 0.05
-        stl = image2stl.convert_to_stl(255 - enhanced_image, printing_object_path, base=True, output_scale=depth)
-        with open(printing_object_name, 'wb') as f:
+
+        stl = image2stl.convert_to_stl(255 - enhanced_image, printing_objects_dir_path, base=True,
+                                       output_scale=depth)
+        printing_objects_path = f'{os.path.join(printing_objects_dir_path, image_name)}.stl'
+        with open(printing_objects_path, 'wb') as f:
             f.write(stl)
 
-        return PrintingObject(printing_object_path, is_dir=self.is_dir)
+    if len(image_files) == 1:
+        return printing_objects_path
+    else:
+        return printing_objects_dir_path
