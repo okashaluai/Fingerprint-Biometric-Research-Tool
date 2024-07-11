@@ -38,7 +38,7 @@ class ConvertorController(metaclass=Singleton):
         extracted_template = Template(template_path, image.is_dir)
         return extracted_template
 
-    def convert_image_to_printing_object(self, image: Image) -> PrintingObject:
-
-        printing_object = image.convert_to_printing_object()
-        return printing_object
+    def convert_image_to_printing_object(self, image: Image,  experiment_name: str, operation_id: str) -> PrintingObject:
+        printing_object_path = image.convert_to_printing_object(experiment_name, operation_id)
+        built_printing_object = PrintingObject(printing_object_path, image.is_dir)
+        return built_printing_object
