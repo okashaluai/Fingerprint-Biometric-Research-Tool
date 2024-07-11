@@ -33,12 +33,10 @@ class ConvertorController(metaclass=Singleton):
         generated_image = Image(generated_image_path, template.is_dir)
         return generated_image
 
-    def convert_image_to_template(self, image: Image) -> Template:
-
-        #Is_dir to be considered in future.
-
-        template_path = image.convert_to_template()
-        return Template(template_path, image.is_dir)
+    def convert_image_to_template(self, image: Image, experiment_name: str, operation_id: str) -> Template:
+        template_path = image.convert_to_template(experiment_name, operation_id)
+        extracted_template = Template(template_path, image.is_dir)
+        return extracted_template
 
     def convert_image_to_printing_object(self, image: Image) -> PrintingObject:
 

@@ -16,18 +16,13 @@ from Dev.Playground import PLAYGROUND
 class Image(Asset):
     def __init__(self, path, is_dir):
         super().__init__(path, is_dir)
+        self.__playground = PLAYGROUND()
 
     def to_dto(self) -> ImageDTO:
-        return ImageDTO(path=self.path, date=self.date, is_dir=self.is_dir)
+        return ImageDTO(path=self.path, is_dir=self.is_dir)
 
     def to_dao(self) -> ImageDAO:
         raise NotImplementedError
-
-    def finalize_path(self, final_destination_path: str):
-        if os.path.exists(final_destination_path) and os.path.isdir(final_destination_path):
-            super().path = final_destination_path
-        else:
-            raise Exception(f'Final Destination was not found {final_destination_path} does not exist')
 
     def __is_valid_image(self, file_path) -> bool:
         try:
@@ -37,13 +32,18 @@ class Image(Asset):
         except (IOError, SyntaxError):
             return False
 
-    def convert_to_template(self) -> str:
-        template_name = Path(self.path).stem
-        template_path = os.path.join(PLAYGROUND().PATH, template_name)
+    def convert_to_template(self, experiment_name: str, operation_id: str) -> str:
+        image_file_name = os.path.splitext(os.path.basename(self.path))[0]
+        self.__playground.prepare_image_to_template_operation_dir(experiment_name, operation_id)
+        templates_dir_path = self.__playground.get_sub_templates_dir_path(experiment_name, operation_id)
+        images_dir_path = self.__playground.get_sub_images_dir_path(experiment_name, operation_id)
+        if self.is_dir:
+            self.__playground.import_images_dir(self.path, experiment_name, operation_id)
+        else:
+            self.__playground.import_image_into_dir(self.path, experiment_name, operation_id)
 
-        detect_minutiae(self.path, PLAYGROUND().PATH, template_name)
-
-        return template_path
+        detect_minutiae(images_dir_path=images_dir_path, templates_dir_path=templates_dir_path)
+        return templates_dir_path
 
     def convert_to_printing_object(self) -> PrintingObject:
         printing_object_name = f"{Path(self.path).stem}.stl"
