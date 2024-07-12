@@ -9,7 +9,9 @@ from Dev.Enums import OperationType
 class FILESYSTEM:
     def __init__(self):
         self.experiments_home_path = os.path.join(os.path.dirname(__file__), 'experiments')
-        self.temp_dir = os.path.join(self.experiments_home_path, 'temp_dir')
+        self.temp_dir = os.path.join(os.path.dirname(__file__), 'temp_dir')
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
 
     def load_experiments(self):
         if not (os.path.exists(self.experiments_home_path) and os.path.isdir(self.experiments_home_path)):
