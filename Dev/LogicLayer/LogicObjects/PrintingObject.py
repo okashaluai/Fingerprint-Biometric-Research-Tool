@@ -1,7 +1,5 @@
 from Dev.DTOs import PrintingObjectDTO
-from Dev.DataAccessLayer.DAOs import PrintingObjectDAO
 from Dev.LogicLayer.LogicObjects.Asset import Asset
-import os
 
 
 class PrintingObject(Asset):
@@ -10,6 +8,3 @@ class PrintingObject(Asset):
 
     def to_dto(self) -> PrintingObjectDTO:
         return PrintingObjectDTO(path=self.path, is_dir=self.is_dir)
-
-    def to_dao(self) -> PrintingObjectDAO:
-        raise NotImplementedError
