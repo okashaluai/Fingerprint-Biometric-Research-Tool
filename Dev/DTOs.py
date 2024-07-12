@@ -68,11 +68,11 @@ class OperationDTO(IDto):
     operation_type: OperationType
     operation_input: AssetDTO
     operation_output: AssetDTO
-    operation_date: datetime
+    operation_datetime: datetime
 
 
 @dataclass(frozen=False)
 class ExperimentDTO(IDto):
     operations: list[OperationDTO]
     experiment_name: str
-    experiment_date: datetime
+    experiment_datetime: datetime

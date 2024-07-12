@@ -1,24 +1,16 @@
 import os
-import time
-from abc import abstractmethod
-from datetime import datetime
 
 from Dev.DTOs import AssetDTO
-from Dev.DataAccessLayer.DAOs import AssetDAO
 from Dev.LogicLayer.LogicObjects.ILogicObject import ILogicObject
 
 
 class Asset(ILogicObject):
     def __init__(self, path: str, is_dir: bool):
         self.path = path
-        self.is_dir = is_dir
+        self.is_dir: bool = is_dir
 
     def to_dto(self) -> AssetDTO:
         return AssetDTO(self.path, self.is_dir)
-
-    def to_dao(self) -> AssetDAO:
-        # return AssetDAO()
-        raise NotImplementedError
 
     def finalize_path(self, final_destination_path: str = None):
         if final_destination_path is None:

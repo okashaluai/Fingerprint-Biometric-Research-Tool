@@ -1,18 +1,15 @@
 import datetime
-import os
-
-from Dev.DTOs import Response, TemplateDTO, ImageDTO, ExperimentDTO
+from Dev.DTOs import Response, TemplateDTO, ImageDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.Controllers.MatcherController import MatcherController
-from Dev.LogicLayer.LogicObjects.Experiment import Experiment
 from Dev.LogicLayer.LogicObjects.Image import Image
 from Dev.LogicLayer.LogicObjects.Operation import Operation
 from Dev.LogicLayer.LogicObjects.Template import Template
 from Dev.LogicLayer.Service.IService import IService
 from Dev.Utils import Singleton
 from Dev.Enums import OperationType
-from Dev.Playground import PLAYGROUND
+from Dev.DataAccessLayer.FILESYSTEM import FILESYSTEM
 
 
 class Service(IService, metaclass=Singleton):
@@ -20,7 +17,7 @@ class Service(IService, metaclass=Singleton):
         self.__converter_controller = ConvertorController()
         self.__matcher_controller = MatcherController()
         self.__experiment_controller = ExperimentController()
-        self.__playground: PLAYGROUND = PLAYGROUND()
+        self.__filesystem: FILESYSTEM = FILESYSTEM()
 
     def convert_template_to_min_map_image(self, template_dto: TemplateDTO) -> Response:
         try:
@@ -34,22 +31,23 @@ class Service(IService, metaclass=Singleton):
     def convert_template_to_image(self, template_dto: TemplateDTO) -> Response:
         try:
             current_experiment = self.__experiment_controller.get_current_experiment()
-            operation_type = ''
-            if template_dto.is_dir:
-                operation_type = OperationType.TMPs2IMGs.value
-            else:
-                operation_type = OperationType.TMP2IMG.value
 
-            operation_id = f'{operation_type}_{str(round(datetime.datetime.now().timestamp() * 1000))}'
+            if template_dto.is_dir:
+                operation_type = OperationType.TMPs2IMGs
+            else:
+                operation_type = OperationType.TMP2IMG
+
+            operation_datetime = datetime.datetime.now()
+            operation_id = f'{operation_type.value}_{str(round(operation_datetime.timestamp() * 1000))}'
             template = Template(template_dto.path, template_dto.is_dir)
 
             image = self.__converter_controller.convert_template_to_image(template,
                                                                           current_experiment.experiment_name,
                                                                           operation_id)
-            template.finalize_path(self.__playground.get_sub_templates_dir_path(current_experiment.experiment_name,
+            template.finalize_path(self.__filesystem.get_sub_templates_dir_path(current_experiment.experiment_name,
                                                                                 operation_id))
             image.finalize_path()
-            operation = Operation(operation_id, operation_type, template, image)
+            operation = Operation(operation_id, operation_type, template, image, operation_datetime)
             self.__experiment_controller.add_operation(operation)
             generated_image = operation.operation_output
             image_dto = generated_image.to_dto()
@@ -60,21 +58,21 @@ class Service(IService, metaclass=Singleton):
     def convert_image_to_template(self, image_dto: ImageDTO) -> Response:
         try:
             current_experiment = self.__experiment_controller.get_current_experiment()
-            operation_type = ''
-            if image_dto.is_dir:
-                operation_type = OperationType.IMGs2TMPs.value
-            else:
-                operation_type = OperationType.IMG2TMP.value
 
-            operation_id = f'{operation_type}_{str(round(datetime.datetime.now().timestamp() * 1000))}'
+            if image_dto.is_dir:
+                operation_type = OperationType.IMGs2TMPs
+            else:
+                operation_type = OperationType.IMG2TMP
+            operation_datetime = datetime.datetime.now()
+            operation_id = f'{operation_type.value}_{str(round(operation_datetime.timestamp() * 1000))}'
             image = Image(image_dto.path, image_dto.is_dir)
             template = self.__converter_controller.convert_image_to_template(image,
                                                                              current_experiment.experiment_name,
                                                                              operation_id)
-            image.finalize_path(self.__playground.get_sub_images_dir_path(current_experiment.experiment_name,
+            image.finalize_path(self.__filesystem.get_sub_images_dir_path(current_experiment.experiment_name,
                                                                           operation_id))
             template.finalize_path()
-            operation = Operation(operation_id, operation_type, image, template)
+            operation = Operation(operation_id, operation_type, image, template, operation_datetime)
             self.__experiment_controller.add_operation(operation)
             template_dto = template.to_dto()
             return Response(True, template_dto, None)
@@ -84,21 +82,22 @@ class Service(IService, metaclass=Singleton):
     def convert_image_to_printing_object(self, image_dto: ImageDTO) -> Response:
         try:
             current_experiment = self.__experiment_controller.get_current_experiment()
-            operation_type = ''
+
             if image_dto.is_dir:
-                operation_type = OperationType.IMGs2POBJs.value
+                operation_type = OperationType.IMGs2POBJs
             else:
-                operation_type = OperationType.IMG2POBJ.value
-            operation_id = f'{operation_type}_{str(round(datetime.datetime.now().timestamp() * 1000))}'
+                operation_type = OperationType.IMG2POBJ
+            operation_datetime = datetime.datetime.now()
+            operation_id = f'{operation_type.value}_{str(round(operation_datetime.timestamp() * 1000))}'
 
             image = Image(image_dto.path, image_dto.is_dir)
             printing_object = self.__converter_controller.convert_image_to_printing_object(image,
                                                                                            current_experiment.experiment_name,
                                                                                            operation_id)
-            image.finalize_path(self.__playground.get_sub_images_dir_path(current_experiment.experiment_name,
-                                                                                operation_id))
+            image.finalize_path(self.__filesystem.get_sub_images_dir_path(current_experiment.experiment_name,
+                                                                          operation_id))
             printing_object.finalize_path()
-            operation = Operation(operation_id, operation_type, image, printing_object)
+            operation = Operation(operation_id, operation_type, image, printing_object, operation_datetime)
             self.__experiment_controller.add_operation(operation)
             printing_object_dto = printing_object.to_dto()
             return Response(True, printing_object_dto, None)
@@ -144,7 +143,7 @@ class Service(IService, metaclass=Singleton):
 
     def get_experiments(self) -> Response:
         try:
-            experiments = self.__experiment_controller.get_sorted_experiments_by_date()
+            experiments = self.__experiment_controller.get_experiments()
             experiments_dtos = list()
             for experiment in experiments:
                 experiment_dto = experiment.to_dto()
@@ -206,9 +205,11 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
+
 # service = Service()
-# e = service.create_experiment('911Julitesting_exp')
-# service.set_current_experiment('911Julitesting_exp')
+# e = service.create_experiment('exp2')
+# service.set_current_experiment('exp2')
+# exps = service.get_experiments()
 # img1 = ImageDTO('/home/z01x/Desktop/Images/109_1_8bit.png', is_dir=False)
 # img2 = ImageDTO('/home/z01x/Desktop/Images', is_dir=True)
 # t1 = service.convert_image_to_printing_object(img1)
