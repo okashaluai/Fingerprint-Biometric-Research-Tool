@@ -207,6 +207,7 @@ class Service(IService, metaclass=Singleton):
 
 
 # service = Service()
+# service.delete_experiment('exp2')
 # e = service.create_experiment('exp2')
 # service.set_current_experiment('exp2')
 # exps = service.get_experiments()
