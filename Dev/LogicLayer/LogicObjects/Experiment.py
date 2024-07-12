@@ -1,23 +1,23 @@
-import datetime
-
+from datetime import datetime
 from Dev.DTOs import ExperimentDTO
-from Dev.DataAccessLayer.DAOs import ExperimentDAO
-from Dev.Enums import OperationType
-from Dev.LogicLayer.LogicObjects.Asset import Asset
 from Dev.LogicLayer.LogicObjects.ILogicObject import ILogicObject
 from Dev.LogicLayer.LogicObjects.Operation import Operation
 
 
 class Experiment(ILogicObject):
-    def __init__(self, experiment_name):
+    def __init__(self, experiment_name, experiment_datetime: datetime, operations: dict[str: Operation] = None):
         if experiment_name is None:
             raise Exception('Experiment name cannot be None')
         if len(experiment_name) < 1 or len(experiment_name) > 20:
             raise Exception('Experiment name must be between 1 and 20 characters')
 
-        self.operations: dict[str: Operation] = dict()
+        if operations is None:
+            self.operations: dict[str: Operation] = dict()
+        else:
+            self.operations: dict[str: Operation] = operations
+
         self.experiment_name: str = experiment_name
-        self.experiment_date = datetime.datetime.now()
+        self.experiment_datetime: datetime = experiment_datetime
 
     def add_convert_operation(
             self,
@@ -33,8 +33,11 @@ class Experiment(ILogicObject):
         self.experiment_name = new_experiment_name
 
     def to_dto(self) -> ExperimentDTO:
-        return ExperimentDTO(operations=list(self.operations.values()),
-                             experiment_name=self.experiment_name, experiment_date=self.experiment_date)
+        operation_dtos = list()
+        for operation in self.operations.values():
+            operation_dto = operation.to_dto()
+            operation_dtos.append(operation_dto)
 
-    def to_dao(self) -> ExperimentDAO:
-        raise NotImplementedError
+        return ExperimentDTO(operations=operation_dtos,
+                             experiment_name=self.experiment_name,
+                             experiment_datetime=self.experiment_datetime)

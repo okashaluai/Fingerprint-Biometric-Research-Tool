@@ -1,21 +1,14 @@
-import os
-
-from Dev.Enums import OperationType
-from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.LogicObjects.Image import Image
 from Dev.LogicLayer.LogicObjects.PrintingObject import PrintingObject
 from Dev.LogicLayer.LogicObjects.Template import Template
 from Dev.Utils import Singleton
-from Dev.FingerprintGenerator.generator import generate
-from Dev.LogicLayer.LogicObjects.Operation import Operation
-from Dev.Playground import PLAYGROUND
+from Dev.DataAccessLayer.FILESYSTEM import FILESYSTEM
 
 
 class ConvertorController(metaclass=Singleton):
 
     def __init__(self):
-        self.__experiment_controller = ExperimentController()  # this behavior indicates high coupling and low cohesion (we should reconsider it).
-        self._playground = PLAYGROUND()
+        self.__filesystem = FILESYSTEM()
         self.__min_maps_cache: dict[str, str] = dict()
 
     def convert_template_to_min_map_image(self, template: Template):
@@ -38,7 +31,7 @@ class ConvertorController(metaclass=Singleton):
         extracted_template = Template(template_path, image.is_dir)
         return extracted_template
 
-    def convert_image_to_printing_object(self, image: Image,  experiment_name: str, operation_id: str) -> PrintingObject:
+    def convert_image_to_printing_object(self, image: Image, experiment_name: str, operation_id: str) -> PrintingObject:
         printing_object_path = image.convert_to_printing_object(experiment_name, operation_id)
         built_printing_object = PrintingObject(printing_object_path, image.is_dir)
         return built_printing_object
