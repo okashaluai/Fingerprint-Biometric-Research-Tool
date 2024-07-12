@@ -10,6 +10,11 @@ from Dev.LogicLayer.LogicObjects.Operation import Operation
 
 class Experiment(ILogicObject):
     def __init__(self, experiment_name):
+        if experiment_name is None:
+            raise Exception('Experiment name cannot be None')
+        if len(experiment_name) < 1 or len(experiment_name) > 20:
+            raise Exception('Experiment name must be between 1 and 20 characters')
+
         self.operations: dict[str: Operation] = dict()
         self.experiment_name: str = experiment_name
         self.experiment_date = datetime.datetime.now()
