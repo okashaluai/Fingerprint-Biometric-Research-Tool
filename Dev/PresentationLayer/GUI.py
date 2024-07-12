@@ -994,7 +994,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
             row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
         )
 
-        formatted_date = operation_dto.operation_date.strftime("%d/%m/%Y    %H:%M:%S")
+        formatted_date = operation_dto.operation_datetime.strftime("%d/%m/%Y    %H:%M:%S")
         self.date_label = customtkinter.CTkLabel(
             self, text=f"Date: {formatted_date}"
         )
