@@ -985,7 +985,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
         #     type = "[Image] -> [Printing Object]"
 
         self.operation_type = customtkinter.CTkLabel(
-            self, text=f"Type: {operation_dto.operation_type}"
+            self, text=f"Type: {operation_dto.operation_type.name}"
         )
         self.operation_type.grid(
             row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
@@ -1377,6 +1377,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                                                          new_experiment_name=self.name_var.get())
                     if response.success:
                         experiments_frame.load_experiments()
+
+                        App(service).change_current_experiment_name(response.data.experiment_name)
+
                         CTkMessagebox(icon="check", title="Experiment",
                                       message=f"Experiment name changed successfully!")
                     else:

@@ -62,9 +62,19 @@ class ExperimentController(metaclass=Singleton):
             self.experiments[experiment_dto.experiment_name] = experiment
 
     def rename_experiment(self, experiment_name: str, new_experiment_name: str):
+        if new_experiment_name in self.experiments:
+            raise Exception(f'Experiment with name {experiment_name} already exists!')
+
         if experiment_name in self.experiments:
             self.experiments[experiment_name].rename_experiment(new_experiment_name)
-            return self.experiments[experiment_name]
+
+            if self.current_experiment_name == experiment_name:
+                self.current_experiment_name = new_experiment_name
+
+            self.experiments[new_experiment_name] = self.experiments[experiment_name]
+            del self.experiments[experiment_name]
+
+            return self.experiments[new_experiment_name]
         else:
             raise Exception(f'Experiment with name {experiment_name} does not exist!')
 
