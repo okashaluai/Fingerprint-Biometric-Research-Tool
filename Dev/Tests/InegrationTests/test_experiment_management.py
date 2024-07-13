@@ -25,7 +25,7 @@ class ExperimentManagement(unittest.TestCase):
 
         for e in experiments:
             if e.experiment_name in cls.experiment_names:
-                response = cls.service.delete_experiment(cls.experiment_name)
+                response = cls.service.delete_experiment(e.experiment_name)
                 if not response.success:
                     raise response.error
 
@@ -60,7 +60,7 @@ class ExperimentManagement(unittest.TestCase):
 
         assert rename_experiment_response.data.experiment_name == new_experiment_name
 
-        delete_experiment_response = self.service.delete_experiment(experiment_name)
+        delete_experiment_response = self.service.delete_experiment(new_experiment_name)
         if not delete_experiment_response.success:
             raise delete_experiment_response.error
 
@@ -174,7 +174,7 @@ class ExperimentManagement(unittest.TestCase):
 
         for e in experiments:
             if e.experiment_name in cls.experiment_names:
-                response = cls.service.delete_experiment(cls.experiment_name)
+                response = cls.service.delete_experiment(e.experiment_name)
                 if not response.success:
                     raise response.error
 
