@@ -58,7 +58,9 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
         dnd_frame.drop_target_register(DND_FILES)
 
         def handle_drop(e):
-            path = fr'{str(e.data)[1:-1]}'
+            path = fr'{str(e.data)}'
+            if e.data[0] == '{' and e.data[-1] == '}':
+                path = fr'{str(e.data)[1:-1]}'
             if os.path.isdir(path):
                 dnd_frame.destroy()
                 build_selected_labels(path)
@@ -282,12 +284,11 @@ class SideMenuFrame(customtkinter.CTkFrame):
                 service.set_current_experiment(response.data.experiment_name)
                 if i % 2 == 0:
                     convert_response1 = service.convert_image_to_template(
-                        ImageDTO(is_dir=False, path=r"C:\Users\Yazan\Desktop\109_1_8bit.png", date=datetime.now())
+                        ImageDTO(is_dir=False, path=r"C:\Users\Yazan\Desktop\109_1_8bit.png")
                     )
                     convert_response2 = service.convert_image_to_template(
                         ImageDTO(is_dir=False,
-                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
-                                 date=datetime.now())
+                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
                     )
                     if convert_response1.success and convert_response2.success:
                         print(convert_response1.data.path)
@@ -297,8 +298,7 @@ class SideMenuFrame(customtkinter.CTkFrame):
                 if i == 0:
                     convert_response2 = service.convert_image_to_printing_object(
                         ImageDTO(is_dir=False,
-                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
-                                 date=datetime.now())
+                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
                     )
                 # else:
                 #     convert_response = service.convert_image_to_template(
@@ -424,7 +424,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.back_button.grid(row=6, column=1, padx=(20, 20), pady=5)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(is_dir=False, path=self.image_path, date=datetime.now())
+                    image_dto = ImageDTO(is_dir=False, path=self.image_path)
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(path=response.data.path)
@@ -528,7 +528,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.template_path = path
 
                 def handle_convert_to_image_button(self):
-                    template_dto = TemplateDTO(is_dir=False, path=self.template_path, date=datetime.now())
+                    template_dto = TemplateDTO(is_dir=False, path=self.template_path)
                     response = service.convert_template_to_image(template_dto)
                     if response.success:
                         self.parent_tab.build_image_export_frame(response.data.path)
@@ -537,7 +537,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                 def view_template_event(self, event):
                     response = service.convert_template_to_min_map_image(
-                        TemplateDTO(path=self.template_path, date=datetime.now(), is_dir=False)
+                        TemplateDTO(path=self.template_path, is_dir=False)
                     )
                     if not response.success:
                         CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
@@ -620,7 +620,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                 def view_template(self, e):
                     response = service.convert_template_to_min_map_image(
-                        TemplateDTO(path=self.template_path, date=datetime.now(), is_dir=False)
+                        TemplateDTO(path=self.template_path, is_dir=False)
                     )
                     if not response.success:
                         CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
@@ -751,7 +751,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.image_path = path
 
                 def handle_convert_to_template_button(self):
-                    image_dto = ImageDTO(is_dir=False, path=self.image_path, date=datetime.now())
+                    image_dto = ImageDTO(is_dir=False, path=self.image_path)
                     response = service.convert_image_to_template(image_dto)
                     if response.success:
                         self.parent_tab.build_template_export_frame(response.data.path)
@@ -759,7 +759,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(is_dir=False, path=self.image_path, date=datetime.now())
+                    image_dto = ImageDTO(is_dir=False, path=self.image_path)
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(response.data.path)
@@ -1174,7 +1174,7 @@ class ExperimentsFrame(customtkinter.CTkFrame):
 
             self.experiment_dto = experiment_dto
             self.experiment_name = experiment_dto.experiment_name
-            self.experiment_date = experiment_dto.experiment_date.strftime("%d/%m/%Y    %H:%M:%S")
+            self.experiment_date = experiment_dto.experiment_datetime.strftime("%d/%m/%Y    %H:%M:%S")
 
             self.experiment_name_label = customtkinter.CTkLabel(self, text=f"{self.experiment_name}")
             self.experiment_name_label.grid(row=0, column=0, sticky=customtkinter.EW, padx=(20, 10), pady=10)
