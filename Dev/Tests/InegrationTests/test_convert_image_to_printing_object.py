@@ -40,7 +40,6 @@ class ConvertImageToPrintingObject(unittest.TestCase):
         else:
             raise set_current_experiment_response.error
 
-    @unittest.skip
     def test_convert_valid_image_to_printing_object(self):
         valid_image = ImageDTO(
             path=os.path.join(images_path, '109_1_8bit', '109_1_8bit.png'),
@@ -53,16 +52,15 @@ class ConvertImageToPrintingObject(unittest.TestCase):
         generated_printing_object: PrintingObjectDTO = response.data
 
         assert generated_printing_object.path.endswith('109_1_8bit.stl')
-        assert os.path.exists(generated_printing_object)
+        assert os.path.exists(generated_printing_object.path)
 
-    @unittest.skip
     def test_convert_many_images_to_many_printing_objects(self):
         valid_image = ImageDTO(
-            path=os.path.join(images_path, 'many_templates_for_convert'),
+            path=os.path.join(images_path, 'many_images'),
             is_dir=True
         )
 
-        response = self.service.convert_template_to_image(valid_image)
+        response = self.service.convert_image_to_printing_object(valid_image)
         assert response.success
         assert response.data is not None
         generated_printing_objects: PrintingObjectDTO = response.data

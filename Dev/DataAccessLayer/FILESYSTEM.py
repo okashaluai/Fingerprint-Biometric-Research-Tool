@@ -4,9 +4,10 @@ import json
 from Dev.DTOs import ExperimentDTO, OperationDTO, ImageDTO, TemplateDTO, PrintingObjectDTO, AssetDTO
 from datetime import datetime
 from Dev.Enums import OperationType
+from Dev.Utils import Singleton
 
 
-class FILESYSTEM:
+class FILESYSTEM(metaclass=Singleton):
     def __init__(self):
         self.experiments_home_path = os.path.join(os.path.dirname(__file__), 'experiments')
         self.temp_dir = os.path.join(os.path.dirname(__file__), 'temp_dir')

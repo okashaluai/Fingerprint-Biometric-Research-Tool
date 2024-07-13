@@ -75,7 +75,7 @@ class ConvertTemplateToImage(unittest.TestCase):
                 if im.startswith(base_name):
                     files_counter += 1
 
-        assert files_counter >= len(os.listdir(valid_template.path))
+        assert files_counter == len(os.listdir(valid_template.path)) * 2
 
     def test_convert_invalid_template_to_image(self):
         invalid_template = TemplateDTO(
@@ -89,9 +89,10 @@ class ConvertTemplateToImage(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        response = cls.service.delete_experiment(cls.experiment_name)
-        if not response.success:
-            raise response.error
+        # response = cls.service.delete_experiment(cls.experiment_name)
+        # if not response.success:
+        #     raise response.error
+        pass
 
 
 if __name__ == '__main__':
