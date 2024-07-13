@@ -34,6 +34,9 @@ class AssetDTO(IDto):
 @dataclass(frozen=True)
 class TemplateDTO(AssetDTO):
     def __eq__(self, other):
+        if self.is_dir != other.is_dir:
+            return False
+
         def get_templates_base_names(path: str):
             template_names = []
             for f in os.listdir(path):

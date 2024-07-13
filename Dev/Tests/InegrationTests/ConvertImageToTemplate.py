@@ -62,6 +62,24 @@ class ConvertImageToTemplate(unittest.TestCase):
 
         assert generated_template == expected_template
 
+    def test_convert_many_images_to_many_templates(self):
+        valid_image = ImageDTO(
+            path=os.path.join(images_path, 'many_images'),
+            is_dir=True
+        )
+
+        response = self.service.convert_image_to_template(valid_image)
+        assert response.success
+        assert response.data is not None
+        generated_template: TemplateDTO = response.data
+
+        assert generated_template.path != ""
+        assert os.path.exists(generated_template.path)
+
+        expected_template = TemplateDTO(path=os.path.join(templates_path, 'many_templates_for_compare'), is_dir=True)
+
+        assert generated_template == expected_template
+
     def test_convert_invalid_image_to_template(self):
         invalid_image = ImageDTO(
             path=os.path.join(images_path, 'bla', 'bla.png'),
