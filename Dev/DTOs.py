@@ -1,5 +1,7 @@
+import os.path
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from Dev.Enums import OperationType
 from Dev.Utils import Interface
@@ -32,24 +34,39 @@ class AssetDTO(IDto):
 @dataclass(frozen=True)
 class TemplateDTO(AssetDTO):
     def __eq__(self, other):
-        f1_min_content = []
-        f1_xyt_content = []
-        f2_min_content = []
-        f2_xyt_content = []
+        def get_templates_base_names(path: str):
+            template_names = []
+            for f in os.listdir(path):
+                base_name = Path(f).stem
+                if base_name not in template_names:
+                    template_names.append(base_name)
+            return template_names
 
-        with open(self.path.join('.min')) as f:
-            f1_min_content = f.readlines()
+        this_templates_base_names = get_templates_base_names(self.path)
+        other_templates_base_names = get_templates_base_names(other.path)
 
-        with open(self.path.join('.xyt')) as f:
-            f1_xyt_content = f.readlines()
+        if this_templates_base_names.sort() != other_templates_base_names.sort():
+            return False
 
-        with open(other.path.join('.min')) as f:
-            f2_min_content = f.readlines()
+        for t_name in this_templates_base_names:
+            with open(os.path.join(self.path, f"{t_name}.min")) as f:
+                f1_min_content = f.readlines()
+            with open(os.path.join(self.path, f"{t_name}.xyt")) as f:
+                f1_xyt_content = f.readlines()
 
-        with open(other.path.join('.xyt')) as f:
-            f2_xyt_content = f.readlines()
+            if not (os.path.exists(os.path.join(other.path, f"{t_name}.min"))
+                    and os.path.join(other.path, f"{t_name}.xyt")):
+                return False
 
-        return (f1_min_content.sort() == f2_min_content.sort()) and (f1_xyt_content.sort() == f2_xyt_content.sort())
+            with open(os.path.join(other.path, f"{t_name}.min")) as f:
+                f2_min_content = f.readlines()
+            with open(os.path.join(other.path, f"{t_name}.xyt")) as f:
+                f2_xyt_content = f.readlines()
+
+            if not (f1_min_content.sort() == f2_min_content.sort() and f1_xyt_content.sort() == f2_xyt_content.sort()):
+                return False
+
+        return True
 
 
 @dataclass(frozen=True)

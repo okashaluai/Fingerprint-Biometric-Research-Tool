@@ -60,7 +60,7 @@ class DetectingMinutiae(unittest.TestCase):
 
 class MatchTemplates(unittest.TestCase):
     def setUp(self):
-        self.same_person_template1_path = os.path.join(templates_path, '109_1_8bit_template', '109_1_8bit_template.xyt')
+        self.same_person_template1_path = os.path.join(templates_path, '109_1_8bit', '109_1_8bit.xyt')
         self.same_person_template2_path = os.path.join(templates_path, '109_2_8bit_template', '109_2_8bit_template.xyt')
         self.same_person_template3_path = os.path.join(templates_path, '109_3_8bit_template', '109_3_8bit_template.xyt')
 

@@ -28,7 +28,7 @@ class ConvertTemplateToImage(unittest.TestCase):
 
     def test_convert_valid_template_to_image(self):
         valid_template = TemplateDTO(
-            path=os.path.join(templates_path, '109_1_8bit_template', '109_1_8bit_template.min'),
+            path=os.path.join(templates_path, '109_1_8bit', '109_1_8bit.min'),
             date=datetime.datetime.now(),
             is_dir=False
         )
@@ -38,7 +38,7 @@ class ConvertTemplateToImage(unittest.TestCase):
         assert response.data is not None
         generated_image: ImageDTO = response.data
 
-        # assert generated_image.path.endswith('109_1_8bit_template.png')
+        # assert generated_image.path.endswith('109_1_8bit.png')
 
         # assert os.path.exists(generated_image.path)
 

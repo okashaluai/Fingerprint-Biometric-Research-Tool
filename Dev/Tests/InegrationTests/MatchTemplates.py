@@ -25,7 +25,7 @@ class MatchTemplates(unittest.TestCase):
             raise set_current_experiment_response.error
 
     def test_match_one_to_one(self):
-        first_template_path = os.path.join(templates_path, '109_1_8bit_template', '109_1_8bit_template.xyt')
+        first_template_path = os.path.join(templates_path, '109_1_8bit', '109_1_8bit.xyt')
         second_template_path = os.path.join(templates_path, '109_2_8bit_template', '109_2_8bit_template.xyt')
 
         response = self.service.match_one_to_one(first_template_path, second_template_path)
@@ -37,14 +37,14 @@ class MatchTemplates(unittest.TestCase):
         assert score == 27
 
     def test_match_one_to_one_invalid_template(self):
-        first_template_path = os.path.join(templates_path, '109_1_8bit_template', '109_1_8bit_template.xyt')
+        first_template_path = os.path.join(templates_path, '109_1_8bit', '109_1_8bit.xyt')
         second_template_path = os.path.join(templates_path, '109_2_8bit_template', 'bla.xyt')
 
         response = self.service.match_one_to_one(first_template_path, second_template_path)
         assert not response.success
 
     def test_match_one_to_many(self):
-        first_template_path = os.path.join(templates_path, '109_1_8bit_template', '109_1_8bit_template.xyt')
+        first_template_path = os.path.join(templates_path, '109_1_8bit', '109_1_8bit.xyt')
         second_template_dir = os.path.join(templates_path, 'many_templates')
 
         response = self.service.match_one_to_many(first_template_path, second_template_dir)
@@ -58,7 +58,7 @@ class MatchTemplates(unittest.TestCase):
         assert score[first_template_path][os.path.join(second_template_dir, '109_3_8bit_template.xyt')] == 100
 
     def test_match_one_to_many_invalid_template(self):
-        first_template_path = os.path.join(templates_path, '109_1_8bit_template', 'bla.xyt')
+        first_template_path = os.path.join(templates_path, '109_1_8bit', 'bla.xyt')
         second_template_dir = os.path.join(templates_path, 'many_templates')
 
         response = self.service.match_one_to_many(first_template_path, second_template_dir)
