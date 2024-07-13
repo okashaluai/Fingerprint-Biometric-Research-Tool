@@ -8,29 +8,31 @@ from Dev.Tests.TestUtils import templates_path, images_path
 
 class DetectingMinutiae(unittest.TestCase):
     def setUp(self):
-        self.png1_24_bit_image_path = os.path.join(images_path, '1_24bit.png')
-        self.png2_8_bit_image_path = os.path.join(images_path, '2_8bit.png')
-        self.template_2_8bit_name = '2_8bit_template'
-        self.template_1_24bit_name = '1_24bit_template'
+        self.png1_24_bit_image_path = os.path.join(images_path, '1_24bit')
+        self.png2_8_bit_image_path = os.path.join(images_path, '2_8bit')
 
-        self.template_path = os.path.join(templates_path, self.template_2_8bit_name)
-        if os.path.exists(self.template_path):
-            shutil.rmtree(self.template_path)
+        self.generated_templates_path = os.path.join(templates_path, 'Generated')
+
+        if os.path.exists(self.generated_templates_path):
+            shutil.rmtree(self.generated_templates_path)
+
+        os.mkdir(self.generated_templates_path)
 
     def test_detect_minutiae_8bit(self):
-        detect_minutiae(self.png2_8_bit_image_path, templates_path, self.template_2_8bit_name)
+        detect_minutiae(self.png2_8_bit_image_path, self.generated_templates_path)
 
         generated_templates_count = 0
 
         # Search for .min and .xyt for the expected template
-        for template in os.listdir(self.template_path):
-            if template.lower().startswith(self.template_2_8bit_name):
+        for template in os.listdir(self.generated_templates_path):
+            if template.lower().startswith(os.path.basename(self.png2_8_bit_image_path)):
                 generated_templates_count += 1
 
         assert generated_templates_count == 2
 
         # Check that .xyt file contains 99 minutiae
-        with open(os.path.join(self.template_path, f"{self.template_2_8bit_name}.xyt")) as t:
+        with open(os.path.join(self.generated_templates_path,
+                               f"{os.path.basename(self.png2_8_bit_image_path)}.xyt")) as t:
             minutiae_count = len(t.readlines())
 
         assert minutiae_count == 99
@@ -39,11 +41,11 @@ class DetectingMinutiae(unittest.TestCase):
         generated_templates_count = 0
 
         try:
-            detect_minutiae(self.png1_24_bit_image_path, templates_path, self.template_1_24bit_name)
+            detect_minutiae(self.png1_24_bit_image_path, self.generated_templates_path)
 
             # Search for .min and .xyt for the expected template
-            for template in os.listdir(os.path.join(templates_path, self.template_1_24bit_name)):
-                if template.lower().startswith(self.template_1_24bit_name):
+            for template in os.listdir(self.generated_templates_path):
+                if template.lower().startswith(os.path.basename(self.png1_24_bit_image_path)):
                     generated_templates_count += 1
         except:
             pass
@@ -52,10 +54,8 @@ class DetectingMinutiae(unittest.TestCase):
 
     def tearDown(self):
         # Remove the expected template files if exists
-        if os.path.exists(self.template_path):
-            shutil.rmtree(self.template_path)
-        if os.path.exists(os.path.join(templates_path, self.template_1_24bit_name)):
-            shutil.rmtree(os.path.join(templates_path, self.template_1_24bit_name))
+        if os.path.exists(self.generated_templates_path):
+            shutil.rmtree(self.generated_templates_path)
 
 
 class MatchTemplates(unittest.TestCase):
