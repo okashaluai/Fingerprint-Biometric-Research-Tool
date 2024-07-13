@@ -30,6 +30,11 @@ class Experiment(ILogicObject):
         del self.operations[operation_id]
 
     def rename_experiment(self, new_experiment_name):
+        if new_experiment_name is None:
+            raise Exception('Experiment name cannot be None')
+        if len(new_experiment_name) < 1 or len(new_experiment_name) > 20:
+            raise Exception('Experiment name must be between 1 and 20 characters')
+
         self.experiment_name = new_experiment_name
 
     def to_dto(self) -> ExperimentDTO:

@@ -97,6 +97,12 @@ class FILESYSTEM:
             raise Exception(f'Experiment {experiment_name} does not exist')
         shutil.rmtree(experiment_dir_path)
 
+    def rename_experiment_dir(self, experiment_name: str, new_experiment_name: str):
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        if not (os.path.isdir(experiment_dir_path)):
+            raise Exception(f'Experiment {experiment_name} does not exist')
+        os.rename(experiment_dir_path, os.path.join(self.experiments_home_path, new_experiment_name))
+
     def delete_operation_dir(self, experiment_name: str, operation_id: str):
         operation_dir_path = os.path.join(self.experiments_home_path, experiment_name, operation_id)
         if not (os.path.isdir(operation_dir_path)):

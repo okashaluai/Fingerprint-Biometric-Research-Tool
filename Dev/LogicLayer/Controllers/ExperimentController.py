@@ -74,19 +74,20 @@ class ExperimentController(metaclass=Singleton):
             self.experiments[new_experiment_name] = self.experiments[experiment_name]
             del self.experiments[experiment_name]
 
+            self.__filesystem.rename_experiment_dir(experiment_name, new_experiment_name)
+
             return self.experiments[new_experiment_name]
         else:
             raise Exception(f'Experiment with name {experiment_name} does not exist!')
 
     def create_experiment(self, experiment_name: str):
-
         if experiment_name in self.experiments:
             raise Exception(f'Experiment with name {experiment_name} already exists!')
 
-        self.__filesystem.create_experiment_dir(experiment_name=experiment_name)
-
         new_experiment = Experiment(experiment_name, datetime.now())
         self.experiments[experiment_name] = new_experiment
+
+        self.__filesystem.create_experiment_dir(experiment_name=experiment_name)
 
         return self.experiments[experiment_name]
 
