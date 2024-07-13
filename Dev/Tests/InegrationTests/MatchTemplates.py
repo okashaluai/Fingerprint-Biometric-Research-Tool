@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from Dev.DTOs import ExperimentDTO
 from Dev.LogicLayer.Service.Service import Service
 from TestUtils import templates_path
 
@@ -9,8 +10,21 @@ class MatchTemplates(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.service = Service()
-        # Create experiment
         cls.experiment_name = "IT_Experiment"
+
+        # Clean dangling experiment
+        get_all_experiments_response = cls.service.get_experiments()
+        if not get_all_experiments_response.success:
+            raise get_all_experiments_response.error
+        experiments: list[ExperimentDTO] = get_all_experiments_response.data
+
+        for e in experiments:
+            if e.experiment_name == cls.experiment_name:
+                response = cls.service.delete_experiment(cls.experiment_name)
+                if not response.success:
+                    raise response.error
+
+        # Create experiment
         create_experiment_response = cls.service.create_experiment(cls.experiment_name)
         if create_experiment_response.success:
             pass
