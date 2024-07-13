@@ -6,7 +6,6 @@ from enum import Enum
 
 class LibName(Enum):
     MINDTCT: str = "mindtct"
-    NFIQ: str = "nfiq"
     BOZORTH3: str = "bozorth3"
 
 
@@ -53,15 +52,6 @@ def match_templates(first_xyt_template_path, second_xyt_template_path) -> int:
     return score
 
 
-def get_image_quality(image_path: str) -> int:
-    stdout = run_process(get_exe_lib_path(LibName.NFIQ), image_path)
-
-    # Parse the output to extract the image quality
-    image_quality_line = stdout.strip().split('\n')[-1]
-    image_quality = int(image_quality_line.split()[0])
-    return image_quality
-
-
 def run_process(exe_lib_path: str, arguments: str) -> str:
     # Give the lib an execution permission
     # TODO: this command corrupts NBIS executables on Windows.
@@ -69,7 +59,6 @@ def run_process(exe_lib_path: str, arguments: str) -> str:
     #     os.chmod(exe_lib_path, mode=stat.S_IRWXU + stat.S_IRWXG + stat.S_IROTH + stat.S_IXOTH)
 
     # Execute lib
-    print(arguments)
     completed_process = subprocess.run(
         args=f'"{exe_lib_path}" {arguments}',
         shell=True,
@@ -80,6 +69,5 @@ def run_process(exe_lib_path: str, arguments: str) -> str:
     )
 
     if completed_process.stderr:
-        print(completed_process.stderr)
         raise Exception(completed_process.stderr)
     return completed_process.stdout
