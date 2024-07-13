@@ -26,7 +26,7 @@ class MatchTemplates(unittest.TestCase):
 
     def test_match_one_to_one(self):
         first_template_path = os.path.join(templates_path, '109_1_8bit', '109_1_8bit.xyt')
-        second_template_path = os.path.join(templates_path, '109_2_8bit_template', '109_2_8bit_template.xyt')
+        second_template_path = os.path.join(templates_path, '109_2_8bit', '109_2_8bit.xyt')
 
         response = self.service.match_one_to_one(first_template_path, second_template_path)
         assert response.success
@@ -38,7 +38,7 @@ class MatchTemplates(unittest.TestCase):
 
     def test_match_one_to_one_invalid_template(self):
         first_template_path = os.path.join(templates_path, '109_1_8bit', '109_1_8bit.xyt')
-        second_template_path = os.path.join(templates_path, '109_2_8bit_template', 'bla.xyt')
+        second_template_path = os.path.join(templates_path, '109_2_8bit', 'bla.xyt')
 
         response = self.service.match_one_to_one(first_template_path, second_template_path)
         assert not response.success
@@ -54,8 +54,8 @@ class MatchTemplates(unittest.TestCase):
 
         assert score is not None
 
-        assert score[first_template_path][os.path.join(second_template_dir, '109_2_8bit_template.xyt')] == 27
-        assert score[first_template_path][os.path.join(second_template_dir, '109_3_8bit_template.xyt')] == 100
+        assert score[first_template_path][os.path.join(second_template_dir, '109_2_8bit.xyt')] == 27
+        assert score[first_template_path][os.path.join(second_template_dir, '109_3_8bit.xyt')] == 100
 
     def test_match_one_to_many_invalid_template(self):
         first_template_path = os.path.join(templates_path, '109_1_8bit', 'bla.xyt')
@@ -74,8 +74,8 @@ class MatchTemplates(unittest.TestCase):
 
         assert score is not None
 
-        t_109_2_path = os.path.join(template_dir, '109_2_8bit_template.xyt')
-        t_109_3_path = os.path.join(template_dir, '109_3_8bit_template.xyt')
+        t_109_2_path = os.path.join(template_dir, '109_2_8bit.xyt')
+        t_109_3_path = os.path.join(template_dir, '109_3_8bit.xyt')
 
         assert score[t_109_2_path][t_109_2_path] == 253
         assert score[t_109_2_path][t_109_3_path] == 32
