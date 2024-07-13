@@ -1,4 +1,3 @@
-import datetime
 import os
 import unittest
 
@@ -12,6 +11,23 @@ class ExperimentManagement(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.service = Service()
+        cls.experiment_names = ["NewExperiment",
+                                "OldName",
+                                "NewName",
+                                "ConvertExperiment",
+                                "OldExperiment"]
+
+        # Clean dangling experiment
+        get_all_experiments_response = cls.service.get_experiments()
+        if not get_all_experiments_response.success:
+            raise get_all_experiments_response.error
+        experiments: list[ExperimentDTO] = get_all_experiments_response.data
+
+        for e in experiments:
+            if e.experiment_name in cls.experiment_names:
+                response = cls.service.delete_experiment(cls.experiment_name)
+                if not response.success:
+                    raise response.error
 
     def test_create_delete_experiment(self):
         experiment_name = "NewExperiment"
@@ -60,8 +76,7 @@ class ExperimentManagement(unittest.TestCase):
 
         # Convert image to template
         valid_image = ImageDTO(
-            path=os.path.join(images_path, '109_1_8bit.png'),
-            date=datetime.datetime.now(),
+            path=os.path.join(images_path, '109_1_8bit', '109_1_8bit.png'),
             is_dir=False
         )
 
@@ -76,7 +91,7 @@ class ExperimentManagement(unittest.TestCase):
         current_experiment: ExperimentDTO = get_current_experiment_response.data
 
         assert current_experiment.operations[0].operation_id
-        assert current_experiment.operations[0].operation_type == OperationType.IMG2TMP.name
+        assert current_experiment.operations[0].operation_type == OperationType.IMG2TMP
         assert current_experiment.operations[0].operation_input.path
         assert current_experiment.operations[0].operation_output.path == generated_template.path
 
@@ -96,8 +111,7 @@ class ExperimentManagement(unittest.TestCase):
 
         # Convert image to template
         valid_image = ImageDTO(
-            path=os.path.join(images_path, '109_1_8bit.png'),
-            date=datetime.datetime.now(),
+            path=os.path.join(images_path, '109_1_8bit', '109_1_8bit.png'),
             is_dir=False
         )
 
@@ -146,6 +160,23 @@ class ExperimentManagement(unittest.TestCase):
         current_experiment: ExperimentDTO = get_current_experiment_response.data
 
         assert current_experiment.experiment_name == experiment_name
+
+        delete_experiment_response = self.service.delete_experiment(experiment_name)
+        if not delete_experiment_response.success:
+            raise delete_experiment_response.error
+
+    def tearDown(cls):
+        # Clean dangling experiment
+        get_all_experiments_response = cls.service.get_experiments()
+        if not get_all_experiments_response.success:
+            raise get_all_experiments_response.error
+        experiments: list[ExperimentDTO] = get_all_experiments_response.data
+
+        for e in experiments:
+            if e.experiment_name in cls.experiment_names:
+                response = cls.service.delete_experiment(cls.experiment_name)
+                if not response.success:
+                    raise response.error
 
 
 if __name__ == '__main__':
