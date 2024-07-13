@@ -1,7 +1,5 @@
 import os
 import shutil
-import uuid
-from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
 
@@ -12,7 +10,6 @@ from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO, TemplateDTO
-from Dev.Enums import OperationType
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 from Dev.Utils import Singleton
@@ -276,38 +273,38 @@ class SideMenuFrame(customtkinter.CTkFrame):
     def handle_experiments_button(self):
         self.master.experiments_frame.tkraise()
 
-        # add 10 experiments for mock
-        for i in range(10):
-            response = service.create_experiment(f"experiment {uuid.uuid1()}")
-            if response.success:
-                print(f"{response.data.experiment_name}")
-                service.set_current_experiment(response.data.experiment_name)
-                if i % 2 == 0:
-                    convert_response1 = service.convert_image_to_template(
-                        ImageDTO(is_dir=False, path=r"C:\Users\Yazan\Desktop\109_1_8bit.png")
-                    )
-                    convert_response2 = service.convert_image_to_template(
-                        ImageDTO(is_dir=False,
-                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
-                    )
-                    if convert_response1.success and convert_response2.success:
-                        print(convert_response1.data.path)
-                        print(convert_response2.data.path)
-                    print(len(service.get_current_experiment().data.operations))
-
-                if i == 0:
-                    convert_response2 = service.convert_image_to_printing_object(
-                        ImageDTO(is_dir=False,
-                                 path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
-                    )
-                # else:
-                #     convert_response = service.convert_image_to_template(
-                #         ImageDTO(is_dir=False,None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
-                #                  datetime.now())
-                #     )
-
-            else:
-                print(response.error)
+        # # add 10 experiments for mock
+        # for i in range(10):
+        #     response = service.create_experiment(f"experiment {random.randint(0,1000)}")
+        #     if response.success:
+        #         print(f"{response.data.experiment_name}")
+        #         service.set_current_experiment(response.data.experiment_name)
+        #         if i % 2 == 0:
+        #             convert_response1 = service.convert_image_to_template(
+        #                 ImageDTO(is_dir=False, path=r"C:\Users\Yazan\Desktop\109_1_8bit.png")
+        #             )
+        #             convert_response2 = service.convert_image_to_template(
+        #                 ImageDTO(is_dir=False,
+        #                          path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
+        #             )
+        #             if convert_response1.success and convert_response2.success:
+        #                 print(convert_response1.data.path)
+        #                 print(convert_response2.data.path)
+        #             print(len(service.get_current_experiment().data.operations))
+        #
+        #         if i == 0:
+        #             convert_response2 = service.convert_image_to_printing_object(
+        #                 ImageDTO(is_dir=False,
+        #                          path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
+        #             )
+        #         # else:
+        #         #     convert_response = service.convert_image_to_template(
+        #         #         ImageDTO(is_dir=False,None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
+        #         #                  datetime.now())
+        #         #     )
+        #
+        #     else:
+        #         print(response.error)
 
         self.master.experiments_frame.load_experiments()
 
@@ -1400,7 +1397,9 @@ class ExperimentsFrame(customtkinter.CTkFrame):
 
         def handle_delete_experiment(self, event=None):
             delete_response = service.delete_experiment(self.experiment_dto.experiment_name)
-            if delete_response.success:
+            if not delete_response.success:
+                CTkMessagebox(icon="cancel", title="Experiments Error", message=delete_response.error)
+            else:
                 for e in experiments_frame.experiment_dtos:
                     if e.experiment_name == self.experiment_dto.experiment_name:
                         experiments_frame.experiment_dtos.remove(e)
@@ -1408,10 +1407,25 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.destroy_tooltips()
                 self.destroy()
 
-                CTkMessagebox(icon="check", title="Experiment",
-                              message=f"Experiment {self.experiment_name} deleted successfully!")
-            else:
-                CTkMessagebox(icon="cancel", title="Experiments Error", message=delete_response.error)
+                get_all_experiments_response = service.get_experiments()
+                if not get_all_experiments_response:
+                    CTkMessagebox(icon="cancel", title="Experiments Error", message=get_all_experiments_response.error)
+                if not get_all_experiments_response.data:
+                    global side_menu_frame
+                    side_menu_frame.convert_assets_button.configure(state=customtkinter.DISABLED)
+                    side_menu_frame.match_templates_button.configure(state=customtkinter.DISABLED)
+                    side_menu_frame.experiments_button.configure(state=customtkinter.DISABLED)
+
+                    global is_first_experiment
+                    is_first_experiment = True
+
+                    App(service).new_experiment_frame.tkraise()
+
+                    CTkMessagebox(icon="warning", title="Experiment",
+                                  message=f"You deleted the last experiment, please create new one to continue!")
+                else:
+                    CTkMessagebox(icon="check", title="Experiment",
+                                  message=f"Experiment {self.experiment_name} deleted successfully!")
 
 
 class NewExperimentFrame(customtkinter.CTkFrame):
@@ -1489,6 +1503,7 @@ class NewExperimentFrame(customtkinter.CTkFrame):
             CTkMessagebox(icon="cancel", title="Experiment Error", message=response.error)
 
     def handle_continue_experiment_button(self, e):
+        self.master.experiments_frame.load_experiments()
         self.master.experiments_frame.tkraise()
 
 
