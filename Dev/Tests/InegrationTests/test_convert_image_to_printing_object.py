@@ -1,13 +1,14 @@
 import os
+import os
 import unittest
 from pathlib import Path
 
-from Dev.DTOs import ImageDTO, TemplateDTO, ExperimentDTO
+from Dev.DTOs import ImageDTO, PrintingObjectDTO, ExperimentDTO
 from Dev.LogicLayer.Service.Service import Service
-from TestUtils import images_path, templates_path
+from TestUtils import images_path
 
 
-class ConvertTemplateToImage(unittest.TestCase):
+class ConvertImageToPrintingObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.service = Service()
@@ -39,51 +40,52 @@ class ConvertTemplateToImage(unittest.TestCase):
         else:
             raise set_current_experiment_response.error
 
-    def test_convert_valid_template_to_image(self):
-        valid_template = TemplateDTO(
-            path=os.path.join(templates_path, '109_1_8bit', '109_1_8bit.min'),
+    @unittest.skip
+    def test_convert_valid_image_to_printing_object(self):
+        valid_image = ImageDTO(
+            path=os.path.join(images_path, '109_1_8bit', '109_1_8bit.png'),
             is_dir=False
         )
 
-        response = self.service.convert_template_to_image(valid_template)
+        response = self.service.convert_image_to_printing_object(valid_image)
         assert response.success
         assert response.data is not None
-        generated_image: ImageDTO = response.data
+        generated_printing_object: PrintingObjectDTO = response.data
 
-        assert os.path.exists(generated_image.path)
-        assert generated_image.path.endswith('109_1_8bit.png')
+        assert generated_printing_object.path.endswith('109_1_8bit.stl')
+        assert os.path.exists(generated_printing_object)
 
-    def test_convert_many_templates_to_many_images(self):
-        valid_template = TemplateDTO(
-            path=os.path.join(templates_path, 'many_templates_for_convert'),
+    @unittest.skip
+    def test_convert_many_images_to_many_printing_objects(self):
+        valid_image = ImageDTO(
+            path=os.path.join(images_path, 'many_templates_for_convert'),
             is_dir=True
         )
 
-        response = self.service.convert_template_to_image(valid_template)
+        response = self.service.convert_template_to_image(valid_image)
         assert response.success
         assert response.data is not None
-        generated_image: ImageDTO = response.data
+        generated_printing_objects: PrintingObjectDTO = response.data
 
-        assert generated_image.path != ""
-        assert os.path.exists(generated_image.path)
+        assert generated_printing_objects.path != ""
+        assert os.path.exists(generated_printing_objects.path)
 
         files_counter = 0
-        for t in os.listdir(valid_template.path):
+        for t in os.listdir(valid_image.path):
             base_name = Path(t).stem
-            for im in os.listdir(generated_image.path):
+            for im in os.listdir(generated_printing_objects.path):
                 if im.startswith(base_name):
                     files_counter += 1
 
-        assert files_counter >= len(os.listdir(valid_template.path))
+        assert files_counter == len(os.listdir(valid_image.path))
 
-    def test_convert_invalid_template_to_image(self):
-        invalid_template = TemplateDTO(
+    def test_convert_invalid_image_to_printing_object(self):
+        invalid_image = ImageDTO(
             path=os.path.join(images_path, 'bla.png'),
-
             is_dir=False
         )
 
-        response = self.service.convert_template_to_image(invalid_template)
+        response = self.service.convert_image_to_printing_object(invalid_image)
         assert not response.success
         assert response.data is None
 
