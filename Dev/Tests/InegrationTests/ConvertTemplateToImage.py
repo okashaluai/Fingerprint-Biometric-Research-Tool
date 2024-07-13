@@ -50,8 +50,8 @@ class ConvertTemplateToImage(unittest.TestCase):
         assert response.data is not None
         generated_image: ImageDTO = response.data
 
-        # assert os.path.exists(generated_image.path)
-        # assert generated_image.path.endswith('109_1_8bit.png')
+        assert os.path.exists(generated_image.path)
+        assert generated_image.path.endswith('109_1_8bit.png')
 
     def test_convert_many_templates_to_many_images(self):
         valid_template = TemplateDTO(
