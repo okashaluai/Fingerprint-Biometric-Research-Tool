@@ -1,8 +1,7 @@
-import datetime
 import os
 import unittest
 
-from Dev.DTOs import ImageDTO, TemplateDTO
+from Dev.DTOs import ImageDTO, TemplateDTO, ExperimentDTO
 from Dev.LogicLayer.Service.Service import Service
 from TestUtils import images_path, templates_path
 
@@ -11,8 +10,21 @@ class ConvertTemplateToImage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.service = Service()
-        # Create experiment
         cls.experiment_name = "IT_Experiment"
+
+        # Clean dangling experiment
+        get_all_experiments_response = cls.service.get_experiments()
+        if not get_all_experiments_response.success:
+            raise get_all_experiments_response.error
+        experiments: list[ExperimentDTO] = get_all_experiments_response.data
+
+        for e in experiments:
+            if e.experiment_name == cls.experiment_name:
+                response = cls.service.delete_experiment(cls.experiment_name)
+                if not response.success:
+                    raise response.error
+
+        # Create experiment
         create_experiment_response = cls.service.create_experiment(cls.experiment_name)
         if create_experiment_response.success:
             pass
@@ -29,7 +41,6 @@ class ConvertTemplateToImage(unittest.TestCase):
     def test_convert_valid_template_to_image(self):
         valid_template = TemplateDTO(
             path=os.path.join(templates_path, '109_1_8bit', '109_1_8bit.min'),
-            date=datetime.datetime.now(),
             is_dir=False
         )
 
@@ -38,19 +49,13 @@ class ConvertTemplateToImage(unittest.TestCase):
         assert response.data is not None
         generated_image: ImageDTO = response.data
 
-        # assert generated_image.path.endswith('109_1_8bit.png')
-
         # assert os.path.exists(generated_image.path)
-
-        response = self.service.convert_template_to_min_map_image(
-            TemplateDTO(path=valid_template.path, date=datetime.datetime.now(), is_dir=False))
-
-        print(response.success)
+        # assert generated_image.path.endswith('109_1_8bit.png')
 
     def test_convert_invalid_template_to_image(self):
         invalid_template = TemplateDTO(
             path=os.path.join(images_path, 'bla.png'),
-            date=datetime.datetime.now(),
+
             is_dir=False
         )
 
