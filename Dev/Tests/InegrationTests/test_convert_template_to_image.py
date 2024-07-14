@@ -4,7 +4,7 @@ from pathlib import Path
 
 from Dev.DTOs import ImageDTO, TemplateDTO, ExperimentDTO
 from Dev.LogicLayer.Service.Service import Service
-from TestUtils import images_path, templates_path
+from TestUtils import templates_path
 
 
 class ConvertTemplateToImage(unittest.TestCase):
@@ -39,7 +39,6 @@ class ConvertTemplateToImage(unittest.TestCase):
         else:
             raise set_current_experiment_response.error
 
-    @unittest.skip
     def test_convert_valid_template_to_image(self):
         valid_template = TemplateDTO(
             path=os.path.join(templates_path, '109_1_8bit', '109_1_8bit.min'),
@@ -52,7 +51,7 @@ class ConvertTemplateToImage(unittest.TestCase):
         generated_image: ImageDTO = response.data
 
         assert os.path.exists(generated_image.path)
-        assert generated_image.path.endswith('109_1_8bit.png')
+        assert generated_image.path.endswith('109_1_8bit_fake.png')
 
     def test_convert_many_templates_to_many_images(self):
         valid_template = TemplateDTO(
