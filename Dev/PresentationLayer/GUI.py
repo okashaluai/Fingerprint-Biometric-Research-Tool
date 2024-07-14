@@ -429,7 +429,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.back_button.grid(row=6, column=1, padx=(20, 20), pady=5)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(is_dir=False, path=self.image_path)
+                    image_dto = ImageDTO(is_dir=os.path.isdir(self.image_path), path=self.image_path)
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(path=response.data.path)
@@ -437,7 +437,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
                 def view_image(self, event=None):
-                    view_image(self.image_path)
+                    if os.path.isdir(self.image_path):
+                        CTkMessagebox(icon="warning", title="Operations Error",
+                                      message="Viewing directories is not supported!")
+                    else:
+                        view_image(self.image_path)
 
                 def handle_back_button(self):
                     self.parent_tab.template_import_frame.tkraise()
@@ -481,7 +485,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.back_button.grid(row=5, column=1, padx=(20, 20), pady=5)
 
                 def view_stl(self, event=None):
-                    view_stl_open3d(self.stl_path)
+                    if os.path.isdir(self.stl_path):
+                        CTkMessagebox(icon="warning", title="Operations Error",
+                                      message="Viewing directories is not supported!")
+                    else:
+                        view_stl_open3d(self.stl_path)
 
                 def handle_back_button(self):
                     self.parent_tab.image_export_frame.tkraise()
@@ -541,13 +549,17 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         CTkMessagebox(icon="cancel", title="Template Converter Error", message=response.error)
 
                 def view_template_event(self, event):
-                    response = service.convert_template_to_min_map_image(
-                        TemplateDTO(path=self.template_path, is_dir=False)
-                    )
-                    if not response.success:
-                        CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+                    if os.path.isdir(self.template_path):
+                        CTkMessagebox(icon="warning", title="Operations Error",
+                                      message="Viewing directories is not supported!")
                     else:
-                        view_image(response.data.path)
+                        response = service.convert_template_to_min_map_image(
+                            TemplateDTO(path=self.template_path, is_dir=False)
+                        )
+                        if not response.success:
+                            CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+                        else:
+                            view_image(response.data.path)
 
         class ImageTab:
             def __init__(self, master):
@@ -623,13 +635,17 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.parent_tab.image_import_frame.tkraise()
 
                 def view_template(self, e):
-                    response = service.convert_template_to_min_map_image(
-                        TemplateDTO(path=get_single_min_filepath(self.template_path), is_dir=False)
-                    )
-                    if not response.success:
-                        CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+                    if os.path.isdir(self.template_path) and len(os.listdir(self.template_path)) > 2:
+                        CTkMessagebox(icon="warning", title="Operations Error",
+                                      message="Viewing directories is not supported!")
                     else:
-                        view_image(response.data.path)
+                        response = service.convert_template_to_min_map_image(
+                            TemplateDTO(path=get_single_min_filepath(self.template_path), is_dir=False)
+                        )
+                        if not response.success:
+                            CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+                        else:
+                            view_image(response.data.path)
 
                 def handle_export_button(self):
                     file_path = filedialog.asksaveasfilename(title="Export Template",
@@ -681,7 +697,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.parent_tab.image_import_frame.tkraise()
 
                 def view_stl(self, e):
-                    view_stl_open3d(self.stl_path)
+                    if os.path.isdir(self.stl_path):
+                        CTkMessagebox(icon="warning", title="Operations Error",
+                                      message="Viewing directories is not supported!")
+                    else:
+                        view_stl_open3d(self.stl_path)
 
                 def handle_export_button(self):
                     file_path = filedialog.asksaveasfilename(title="Export STL",
@@ -737,7 +757,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.dnd.grid(row=0, column=1, padx=(20, 20), pady=5)
 
                 def view_image_event(self, event=None):
-                    view_image(self.image_path)
+                    if os.path.isdir(self.image_path):
+                        CTkMessagebox(icon="warning", title="Operations Error",
+                                      message="Viewing directories is not supported!")
+                    else:
+                        view_image(self.image_path)
 
                 def handle_reset(self):
                     self.convert_to_template_button.configure(state=customtkinter.DISABLED)
@@ -1046,7 +1070,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
         elif self.operation_dto.operation_type == OperationType.IMG2TMP or self.operation_dto.operation_type == OperationType.IMG2POBJ:
             view_image(self.operation_dto.operation_input.path)
         else:
-            CTkMessagebox(icon="Warning", title="Operations Error", message="Viewing directories is not supported!")
+            CTkMessagebox(icon="warning", title="Operations Error", message="Viewing directories is not supported!")
 
     def view_files_output(self, e):
         if self.operation_dto.operation_type == OperationType.IMG2TMP:
@@ -1066,7 +1090,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
             view_stl_open3d(self.operation_dto.operation_output.path)
 
         else:
-            CTkMessagebox(icon="Warning", title="Operations Error", message="Viewing directories is not supported!")
+            CTkMessagebox(icon="warning", title="Operations Error", message="Viewing directories is not supported!")
 
     def destroy_tooltips(self):
         self.tp1.destroy()
