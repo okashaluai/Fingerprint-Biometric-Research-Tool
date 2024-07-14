@@ -1,4 +1,6 @@
 import datetime
+import os.path
+
 from Dev.DTOs import Response, TemplateDTO, ImageDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
@@ -209,4 +211,18 @@ class Service(IService, metaclass=Singleton):
 
 # service = Service()
 # service.rename_experiment('exp2', 'exp9')
+# service.create_experiment('test1')
+# service.set_current_experiment('test1')
+# t1 = TemplateDTO('', is_dir=False)
+# t2 = TemplateDTO('', is_dir=True)
+# img1 = ImageDTO('/home/z01x/Desktop/Images/1_8bit.png', is_dir=False)
+# img2 = ImageDTO('/home/z01x/Desktop/Images', is_dir=True)
+# t1 = service.convert_image_to_template(img1).data
+# t2 = service.convert_image_to_template(img2).data
+# path = os.path.join(t1.path, os.path.splitext(os.path.basename(img1.path))[0] + '.min')
+# t = TemplateDTO(path, is_dir=False)
+# service.convert_template_to_image(t)
+# service.convert_template_to_image(t2)
+# service.rename_experiment('test1', 'renamed_test')
+# exps = service.get_experiments().data
 # print('DONE')
