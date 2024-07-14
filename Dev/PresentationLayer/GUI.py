@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from threading import Thread
 from tkinter import filedialog
 
@@ -408,7 +409,14 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                                                              filetypes=(("All Files", "*.*"),),
                                                              initialfile="Exported Images")
                     if file_path:
-                        pass
+                        os.mkdir(file_path)
+                        if os.path.isdir(self.image_path):
+                            service.export_asset(self.image_path, file_path)
+                            for f in os.listdir(self.image_path):
+                                shutil.move(os.path.join(self.image_path, f), file_path)
+                            shutil.rmtree(os.path.join(file_path, Path(self.image_path).stem))
+                        else:
+                            service.export_asset(self.image_path, file_path)
 
                 def handle_convert_to_printing_object_button(self):
                     self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
