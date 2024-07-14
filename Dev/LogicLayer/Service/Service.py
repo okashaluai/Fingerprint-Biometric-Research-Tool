@@ -206,14 +206,7 @@ class Service(IService, metaclass=Singleton):
             return Response(False, None, str(error))
 
 
-service = Service()
-# service.delete_experiment('exp2')
-e = service.create_experiment('exp2')
-service.set_current_experiment('exp2')
-exps = service.get_experiments()
-img1 = ImageDTO(r'C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_1_8bit\109_1_8bit.png', is_dir=False)
-# img2 = ImageDTO('/home/z01x/Desktop/Images', is_dir=True)
-t1 = service.convert_image_to_printing_object(img1)
-# t2 = service.convert_image_to_printing_object(img2)
-# cr = service.get_current_experiment()
-print('DONE')
+
+# service = Service()
+# service.rename_experiment('exp2', 'exp9')
+# print('DONE')

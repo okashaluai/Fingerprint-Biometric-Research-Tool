@@ -74,7 +74,7 @@ class ExperimentController(metaclass=Singleton):
             self.experiments[new_experiment_name] = self.experiments[experiment_name]
             del self.experiments[experiment_name]
 
-            self.__filesystem.rename_experiment_dir(experiment_name, new_experiment_name)
+            self.__filesystem.cascade_experiment_renaming(experiment_name, new_experiment_name)
 
             return self.experiments[new_experiment_name]
         else:
