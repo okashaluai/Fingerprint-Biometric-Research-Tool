@@ -25,6 +25,12 @@ class Template(Asset):
             self.__filesystem.import_template_into_dir(self.path, experiment_name, operation_id)
             generate_image(templates_dir_path, min_map_dir_path, image_dir_path)
             image_path = os.path.join(image_dir_path, template_file_name + '_fake.png')
+
+        # Delete the real images and only keep the fake (generated) ones.
+        for im in os.listdir(image_dir_path):
+            if not im.endswith('_fake.png'):
+                os.remove(os.path.join(image_dir_path, im))
+
         return image_path
 
     def to_dto(self) -> TemplateDTO:

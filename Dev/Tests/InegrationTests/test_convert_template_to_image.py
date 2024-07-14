@@ -74,7 +74,7 @@ class ConvertTemplateToImage(unittest.TestCase):
                 if im.startswith(base_name):
                     files_counter += 1
 
-        assert files_counter == len(os.listdir(valid_template.path)) * 2
+        assert files_counter == len(os.listdir(valid_template.path))
 
     def test_convert_invalid_template_to_image(self):
         invalid_template = TemplateDTO(
