@@ -10,6 +10,7 @@ from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from Dev.DTOs import ImageDTO, ExperimentDTO, OperationDTO, TemplateDTO
+from Dev.Enums import OperationType
 from Dev.LogicLayer.Service.IService import IService
 from Dev.PresentationLayer.tooltip import ToolTip
 from Dev.Utils import Singleton
@@ -31,7 +32,8 @@ supported_images_formats = ['png', 'gpeg', 'tiff', 'jpg']
 
 # Builds drag and drop / browse files widget
 def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose_file_title, file_types,
-                      choose_directory_title, invoke_reset_wrapper=None, width=240, height=80, view_function=None):
+                      choose_directory_title, invoke_reset_wrapper=None, width=240, height=80, view_function=None,
+                      disable_view=False):
     main_frame = customtkinter.CTkFrame(
         master=frame,
         width=width,
@@ -101,11 +103,10 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
             cursor="hand2",
             text_color="dodger blue"
         )
-        view_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10, pady=18)
-        if view_function is not None:
-            # def view(event):
-            #     view_function()
-            view_label.bind('<Button-1>', view_function)
+        if not disable_view:
+            view_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10, pady=18)
+            if view_function is not None:
+                view_label.bind('<Button-1>', view_function)
 
         reset_label = customtkinter.CTkLabel(
             selected_frame,
@@ -204,6 +205,13 @@ def view_image(image_path: str):
 
 
 global side_menu_frame
+
+
+def get_single_min_filepath(template_path: str):
+    for t in os.listdir(template_path):
+        if t.endswith('.min'):
+            return os.path.join(template_path, t)
+    return None
 
 
 class SideMenuFrame(customtkinter.CTkFrame):
@@ -539,7 +547,6 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     if not response.success:
                         CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
                     else:
-                        print(response.data.path)
                         view_image(response.data.path)
 
         class ImageTab:
@@ -617,12 +624,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                 def view_template(self, e):
                     response = service.convert_template_to_min_map_image(
-                        TemplateDTO(path=self.template_path, is_dir=False)
+                        TemplateDTO(path=get_single_min_filepath(self.template_path), is_dir=False)
                     )
                     if not response.success:
                         CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
                     else:
-                        print(response.data.path)
                         view_image(response.data.path)
 
                 def handle_export_button(self):
@@ -826,7 +832,9 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             choose_file_title="Choose a template file",
             file_types=[("Template files", "*.xyt")],
             choose_directory_title="Choose a templates directory",
-            invoke_reset_wrapper=handle_reset1
+            invoke_reset_wrapper=handle_reset1,
+            view_function=self.view_template_event,
+            disable_view=True
         )
         self.dnd1.grid(row=3, column=1, padx=(20, 20), pady=5)
 
@@ -852,7 +860,9 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             choose_file_title="Choose a template file",
             file_types=[("Template files", "*.xyt")],
             choose_directory_title="Choose a templates directory",
-            invoke_reset_wrapper=handle_reset2
+            invoke_reset_wrapper=handle_reset2,
+            view_function=self.view_template_event,
+            disable_view=True
         )
         self.dnd2.grid(row=3, column=2, padx=(20, 20), pady=5)
 
@@ -865,6 +875,9 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             pady=(40, 5)
         )
         self.match_button.configure(state=customtkinter.DISABLED)
+
+    def view_template_event(self, event):
+        CTkMessagebox(icon="cancel", title="Unable to view template", message="Viewing .xyt format not supported!")
 
     def handle_match_templates_button(self):
         if self.f1_is_selected and self.f2_is_selected:
@@ -959,33 +972,37 @@ class OperationRowFrame(customtkinter.CTkFrame):
         self.input_label.grid(
             row=0, column=0, sticky=customtkinter.EW, padx=(20, 20)
         )
-        self.input_label.bind('<Button-1>', lambda e: self.view_files(self.operation_dto.operation_input.path))
+        self.input_label.bind('<Button-1>', self.view_files_input)
 
+        output_display = os.path.basename(operation_dto.operation_output.path)
+        if operation_dto.operation_type == OperationType.IMG2TMP:
+            output_display = os.path.basename(get_single_min_filepath(operation_dto.operation_output.path))
         self.output_label = customtkinter.CTkLabel(
             self,
-            text=f"Output: {os.path.basename(operation_dto.operation_output.path)}",
+            text=f"Output: {output_display}",
             cursor="hand2")
         self.output_label.grid(
             row=0, column=1, sticky=customtkinter.EW, padx=(20, 20)
         )
-        self.output_label.bind('<Button-1>', lambda e: self.view_files(self.operation_dto.operation_output.path))
+        self.output_label.bind('<Button-1>', self.view_files_output)
 
-        # operation_type = operation_dto.operation_type
-        # if operation_type == OperationType.IMG2TMP:
-        #     type = "Image -> Template"
-        # elif operation_type.TMP2IMG.value == OperationType.IMG2TMP:
-        #     type = "Template -> Image"
-        # elif operation_type.IMG2POBJ.value == OperationType.IMG2TMP:
-        #     type = "Image -> Printing Object"
-        # elif operation_type.IMGs2TMPs == OperationType.IMG2TMP:
-        #     type = "[Image] -> [Template]"
-        # elif operation_type.TMPs2IMGs == OperationType.IMG2TMP:
-        #     type = "[Template] -> [Image]"
-        # elif operation_type.IMGs2POBJs == OperationType.IMG2TMP:
-        #     type = "[Image] -> [Printing Object]"
+        operation_type = operation_dto.operation_type
+        type = ""
+        if operation_type == OperationType.IMG2TMP:
+            type = "Image -> Template"
+        elif operation_type == OperationType.TMP2IMG:
+            type = "Template -> Image"
+        elif operation_type == OperationType.IMG2POBJ:
+            type = "Image -> Printing Object"
+        elif operation_type == OperationType.IMGs2TMPs:
+            type = "[Image] -> [Template]"
+        elif operation_type == OperationType.TMPs2IMGs:
+            type = "[Template] -> [Image]"
+        elif operation_type == OperationType.IMGs2POBJs:
+            type = "[Image] -> [Printing Object]"
 
         self.operation_type = customtkinter.CTkLabel(
-            self, text=f"Type: {operation_dto.operation_type.name}"
+            self, text=f"Type: {type}"
         )
         self.operation_type.grid(
             row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
@@ -1016,13 +1033,40 @@ class OperationRowFrame(customtkinter.CTkFrame):
 
         self.operation_dto = operation_dto
 
-    def view_files(self, path: str):
-        if path.endswith('.xyt'):
-            pass
-        elif path.endswith('.png'):
+    def view_files_input(self, e):
+        if self.operation_dto.operation_type == OperationType.TMP2IMG:
+            response = service.convert_template_to_min_map_image(
+                TemplateDTO(path=self.operation_dto.operation_input.path, is_dir=False)
+            )
+            if not response.success:
+                CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+            else:
+                view_image(response.data.path)
+
+        elif self.operation_dto.operation_type == OperationType.IMG2TMP or self.operation_dto.operation_type == OperationType.IMG2POBJ:
             view_image(self.operation_dto.operation_input.path)
-        elif path.endswith('.stl'):
-            view_stl_open3d(path)
+        else:
+            CTkMessagebox(icon="Warning", title="Operations Error", message="Viewing directories is not supported!")
+
+    def view_files_output(self, e):
+        if self.operation_dto.operation_type == OperationType.IMG2TMP:
+            min_path = get_single_min_filepath(self.operation_dto.operation_output.path)
+            response = service.convert_template_to_min_map_image(
+                TemplateDTO(path=min_path, is_dir=False)
+            )
+            if not response.success:
+                CTkMessagebox(icon="cancel", title="Unable to view template", message=response.error)
+            else:
+                view_image(response.data.path)
+
+        elif self.operation_dto.operation_type == OperationType.TMP2IMG:
+            view_image(self.operation_dto.operation_output.path)
+
+        elif self.operation_dto.operation_type == OperationType.IMG2POBJ:
+            view_stl_open3d(self.operation_dto.operation_output.path)
+
+        else:
+            CTkMessagebox(icon="Warning", title="Operations Error", message="Viewing directories is not supported!")
 
     def destroy_tooltips(self):
         self.tp1.destroy()
