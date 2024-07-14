@@ -1638,9 +1638,11 @@ class App(Tk, metaclass=Singleton):
         global service
         service = _service
 
+        get_curr_exp_response = service.get_current_experiment()
+
         # Current experiment name
         global experiment_name
-        experiment_name = "Demo Experiment"
+        experiment_name = "NO EXPERIMENT" if get_curr_exp_response.data is None else get_curr_exp_response.data.experiment_name
 
         # Configure app window
         app_width = 900
