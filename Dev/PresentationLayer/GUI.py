@@ -641,9 +641,9 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 def handle_export_button(self):
                     file_path = filedialog.asksaveasfilename(title="Export Template",
                                                              filetypes=(("All Files", "*.*"),),
-                                                             initialfile=Path(self.template_path).stem)
+                                                             initialfile="exported_templates")
                     if file_path:
-                        shutil.copytree(self.template_path, os.path.dirname(file_path), dirs_exist_ok=True)
+                        shutil.copytree(self.template_path, file_path, dirs_exist_ok=True)
 
             class PrintingObjectExportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab, path):
