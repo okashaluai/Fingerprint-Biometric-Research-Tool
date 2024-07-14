@@ -5,6 +5,7 @@ from Dev.DTOs import ExperimentDTO, OperationDTO, ImageDTO, TemplateDTO, Printin
 from datetime import datetime
 from Dev.Enums import OperationType
 from Dev.Utils import Singleton
+from pathlib import Path
 
 
 class FILESYSTEM(metaclass=Singleton):
@@ -98,11 +99,14 @@ class FILESYSTEM(metaclass=Singleton):
             raise Exception(f'Experiment {experiment_name} does not exist')
         shutil.rmtree(experiment_dir_path)
 
-    def rename_experiment_dir(self, experiment_name: str, new_experiment_name: str):
+    def cascade_experiment_renaming(self, experiment_name: str, new_experiment_name: str):
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        new_experiment_dir_path = os.path.join(self.experiments_home_path, new_experiment_name)
         if not (os.path.isdir(experiment_dir_path)):
             raise Exception(f'Experiment {experiment_name} does not exist')
-        os.rename(experiment_dir_path, os.path.join(self.experiments_home_path, new_experiment_name))
+        os.rename(experiment_dir_path, new_experiment_dir_path)
+        self.rebase_metadata(old_experiment_name=experiment_name,
+                             new_experiment_name=new_experiment_name)
 
     def delete_operation_dir(self, experiment_name: str, operation_id: str):
         operation_dir_path = os.path.join(self.experiments_home_path, experiment_name, operation_id)
@@ -299,6 +303,28 @@ class FILESYSTEM(metaclass=Singleton):
         metadata_path = self.get_metadata_json_path(experiment_name, operation.operation_id)
         with open(metadata_path, 'w') as json_file:
             json.dump(metadata, json_file)
+
+    def rebase_metadata(self, old_experiment_name: str, new_experiment_name: str):
+        old_experiment_dir_path = os.path.join(self.experiments_home_path, old_experiment_name)
+        new_experiment_dir_path = os.path.join(self.experiments_home_path, new_experiment_name)
+
+        operations_dirs = os.listdir(new_experiment_dir_path)
+        for operation_dir in operations_dirs:
+            operation_dir_path = os.path.join(new_experiment_dir_path, operation_dir)
+            if os.path.isdir(operation_dir_path):
+                operation_metadata = self.load_operation_metadata(new_experiment_name, operation_dir)
+                input_asset_path = Path(operation_metadata['input_asset_path'])
+                output_asset_path = Path(operation_metadata['output_asset_path'])
+                input_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
+                                                                input_asset_path.relative_to(old_experiment_dir_path)))
+                output_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
+                                                                 output_asset_path.relative_to(
+                                                                     old_experiment_dir_path)))
+                operation_metadata['input_asset_path'] = input_asset_path
+                operation_metadata['output_asset_path'] = output_asset_path
+                metadata_path = self.get_metadata_json_path(new_experiment_name, operation_dir)
+                with open(metadata_path, 'w') as json_file:
+                    json.dump(operation_metadata, json_file)
 
     def load_operation_metadata(self, experiment_name: str, operation_id: str) -> dict:
         metadata_path = self.get_metadata_json_path(experiment_name, operation_id)
