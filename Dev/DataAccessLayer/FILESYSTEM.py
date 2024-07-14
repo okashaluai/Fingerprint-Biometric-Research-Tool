@@ -333,3 +333,13 @@ class FILESYSTEM(metaclass=Singleton):
         with open(metadata_path, 'r') as json_file:
             metadata = json.load(json_file)
         return metadata
+
+    def export_data(self, data_path: str, dest_dir_path: str):
+        if not os.path.exists(dest_dir_path):
+            raise Exception(f'Destination directory {dest_dir_path} does not exist')
+        if not os.path.exists(data_path):
+            raise Exception(f'Data path {data_path} does not exist')
+        if os.path.isdir(data_path):
+            shutil.copytree(data_path, os.path.join(dest_dir_path, os.path.basename(data_path)), dirs_exist_ok=False)
+        else:
+            shutil.copy(src=data_path, dst=os.path.join(dest_dir_path, os.path.basename(data_path)))

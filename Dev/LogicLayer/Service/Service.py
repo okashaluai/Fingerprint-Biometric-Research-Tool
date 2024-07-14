@@ -15,11 +15,19 @@ from Dev.DataAccessLayer.FILESYSTEM import FILESYSTEM
 
 
 class Service(IService, metaclass=Singleton):
+
     def __init__(self):
         self.__converter_controller = ConvertorController()
         self.__matcher_controller = MatcherController()
         self.__experiment_controller = ExperimentController()
         self.__filesystem: FILESYSTEM = FILESYSTEM()
+
+    def export_asset(self, asset_path: str, export_dest_path: str) -> Response:
+        try:
+            self.__filesystem.export_data(data_path=asset_path, dest_dir_path=export_dest_path)
+            return Response(True, export_dest_path, None)
+        except Exception as error:
+            return Response(False, None, str(error))
 
     def convert_template_to_min_map_image(self, template_dto: TemplateDTO) -> Response:
         try:
@@ -206,8 +214,6 @@ class Service(IService, metaclass=Singleton):
             return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
-
-
 
 # service = Service()
 # service.rename_experiment('exp2', 'exp9')
