@@ -290,40 +290,6 @@ class SideMenuFrame(customtkinter.CTkFrame):
 
     def handle_experiments_button(self):
         self.master.experiments_frame.tkraise()
-
-        # # add 10 experiments for mock
-        # for i in range(10):
-        #     response = service.create_experiment(f"experiment {random.randint(0,1000)}")
-        #     if response.success:
-        #         print(f"{response.data.experiment_name}")
-        #         service.set_current_experiment(response.data.experiment_name)
-        #         if i % 2 == 0:
-        #             convert_response1 = service.convert_image_to_template(
-        #                 ImageDTO(is_dir=False, path=r"C:\Users\Yazan\Desktop\109_1_8bit.png")
-        #             )
-        #             convert_response2 = service.convert_image_to_template(
-        #                 ImageDTO(is_dir=False,
-        #                          path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
-        #             )
-        #             if convert_response1.success and convert_response2.success:
-        #                 print(convert_response1.data.path)
-        #                 print(convert_response2.data.path)
-        #             print(len(service.get_current_experiment().data.operations))
-        #
-        #         if i == 0:
-        #             convert_response2 = service.convert_image_to_printing_object(
-        #                 ImageDTO(is_dir=False,
-        #                          path=r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png")
-        #             )
-        #         # else:
-        #         #     convert_response = service.convert_image_to_template(
-        #         #         ImageDTO(is_dir=False,None, r"C:\Users\Yazan\Desktop\Final_Project\Dev\Tests\Assets\Images\109_2_8bit.png",
-        #         #                  datetime.now())
-        #         #     )
-        #
-        #     else:
-        #         print(response.error)
-
         self.master.experiments_frame.load_experiments()
 
     def handle_new_experiment_button(self):
@@ -1046,7 +1012,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
             self, text=f"Input: {os.path.basename(operation_dto.operation_input.path)}", cursor="hand2"
         )
         self.input_label.grid(
-            row=0, column=0, sticky=customtkinter.EW, padx=(20, 20)
+            row=0, column=0, sticky=customtkinter.EW, padx=10
         )
         self.input_label.bind('<Button-1>', self.view_files_input)
 
@@ -1058,7 +1024,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
             text=f"Output: {output_display}",
             cursor="hand2")
         self.output_label.grid(
-            row=0, column=1, sticky=customtkinter.EW, padx=(20, 20)
+            row=0, column=1, sticky=customtkinter.EW, padx=10
         )
         self.output_label.bind('<Button-1>', self.view_files_output)
 
@@ -1081,15 +1047,15 @@ class OperationRowFrame(customtkinter.CTkFrame):
             self, text=f"Type: {type}"
         )
         self.operation_type.grid(
-            row=0, column=2, sticky=customtkinter.EW, padx=(20, 20)
+            row=0, column=2, sticky=customtkinter.EW, padx=10
         )
 
-        formatted_date = operation_dto.operation_datetime.strftime("%d/%m/%Y    %H:%M:%S")
+        formatted_date = operation_dto.operation_datetime.strftime("%d/%m/%Y - %H:%M:%S")
         self.date_label = customtkinter.CTkLabel(
             self, text=f"Date: {formatted_date}"
         )
         self.date_label.grid(
-            row=0, column=3, sticky=customtkinter.EW, padx=(20, 20)
+            row=0, column=3, sticky=customtkinter.EW, padx=(10, 20)
         )
 
         self.delete_button = customtkinter.CTkLabel(
@@ -1446,7 +1412,6 @@ class ExperimentsFrame(customtkinter.CTkFrame):
 
         def load_operations(self):
             self.operations_dtos = self.experiment_dto.operations
-            print(self.operations_dtos)
             self.show_operations_on_frame(self.operations_dtos)
 
         def search(self, event=None):
@@ -1464,11 +1429,17 @@ class ExperimentsFrame(customtkinter.CTkFrame):
             filtered_operations_list: list[OperationDTO] = []
 
             for o in self.operations_dtos:
-                # filter operations according to its name
+                # filter operations according to files assets
                 k = get_searchable_string(keyword)
-                on1 = get_searchable_string(o.operation_input.path)
-                on2 = get_searchable_string(o.operation_output.path)
-                if k in on1 or on2:
+                on1 = get_searchable_string(os.path.basename(o.operation_input.path))
+                if k in on1:
+                    filtered_operations_list.append(o)
+
+            for o in self.operations_dtos:
+                # filter operations according to files assets
+                k = get_searchable_string(keyword)
+                on2 = get_searchable_string(os.path.basename(o.operation_output.path))
+                if k in on2:
                     filtered_operations_list.append(o)
 
             self.show_operations_on_frame(filtered_operations_list)
