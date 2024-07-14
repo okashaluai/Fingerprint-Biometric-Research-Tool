@@ -62,16 +62,20 @@ class Image(Asset):
         return printing_objects_path
 
     def convert_image_to_png(self, image_path: str):
-        with PImage.open(image_path) as image:
+        original_image = PImage.open(image_path)
+        image = original_image.copy()
+        original_image.close()
 
-            # Convert the image to 8-bit grayscale
-            if image.mode != 'L':
-                image = image.convert('L')
 
-            # Save the converted image as PNG
-            file_name, file_ext = os.path.splitext(image_path)
-            output_file = file_name + ".png"
-            image.save(output_file, 'PNG')
+        # Convert the image to 8-bit grayscale
+        if image.mode != 'L':
+            image = image.convert('L')
+
+        # Save the converted image as PNG
+        file_name, file_ext = os.path.splitext(image_path)
+        output_file = file_name + ".png"
+        image.save(output_file, 'PNG')
+        image.close()
         if not image_path.endswith('.png'):
             os.remove(image_path)
         return output_file
