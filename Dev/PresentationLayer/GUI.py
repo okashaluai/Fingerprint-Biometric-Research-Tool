@@ -101,7 +101,7 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
             width=width,
             text="View",
             cursor="hand2",
-            text_color="dodger blue"
+            text_color="#007FFF"
         )
         if not disable_view:
             view_label.grid(row=2, column=0, sticky=customtkinter.EW, padx=10, pady=18)
@@ -113,7 +113,7 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
             width=width,
             text="Reset",
             cursor="hand2",
-            text_color="dodger blue"
+            text_color="#007FFF"
         )
         reset_label.grid(row=3, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
 
@@ -151,7 +151,7 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
             corner_radius=20,
             width=width,
             cursor="hand2",
-            text_color="dodger blue",
+            text_color="#007FFF",
             font=customtkinter.CTkFont(underline=True)
         )
         choose_file_label.grid(row=3, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 0))
@@ -162,7 +162,7 @@ def build_drag_n_drop(frame, handle_choose_file, handle_choose_directory, choose
             corner_radius=20,
             width=width,
             cursor="hand2",
-            text_color="dodger blue",
+            text_color="#007FFF",
             font=customtkinter.CTkFont(underline=True)
         )
         choose_directory_label.grid(row=4, column=0, sticky=customtkinter.EW, padx=10, pady=(0, 20))
@@ -408,7 +408,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self,
                         text="View",
                         cursor="hand2",
-                        text_color="dodger blue"
+                        text_color="#007FFF"
                     )
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_image)
@@ -471,7 +471,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self,
                         text="View",
                         cursor="hand2",
-                        text_color="dodger blue"
+                        text_color="#007FFF"
                     )
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_stl)
@@ -617,7 +617,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self,
                         text="View",
                         cursor="hand2",
-                        text_color="dodger blue"
+                        text_color="#007FFF"
                     )
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_template)
@@ -679,7 +679,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self,
                         text="View",
                         cursor="hand2",
-                        text_color="dodger blue"
+                        text_color="#007FFF"
                     )
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_stl)
@@ -1530,7 +1530,7 @@ class NewExperimentFrame(customtkinter.CTkFrame):
         self.new_experiment_button.grid(row=3, column=0, padx=(20, 20), pady=(10, 10))
 
         self.continue_experiment_button = customtkinter.CTkLabel(self.frame, text="Continue from existing experiment?",
-                                                                 cursor="hand2", text_color="dodger blue2")
+                                                                 cursor="hand2", text_color="#007FFF")
         self.continue_experiment_button.grid(row=4, column=0, padx=(20, 20), pady=(10, 40))
         self.continue_experiment_button.bind('<Button-1>', self.handle_continue_experiment_button)
 
