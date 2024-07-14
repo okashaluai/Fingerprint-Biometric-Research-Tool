@@ -423,15 +423,15 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_image)
 
-                    self.export_button = customtkinter.CTkButton(self, text="Export")
-                    self.export_button.grid(row=4, column=1, padx=(20, 20), pady=5)
+                    self.convert_to_printing_object_button = customtkinter.CTkButton(self, text="Export")
+                    self.convert_to_printing_object_button.grid(row=4, column=1, padx=(20, 20), pady=5)
 
-                    self.export_button = customtkinter.CTkButton(
+                    self.convert_to_printing_object_button = customtkinter.CTkButton(
                         self,
                         text="Convert to 3D Object",
-                        command=self.handle_convert_to_printing_object_button,
+                        command=lambda: send_request(self.handle_convert_to_printing_object_button),
                     )
-                    self.export_button.grid(row=5, column=1, padx=(20, 20), pady=5)
+                    self.convert_to_printing_object_button.grid(row=5, column=1, padx=(20, 20), pady=5)
 
                     self.back_button = customtkinter.CTkButton(
                         self, text="Back", command=self.handle_back_button
@@ -439,12 +439,19 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.back_button.grid(row=6, column=1, padx=(20, 20), pady=5)
 
                 def handle_convert_to_printing_object_button(self):
+                    self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
+
                     image_dto = ImageDTO(is_dir=os.path.isdir(self.image_path), path=self.image_path)
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(path=response.data.path)
                     else:
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
+
+                    app = App(service)
+                    app.set_finished_status()
+                    app.enable_app()
+                    self.convert_to_printing_object_button.configure(state=customtkinter.NORMAL)
 
                 def view_image(self, event=None):
                     if os.path.isdir(self.image_path):
@@ -532,7 +539,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.convert_to_image_button = customtkinter.CTkButton(
                         self,
                         text="Convert to Image",
-                        command=self.handle_convert_to_image_button,
+                        command=lambda: send_request(self.handle_convert_to_image_button),
                     )
                     self.convert_to_image_button.grid(
                         row=1, column=1, padx=(20, 20), pady=5
@@ -551,12 +558,20 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.template_path = path
 
                 def handle_convert_to_image_button(self):
+                    self.convert_to_image_button.configure(state=customtkinter.DISABLED)
+
                     template_dto = TemplateDTO(is_dir=os.path.isdir(self.template_path), path=self.template_path)
                     response = service.convert_template_to_image(template_dto)
                     if response.success:
                         self.parent_tab.build_image_export_frame(response.data.path)
                     else:
                         CTkMessagebox(icon="cancel", title="Template Converter Error", message=response.error)
+
+                    app = App(service)
+                    app.set_finished_status()
+                    app.enable_app()
+
+                    self.convert_to_image_button.configure(state=customtkinter.NORMAL)
 
                 def view_template_event(self, event):
                     if os.path.isdir(self.template_path):
@@ -736,7 +751,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.convert_to_template_button = customtkinter.CTkButton(
                         self,
                         text="Convert to Template",
-                        command=self.handle_convert_to_template_button,
+                        command=lambda: send_request(self.handle_convert_to_template_button),
                     )
                     self.convert_to_template_button.grid(
                         row=1, column=1, padx=(20, 20), pady=5
@@ -788,12 +803,22 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.image_path = path
 
                 def handle_convert_to_template_button(self):
+                    self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
+                    self.convert_to_template_button.configure(state=customtkinter.DISABLED)
+
                     image_dto = ImageDTO(is_dir=os.path.isdir(self.image_path), path=self.image_path)
                     response = service.convert_image_to_template(image_dto)
                     if response.success:
                         self.parent_tab.build_template_export_frame(response.data.path)
                     else:
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
+
+                    app = App(service)
+                    app.set_finished_status()
+                    app.enable_app()
+
+                    self.convert_to_printing_object_button.configure(state=customtkinter.NORMAL)
+                    self.convert_to_template_button.configure(state=customtkinter.NORMAL)
 
                 def handle_convert_to_printing_object_button(self):
                     self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
@@ -911,7 +936,7 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         self.dnd2.grid(row=3, column=2, padx=(20, 20), pady=5)
 
         self.match_button = customtkinter.CTkButton(self.frame, text="Match Templates",
-                                                    command=self.handle_match_templates_button)
+                                                    command=lambda: send_request(self.handle_match_templates_button))
         self.match_button.grid(
             row=4,
             columnspan=4,
@@ -924,6 +949,8 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
         CTkMessagebox(icon="cancel", title="Unable to view template", message="Viewing .xyt format not supported!")
 
     def handle_match_templates_button(self):
+        self.match_button.configure(state=customtkinter.DISABLED)
+
         if self.f1_is_selected and self.f2_is_selected:
             response = service.match_one_to_one(self.path_set1, self.path_set2)
         elif self.f1_is_selected and self.dir2_is_selected:
@@ -934,6 +961,11 @@ class MatchTemplatesFrame(customtkinter.CTkFrame):
             response = service.match_many_to_many(self.path_set1, self.path_set2)
         else:
             CTkMessagebox(icon="cancel", title="Unexpected Error", message="Unexpected GUI Error")
+
+        app = App(service)
+        app.set_finished_status()
+        app.enable_app()
+        self.match_button.configure(state=customtkinter.NORMAL)
 
         if response.success:
             self.build_results_frame(response.data)
