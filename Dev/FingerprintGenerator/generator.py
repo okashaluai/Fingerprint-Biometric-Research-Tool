@@ -190,16 +190,19 @@ def __get_centralized_width_height(mnt_array):
 def create_minutiae_map_image(templates_dir_path: str, min_maps_dir_path: str):
     templates_files = os.listdir(templates_dir_path)
     for template_file_path in templates_files:
-        template_min_file_name = os.path.splitext(template_file_path)[0]
-        mnt_array_list = __convert_minutiae_to_array_list(os.path.join(templates_dir_path, template_file_path),
-                                                          templates_dir_path)
-        width, height = __get_centralized_width_height(mnt_array_list)
-        min_map = __create_map_scipy(mnt_array_list, include_singular=False, size=(height, width))
-        map_filename = os.path.join(min_maps_dir_path, f"{os.path.splitext(template_min_file_name)[0]}.png")
-        plt.imsave(map_filename, min_map)
+        if template_file_path.endswith('.min'):
+            template_min_file_name = os.path.splitext(template_file_path)[0]
+            mnt_array_list = __convert_minutiae_to_array_list(os.path.join(templates_dir_path, template_file_path),
+                                                              templates_dir_path)
+            width, height = __get_centralized_width_height(mnt_array_list)
+            min_map = __create_map_scipy(mnt_array_list, include_singular=False, size=(height, width))
+            map_filename = os.path.join(min_maps_dir_path, f"{os.path.splitext(template_min_file_name)[0]}.png")
+            plt.imsave(map_filename, min_map)
 
 
 def create_temp_minutiae_map_image(template_path: str, min_map_dir_path: str):
+    if not template_path.endswith('.min'):
+        raise Exception("Template file must end with .min")
     template_parent_dir = os.path.dirname(template_path)
     template_min_file_name = os.path.basename(template_path)
     mnt_array_list = __convert_minutiae_to_array_list(template_path, template_parent_dir)
