@@ -124,6 +124,19 @@ class IService:
         pass
 
     @abstractmethod
+    def export_asset(self, asset_path: str, export_dest_path: str) -> Response:
+        """
+        This function exports an experiment as text file.
+        :param str asset_path: Asset's path that will be exported.
+        :param str export_dest_path: Export destination path.
+        :returns Response(success:bool, data:TextIO|None, errors:str|None)
+        Args:
+            asset_path:
+            export_dest_path:
+        """
+        pass
+
+    @abstractmethod
     def rename_experiment(self, experiment_name: str, new_experiment_name: str) -> Response:
         """
         This function renames an experiment and returns the new renamed experiment.
