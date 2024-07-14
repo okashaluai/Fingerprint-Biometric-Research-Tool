@@ -16,12 +16,12 @@ class Asset(ILogicObject):
         if final_destination_path is None:
             self.path = os.path.abspath(self.path)
         else:
-            template_file_name = os.path.basename(self.path)
+            file_name = os.path.basename(self.path)
             if os.path.exists(final_destination_path) and os.path.isdir(final_destination_path):
                 if self.is_dir:
                     self.path = os.path.abspath(final_destination_path)
                 else:
-                    self.path = os.path.abspath(os.path.join(final_destination_path, template_file_name))
+                    self.path = os.path.abspath(os.path.join(final_destination_path, file_name))
             else:
                 raise Exception(f'Final Destination was not found {final_destination_path} does not exist')
 

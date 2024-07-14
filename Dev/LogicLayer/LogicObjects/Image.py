@@ -26,14 +26,18 @@ class Image(Asset):
             return False
 
     def convert_to_template(self, experiment_name: str, operation_id: str) -> str:
-        image_file_name = os.path.splitext(os.path.basename(self.path))[0]
         self.__filesystem.prepare_image_to_template_operation_dir(experiment_name, operation_id)
         templates_dir_path = self.__filesystem.get_sub_templates_dir_path(experiment_name, operation_id)
         images_dir_path = self.__filesystem.get_sub_images_dir_path(experiment_name, operation_id)
         if self.is_dir:
-            self.__filesystem.import_images_dir(self.path, experiment_name, operation_id)
+            images_path = self.__filesystem.import_images_dir(self.path, experiment_name, operation_id)
+            image_names = os.listdir(images_path)
+            for image_name in image_names:
+                image_path = os.path.join(images_path, image_name)
+                self.convert_image_to_png(image_path)
         else:
-            self.__filesystem.import_image_into_dir(self.path, experiment_name, operation_id)
+            image_path = self.__filesystem.import_image_into_dir(self.path, experiment_name, operation_id)
+            self.path = self.convert_image_to_png(image_path)
 
         detect_minutiae(images_dir_path=images_dir_path, templates_dir_path=templates_dir_path)
         return templates_dir_path
@@ -42,16 +46,36 @@ class Image(Asset):
         self.__filesystem.prepare_image_to_printing_object_operation_dir(experiment_name, operation_id)
         images_dir_path = self.__filesystem.get_sub_images_dir_path(experiment_name, operation_id)
         printing_objects_dir_path = self.__filesystem.get_sub_printing_objects_dir_path(experiment_name, operation_id)
-        image_name = os.path.splitext(os.path.basename(self.path))[0]
 
         if self.is_dir:
-            self.__filesystem.import_images_dir(self.path, experiment_name, operation_id)
+            images_path = self.__filesystem.import_images_dir(self.path, experiment_name, operation_id)
+            image_names = os.listdir(images_path)
+            for image_name in image_names:
+                image_path = os.path.join(images_path, image_name)
+                self.convert_image_to_png(image_path)
 
         else:
-            self.__filesystem.import_image_into_dir(self.path, experiment_name, operation_id)
+            image_path = self.__filesystem.import_image_into_dir(self.path, experiment_name, operation_id)
+            self.path = self.convert_image_to_png(image_path)
 
         printing_objects_path = build_printing_objects(images_dir_path, printing_objects_dir_path)
         return printing_objects_path
+
+    def convert_image_to_png(self, image_path: str):
+        image = PImage.open(image_path)
+
+        # Convert the image to 8-bit grayscale
+        if image.mode != 'L':
+            image = image.convert('L')
+
+        # Save the converted image as PNG
+        file_name, file_ext = os.path.splitext(image_path)
+        output_file = file_name + ".png"
+        image.save(output_file, 'PNG')
+
+        image.close()
+        # os.remove(image_path)
+        return output_file
 
 
 def build_printing_objects(images_dir_path: str, printing_objects_dir_path: str) -> str:

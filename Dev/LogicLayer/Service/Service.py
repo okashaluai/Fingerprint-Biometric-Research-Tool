@@ -215,10 +215,12 @@ class Service(IService, metaclass=Singleton):
 # service.set_current_experiment('test1')
 # t1 = TemplateDTO('', is_dir=False)
 # t2 = TemplateDTO('', is_dir=True)
-# img1 = ImageDTO('/home/z01x/Desktop/Images/1_8bit.png', is_dir=False)
+# img1 = ImageDTO('/home/z01x/Desktop/Images/1.png', is_dir=False)
 # img2 = ImageDTO('/home/z01x/Desktop/Images', is_dir=True)
-# t1 = service.convert_image_to_template(img1).data
-# t2 = service.convert_image_to_template(img2).data
+# t1 = service.convert_image_to_template(img1)
+# t2 = service.convert_image_to_template(img2)
+# po1 = service.convert_image_to_printing_object(img1)
+# po2 = service.convert_image_to_printing_object(img2)
 # path = os.path.join(t1.path, os.path.splitext(os.path.basename(img1.path))[0] + '.min')
 # t = TemplateDTO(path, is_dir=False)
 # service.convert_template_to_image(t)
