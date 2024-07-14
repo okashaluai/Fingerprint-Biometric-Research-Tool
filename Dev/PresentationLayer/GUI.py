@@ -1,6 +1,5 @@
 import os
 import shutil
-from pathlib import Path
 from threading import Thread
 from tkinter import filedialog
 
@@ -389,8 +388,8 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_image)
 
-                    self.convert_to_printing_object_button = customtkinter.CTkButton(self, text="Export")
-                    self.convert_to_printing_object_button.grid(row=4, column=1, padx=(20, 20), pady=5)
+                    self.export_button = customtkinter.CTkButton(self, text="Export", command=self.handle_export_button)
+                    self.export_button.grid(row=4, column=1, padx=(20, 20), pady=5)
 
                     self.convert_to_printing_object_button = customtkinter.CTkButton(
                         self,
@@ -403,6 +402,13 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         self, text="Back", command=self.handle_back_button
                     )
                     self.back_button.grid(row=6, column=1, padx=(20, 20), pady=5)
+
+                def handle_export_button(self):
+                    file_path = filedialog.asksaveasfilename(title="Export Images",
+                                                             filetypes=(("All Files", "*.*"),),
+                                                             initialfile="Exported Images")
+                    if file_path:
+                        pass
 
                 def handle_convert_to_printing_object_button(self):
                     self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
@@ -476,6 +482,13 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
 
                 def handle_back_button(self):
                     self.parent_tab.image_export_frame.tkraise()
+
+                def handle_export_button(self):
+                    file_path = filedialog.asksaveasfilename(title="Export STLs",
+                                                             filetypes=(("All Files", "*.*"),),
+                                                             initialfile="Exported Printing Objects")
+                    if file_path:
+                        pass
 
             class TemplateImportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab):
@@ -639,11 +652,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                             view_image(response.data.path)
 
                 def handle_export_button(self):
-                    file_path = filedialog.asksaveasfilename(title="Export Template",
+                    file_path = filedialog.asksaveasfilename(title="Export Templates",
                                                              filetypes=(("All Files", "*.*"),),
-                                                             initialfile="exported_templates")
+                                                             initialfile="Exported Templates")
                     if file_path:
-                        shutil.copytree(self.template_path, file_path, dirs_exist_ok=True)
+                        pass
 
             class PrintingObjectExportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab, path):
@@ -695,11 +708,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         view_stl_open3d(self.stl_path)
 
                 def handle_export_button(self):
-                    file_path = filedialog.asksaveasfilename(title="Export STL",
-                                                             filetypes=(("STL Files", ".stl"),),
-                                                             initialfile=Path(self.stl_path).stem)
+                    file_path = filedialog.asksaveasfilename(title="Export STLs",
+                                                             filetypes=(("All Files", "*.*"),),
+                                                             initialfile="Exported STLs")
                     if file_path:
-                        shutil.copy(self.stl_path, f"{file_path}.stl")
+                        pass
 
             class ImageImportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab):
