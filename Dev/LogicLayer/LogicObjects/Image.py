@@ -71,9 +71,9 @@ class Image(Asset):
             # Save the converted image as PNG
             file_name, file_ext = os.path.splitext(image_path)
             output_file = file_name + ".png"
-            os.remove(image_path)
             image.save(output_file, 'PNG')
-
+        if not image_path.endswith('.png'):
+            os.remove(image_path)
         return output_file
 
 
