@@ -533,7 +533,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.template_path = path
 
                 def handle_convert_to_image_button(self):
-                    template_dto = TemplateDTO(is_dir=False, path=self.template_path)
+                    template_dto = TemplateDTO(is_dir=os.path.isdir(self.template_path), path=self.template_path)
                     response = service.convert_template_to_image(template_dto)
                     if response.success:
                         self.parent_tab.build_image_export_frame(response.data.path)
@@ -754,7 +754,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.image_path = path
 
                 def handle_convert_to_template_button(self):
-                    image_dto = ImageDTO(is_dir=False, path=self.image_path)
+                    image_dto = ImageDTO(is_dir=os.path.isdir(self.image_path), path=self.image_path)
                     response = service.convert_image_to_template(image_dto)
                     if response.success:
                         self.parent_tab.build_template_export_frame(response.data.path)
@@ -762,7 +762,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
                 def handle_convert_to_printing_object_button(self):
-                    image_dto = ImageDTO(is_dir=False, path=self.image_path)
+                    image_dto = ImageDTO(is_dir=os.path.isdir(self.image_path), path=self.image_path)
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(response.data.path)
