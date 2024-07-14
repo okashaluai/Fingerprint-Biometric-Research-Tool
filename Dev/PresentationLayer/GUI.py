@@ -473,7 +473,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.view_label.grid(row=3, column=1, padx=(20, 20), pady=(5, 20))
                     self.view_label.bind('<Button-1>', self.view_stl)
 
-                    self.export_button = customtkinter.CTkButton(self, text="Export")
+                    self.export_button = customtkinter.CTkButton(self, text="Export", command=self.handle_export_button)
                     self.export_button.grid(row=4, column=1, padx=(20, 20), pady=5)
 
                     self.back_button = customtkinter.CTkButton(
@@ -494,9 +494,16 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                 def handle_export_button(self):
                     file_path = filedialog.asksaveasfilename(title="Export STLs",
                                                              filetypes=(("All Files", "*.*"),),
-                                                             initialfile="Exported Printing Objects")
+                                                             initialfile="Exported STLs")
                     if file_path:
-                        pass
+                        os.mkdir(file_path)
+                        if os.path.isdir(self.stl_path):
+                            service.export_asset(self.stl_path, file_path)
+                            for f in os.listdir(self.stl_path):
+                                shutil.move(os.path.join(self.stl_path, f), file_path)
+                            shutil.rmtree(os.path.join(file_path, Path(self.stl_path).stem))
+                        else:
+                            service.export_asset(self.stl_path, file_path)
 
             class TemplateImportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab):
@@ -664,7 +671,14 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                                                              filetypes=(("All Files", "*.*"),),
                                                              initialfile="Exported Templates")
                     if file_path:
-                        pass
+                        os.mkdir(file_path)
+                        if os.path.isdir(self.template_path):
+                            service.export_asset(self.template_path, file_path)
+                            for f in os.listdir(self.template_path):
+                                shutil.move(os.path.join(self.template_path, f), file_path)
+                            shutil.rmtree(os.path.join(file_path, Path(self.template_path).stem))
+                        else:
+                            service.export_asset(self.template_path, file_path)
 
             class PrintingObjectExportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab, path):
@@ -720,7 +734,14 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                                                              filetypes=(("All Files", "*.*"),),
                                                              initialfile="Exported STLs")
                     if file_path:
-                        pass
+                        os.mkdir(file_path)
+                        if os.path.isdir(self.stl_path):
+                            service.export_asset(self.stl_path, file_path)
+                            for f in os.listdir(self.stl_path):
+                                shutil.move(os.path.join(self.stl_path, f), file_path)
+                            shutil.rmtree(os.path.join(file_path, Path(self.stl_path).stem))
+                        else:
+                            service.export_asset(self.stl_path, file_path)
 
             class ImageImportFrame(customtkinter.CTkFrame):
                 def __init__(self, parent_tab):
