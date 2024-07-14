@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+from threading import Thread
 from tkinter import filedialog
 
 import customtkinter
@@ -28,6 +29,15 @@ class Tk(customtkinter.CTk, TkinterDnD.DnDWrapper):
 
 # Supported image formats
 supported_images_formats = ['png', 'gpeg', 'tiff', 'jpg']
+
+
+def send_request(f):
+    app = App(service)
+    app.set_processing_status()
+    app.disable_app()
+
+    t = Thread(target=f, daemon=True)
+    t.start()
 
 
 # Builds drag and drop / browse files widget
@@ -735,7 +745,7 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     self.convert_to_printing_object_button = customtkinter.CTkButton(
                         self,
                         text="Convert to 3D Object",
-                        command=self.handle_convert_to_printing_object_button,
+                        command=lambda: send_request(self.handle_convert_to_printing_object_button),
                     )
                     self.convert_to_printing_object_button.grid(
                         row=2, column=1, padx=(20, 20), pady=5
@@ -786,12 +796,22 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
                 def handle_convert_to_printing_object_button(self):
+                    self.convert_to_printing_object_button.configure(state=customtkinter.DISABLED)
+                    self.convert_to_template_button.configure(state=customtkinter.DISABLED)
+
                     image_dto = ImageDTO(is_dir=os.path.isdir(self.image_path), path=self.image_path)
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(response.data.path)
                     else:
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
+
+                    app = App(service)
+                    app.set_finished_status()
+                    app.enable_app()
+
+                    self.convert_to_printing_object_button.configure(state=customtkinter.NORMAL)
+                    self.convert_to_template_button.configure(state=customtkinter.NORMAL)
 
 
 class MatchTemplatesFrame(customtkinter.CTkFrame):
@@ -1663,6 +1683,71 @@ class App(Tk, metaclass=Singleton):
 
     def change_current_experiment_name(self, experiment_name: str):
         self.title(f"{self.app_name} - [ {experiment_name} ]")
+
+    def set_processing_status(self):
+        response = service.get_current_experiment()
+        if not response.success:
+            CTkMessagebox(icon="cancel", title="Error", message=response.error)
+        else:
+            self.title(f"{self.app_name} - [ {response.data.experiment_name} ] - Processing...")
+
+    def set_finished_status(self):
+        response = service.get_current_experiment()
+        if not response.success:
+            CTkMessagebox(icon="cancel", title="Error", message=response.error)
+        else:
+            self.title(f"{self.app_name} - [ {response.data.experiment_name} ]")
+
+    def disable_app(self):
+        # self.disableChildren(self.side_menu_frame)
+        self.disableChildren(self.convert_assets_frame)
+        self.disableChildren(self.match_templates_frame)
+        self.disableChildren(self.experiments_frame)
+        self.disableChildren(self.new_experiment_frame)
+        for child in self.side_menu_frame.winfo_children():
+            child.configure(state=customtkinter.DISABLED)
+        # for child in self.convert_assets_frame.winfo_children():
+        #     child.configure(state=customtkinter.DISABLED)
+        # for child in self.match_templates_frame.winfo_children():
+        #         child.configure(state=customtkinter.DISABLED)
+        # for child in self.experiments_frame.winfo_children():
+        #     child.configure(state=customtkinter.DISABLED)
+        # for child in self.new_experiment_frame.winfo_children():
+        #     child.configure(state=customtkinter.DISABLED)
+
+    def enable_app(self):
+        # self.enableChildren(self.side_menu_frame)
+        self.enableChildren(self.convert_assets_frame)
+        self.enableChildren(self.match_templates_frame)
+        self.enableChildren(self.experiments_frame)
+        self.enableChildren(self.new_experiment_frame)
+        for child in self.side_menu_frame.winfo_children():
+            child.configure(state=customtkinter.NORMAL)
+        # for child in self.convert_assets_frame.winfo_children():
+        #     child.configure(state=customtkinter.NORMAL)
+        # for child in self.match_templates_frame.winfo_children():
+        #     child.configure(state=customtkinter.NORMAL)
+        # for child in self.experiments_frame.winfo_children():
+        #     child.configure(state=customtkinter.NORMAL)
+        # for child in self.new_experiment_frame.winfo_children():
+        #     child.configure(state=customtkinter.NORMAL)
+
+    def disableChildren(self, parent):
+        for child in parent.winfo_children():
+            wtype = child.winfo_class()
+            if wtype not in ('Frame', 'Labelframe', 'TFrame', 'TLabelframe'):
+                child.configure(state=customtkinter.DISABLED)
+            else:
+                self.disableChildren(child)
+
+    def enableChildren(self, parent):
+        for child in parent.winfo_children():
+            wtype = child.winfo_class()
+            print(wtype)
+            if wtype not in ('Frame', 'Labelframe', 'TFrame', 'TLabelframe'):
+                child.configure(state=customtkinter.NORMAL)
+            else:
+                self.enableChildren(child)
 
 
 global is_first_experiment
