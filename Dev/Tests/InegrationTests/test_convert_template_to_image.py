@@ -88,10 +88,9 @@ class ConvertTemplateToImage(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # response = cls.service.delete_experiment(cls.experiment_name)
-        # if not response.success:
-        #     raise response.error
-        pass
+        response = cls.service.delete_experiment(cls.experiment_name)
+        if not response.success:
+            raise response.error
 
 
 if __name__ == '__main__':

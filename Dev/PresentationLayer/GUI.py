@@ -1532,36 +1532,44 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 
         def handle_delete_experiment(self, event=None):
-            delete_response = service.delete_experiment(self.experiment_dto.experiment_name)
-            if not delete_response.success:
-                CTkMessagebox(icon="cancel", title="Experiments Error", message=delete_response.error)
-            else:
-                for e in experiments_frame.experiment_dtos:
-                    if e.experiment_name == self.experiment_dto.experiment_name:
-                        experiments_frame.experiment_dtos.remove(e)
+            get_curr_exp_response = service.get_current_experiment()
+            if not get_curr_exp_response.success:
+                CTkMessagebox(icon="cancel", title="Experiment", message=get_curr_exp_response.error)
+            elif get_curr_exp_response.data.experiment_name == self.experiment_dto.experiment_name:
 
-                self.destroy_tooltips()
-                self.destroy()
-
-                get_all_experiments_response = service.get_experiments()
-                if not get_all_experiments_response:
-                    CTkMessagebox(icon="cancel", title="Experiments Error", message=get_all_experiments_response.error)
-                if not get_all_experiments_response.data:
-                    global side_menu_frame
-                    side_menu_frame.convert_assets_button.configure(state=customtkinter.DISABLED)
-                    side_menu_frame.match_templates_button.configure(state=customtkinter.DISABLED)
-                    side_menu_frame.experiments_button.configure(state=customtkinter.DISABLED)
-
-                    global is_first_experiment
-                    is_first_experiment = True
-
-                    App(service).new_experiment_frame.tkraise()
-
-                    CTkMessagebox(icon="warning", title="Experiment",
-                                  message=f"You deleted the last experiment, please create new one to continue!")
+                delete_response = service.delete_experiment(self.experiment_dto.experiment_name)
+                if not delete_response.success:
+                    CTkMessagebox(icon="cancel", title="Experiments Error", message=delete_response.error)
                 else:
-                    CTkMessagebox(icon="check", title="Experiment",
-                                  message=f"Experiment {self.experiment_name} deleted successfully!")
+                    App(service).change_current_experiment_name("NO EXPERIMENT")
+
+                    for e in experiments_frame.experiment_dtos:
+                        if e.experiment_name == self.experiment_dto.experiment_name:
+                            experiments_frame.experiment_dtos.remove(e)
+
+                    self.destroy_tooltips()
+                    self.destroy()
+
+                    get_all_experiments_response = service.get_experiments()
+                    if not get_all_experiments_response:
+                        CTkMessagebox(icon="cancel", title="Experiments Error", message=get_all_experiments_response.error)
+                    if not get_all_experiments_response.data:
+                        global side_menu_frame
+                        side_menu_frame.convert_assets_button.configure(state=customtkinter.DISABLED)
+                        side_menu_frame.match_templates_button.configure(state=customtkinter.DISABLED)
+                        side_menu_frame.experiments_button.configure(state=customtkinter.DISABLED)
+
+                        global is_first_experiment
+                        is_first_experiment = True
+
+                        App(service).new_experiment_frame.tkraise()
+
+                        CTkMessagebox(icon="warning", title="Experiment",
+                                      message=f"You deleted the last experiment, please create new one to continue!")
+
+                    else:
+                        CTkMessagebox(icon="check", title="Experiment",
+                                      message=f"Experiment {self.experiment_name} deleted successfully!")
 
 
 class NewExperimentFrame(customtkinter.CTkFrame):
