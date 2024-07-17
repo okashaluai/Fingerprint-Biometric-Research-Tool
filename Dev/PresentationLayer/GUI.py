@@ -836,6 +836,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     response = service.convert_image_to_printing_object(image_dto)
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(response.data.path)
+
+                        total_images = len(os.listdir(self.image_path))
+                        CTkMessagebox(icon="check",
+                                      title="Convert Status",
+                                      message=f"Successfully converted {response.data.converted_successfully_count} out of {total_images} images!")
                     else:
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
