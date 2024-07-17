@@ -79,6 +79,7 @@ class ImageDTO(AssetDTO):
 
 @dataclass(frozen=True)
 class PrintingObjectDTO(AssetDTO):
+    converted_successfully_count: int = 0
     pass
 
 
