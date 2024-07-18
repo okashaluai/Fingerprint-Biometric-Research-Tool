@@ -9,7 +9,10 @@ Recommended **Python** version is **python3.10.2** (install the interpreter).
 Create the environment using the recommended version (you may have to replace 'python' with the path of the python3.10.2
 in your system)
 
-```python -m venv env```
+```
+python -m venv env
+```
+
 ### Activate Environment
 
 ```
