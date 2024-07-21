@@ -5,6 +5,7 @@ from Dev.DTOs import Response, TemplateDTO, ImageDTO
 from Dev.LogicLayer.Controllers.ConverterController import ConvertorController
 from Dev.LogicLayer.Controllers.ExperimentController import ExperimentController
 from Dev.LogicLayer.Controllers.MatcherController import MatcherController
+from Dev.LogicLayer.LogicObjects.Asset import Asset
 from Dev.LogicLayer.LogicObjects.Image import Image
 from Dev.LogicLayer.LogicObjects.Operation import Operation
 from Dev.LogicLayer.LogicObjects.Template import Template
@@ -114,30 +115,119 @@ class Service(IService, metaclass=Singleton):
         except Exception as error:
             return Response(False, None, str(error))
 
-    def match_one_to_one(self, template1_path: str, template2_path: str) -> Response:
+    def match_one_to_one(self, src_template_path: str, target_template_path: str) -> Response:
         try:
-            score = self.__matcher_controller.match_one_to_one(template1_path, template2_path)
-            return Response(True, score, None)
+            current_experiment_name = self.__experiment_controller.get_current_experiment().experiment_name
+            operation_datetime = datetime.datetime.now()
+            operation_id = f'{OperationType.OneVsOneMatching.value}_{str(round(operation_datetime.timestamp() * 1000))}'
+
+            self.__filesystem.prepare_matching_operation_dir(experiment_name=current_experiment_name,
+                                                           operation_id=operation_id)
+            local_src_template_path = self.__filesystem.import_src_matching_template(experiment_name=current_experiment_name,
+                                                                                     operation_id=operation_id,
+                                                                                     template_path=src_template_path)
+            local_target_template_path = self.__filesystem.import_target_matching_template(experiment_name=current_experiment_name,
+                                                                                           operation_id=operation_id,
+                                                                                           template_path=target_template_path)
+
+            matching_score = self.__matcher_controller.match_one_to_one(local_src_template_path, local_target_template_path)
+
+            csv_path = self.__filesystem.get_sub_matching_report_csv_path(experiment_name=current_experiment_name,
+                                                                           operation_id=operation_id)
+            self.__matcher_controller.write_one_to_one_score_as_csv(local_src_template_path,
+                                                                    local_target_template_path,
+                                                                    matching_score,
+                                                                    csv_path)
+
+            operation = Operation(operation_id=operation_id,
+                                  operation_type=OperationType.OneVsOneMatching,
+                                  operation_input= Template(local_src_template_path, is_dir=False),
+                                  operation_datetime=operation_datetime,
+                                  operation_optional_extra_input=Template(local_target_template_path, is_dir=False),
+                                  operation_output=csv_path)
+            self.__experiment_controller.add_operation(operation)
+
+            return Response(True, matching_score, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def match_one_to_many(self, template_path: str, templates_dir_path: str) -> Response:
+    def match_one_to_many(self, src_template_path: str, target_templates_dir_path: str) -> Response:
         try:
-            score = self.__matcher_controller.match_one_to_many(template_path, templates_dir_path)
-            return Response(True, score, None)
+            current_experiment_name = self.__experiment_controller.get_current_experiment().experiment_name
+            operation_datetime = datetime.datetime.now()
+            operation_id = f'{OperationType.OneVsManyMatching.value}_{str(round(operation_datetime.timestamp() * 1000))}'
+
+            self.__filesystem.prepare_matching_operation_dir(experiment_name=current_experiment_name,
+                                                             operation_id=operation_id)
+            local_src_template_path = self.__filesystem.import_src_matching_template(
+                experiment_name=current_experiment_name,
+                operation_id=operation_id,
+                template_path=src_template_path)
+            local_target_templates_dir_path = self.__filesystem.import_target_matching_templates(
+                experiment_name=current_experiment_name,
+                operation_id=operation_id,
+                templates_path=target_templates_dir_path)
+
+            matching_score = self.__matcher_controller.match_one_to_many(local_src_template_path,
+                                                                        local_target_templates_dir_path)
+
+            csv_path = self.__filesystem.get_sub_matching_report_csv_path(experiment_name=current_experiment_name,
+                                                                          operation_id=operation_id)
+            self.__matcher_controller.write_matrix_score_as_csv(matching_score,
+                                                                csv_path)
+
+            operation = Operation(operation_id=operation_id,
+                                  operation_type=OperationType.OneVsManyMatching,
+                                  operation_input=Template(local_src_template_path, is_dir=False),
+                                  operation_datetime=operation_datetime,
+                                  operation_optional_extra_input=Template(local_target_templates_dir_path, is_dir=True),
+                                  operation_output=csv_path)
+            self.__experiment_controller.add_operation(operation)
+
+            return Response(True, matching_score, None)
         except Exception as error:
             return Response(False, None, str(error))
 
-    def match_many_to_many(self, templates1_dir_path: str, templates2_dir_path: str) -> Response:
+    def match_many_to_many(self, src_templates_dir_path: str, target_templates_dir_path: str) -> Response:
         try:
-            score = self.__matcher_controller.match_many_to_many(templates1_dir_path, templates2_dir_path)
-            return Response(True, score, None)
+            current_experiment_name = self.__experiment_controller.get_current_experiment().experiment_name
+            operation_datetime = datetime.datetime.now()
+            operation_id = f'{OperationType.ManyVsManyMatching.value}_{str(round(operation_datetime.timestamp() * 1000))}'
+
+            self.__filesystem.prepare_matching_operation_dir(experiment_name=current_experiment_name,
+                                                             operation_id=operation_id)
+            local_src_templates_dir_path = self.__filesystem.import_src_matching_templates(
+                experiment_name=current_experiment_name,
+                operation_id=operation_id,
+                templates_path=src_templates_dir_path)
+            local_target_templates_dir_path = self.__filesystem.import_target_matching_templates(
+                experiment_name=current_experiment_name,
+                operation_id=operation_id,
+                templates_path=target_templates_dir_path)
+
+            matching_score = self.__matcher_controller.match_many_to_many(local_src_templates_dir_path,
+                                                                        local_target_templates_dir_path)
+
+            csv_path = self.__filesystem.get_sub_matching_report_csv_path(experiment_name=current_experiment_name,
+                                                                          operation_id=operation_id)
+            self.__matcher_controller.write_matrix_score_as_csv(matching_score,
+                                                                csv_path)
+
+            operation = Operation(operation_id=operation_id,
+                                  operation_type=OperationType.ManyVsManyMatching,
+                                  operation_input=Template(local_src_templates_dir_path, is_dir=True),
+                                  operation_datetime=operation_datetime,
+                                  operation_optional_extra_input=Template(local_target_templates_dir_path, is_dir=True),
+                                  operation_output=csv_path)
+            self.__experiment_controller.add_operation(operation)
+
+            return Response(True, matching_score, None)
         except Exception as error:
             return Response(False, None, str(error))
 
     def export_matching_matrix_csv(self, score_matrix, export_full_path: str) -> Response:
         try:
-            self.__matcher_controller.export_matrix_score_as_csv(score_matrix, export_full_path)
+            self.__matcher_controller.write_matrix_score_as_csv(score_matrix, export_full_path)
             return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
@@ -145,8 +235,8 @@ class Service(IService, metaclass=Singleton):
     def export_matching_one_to_one_csv(self, template1_path, template2_path, score,
                                        export_full_path: str) -> Response:
         try:
-            self.__matcher_controller.export_one_to_one_score_as_csv(template1_path, template2_path, score,
-                                                                     export_full_path)
+            self.__matcher_controller.write_one_to_one_score_as_csv(template1_path, template2_path, score,
+                                                                    export_full_path)
             return Response(True, None, None)
         except Exception as error:
             return Response(False, None, str(error))
@@ -232,5 +322,8 @@ class Service(IService, metaclass=Singleton):
 # service.convert_template_to_image(t)
 # service.convert_template_to_image(t2)
 # service.rename_experiment('test1', 'renamed_test')
+# r1 = service.match_many_to_many('/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/Tests/Assets/Templates/many_templates', '/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/Tests/Assets/Templates/many_templates')
+# r2 = service.match_one_to_many('/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/Tests/Assets/Templates/109_3_8bit/109_3_8bit.xyt', '/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/Tests/Assets/Templates/many_templates')
+# r3 = service.match_one_to_one('/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/Tests/Assets/Templates/109_3_8bit/109_3_8bit.xyt', '/home/z01x/Desktop/Fingerprint Biometric Research Tool/Final_Project/Dev/Tests/Assets/Templates/109_3_8bit/109_3_8bit.xyt')
 # exps = service.get_experiments().data
 # print('DONE')
