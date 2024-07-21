@@ -10,8 +10,8 @@ from pathlib import Path
 
 class FILESYSTEM(metaclass=Singleton):
     def __init__(self):
-        self.experiments_home_path = os.path.join(os.path.dirname(__file__), 'experiments')
-        self.temp_dir = os.path.join(os.path.dirname(__file__), 'temp_dir')
+        self.experiments_home_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'experiments'))
+        self.temp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'temp_dir'))
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
@@ -57,15 +57,17 @@ class FILESYSTEM(metaclass=Singleton):
         operation_datetime = datetime.fromtimestamp(float(operation_metadata['operation_timestamp']))
         operation_input = self.wrap_asset(operation_metadata['input_asset_path'])
         operation_output = self.wrap_asset(operation_metadata['output_asset_path'])
-        # data = None
+        operation_extra_optional_input = self.wrap_asset(operation_metadata['optional_extra_asset_path'])
+
         operation_dto = OperationDTO(operation_id=operation_id,
                                      operation_datetime=operation_datetime,
                                      operation_type=operation_type,
                                      operation_input=operation_input,
-                                     operation_output=operation_output)
+                                     operation_output=operation_output,
+                                     operation_optional_extra_input=operation_extra_optional_input)
         return operation_dto
 
-    def wrap_asset(self, asset_path: str) -> AssetDTO:
+    def wrap_asset(self, asset_path: str) -> AssetDTO | str:
         if not os.path.exists(asset_path):
             raise Exception(f'Asset {asset_path} path does not exist')
 
@@ -77,7 +79,8 @@ class FILESYSTEM(metaclass=Singleton):
             elif 'printing_objects' in os.path.basename(asset_path):
                 return PrintingObjectDTO(path=asset_path, is_dir=True)
             else:
-                raise Exception(f'Non supported asset type: {asset_path}')
+                return asset_path
+                # raise Exception(f'Non supported asset type: {asset_path}')
         else:
             if 'images' in os.path.dirname(asset_path):
                 return ImageDTO(path=asset_path, is_dir=False)
@@ -85,8 +88,10 @@ class FILESYSTEM(metaclass=Singleton):
                 return TemplateDTO(path=asset_path, is_dir=False)
             elif 'printing_objects' in os.path.dirname(asset_path):
                 return PrintingObjectDTO(path=asset_path, is_dir=False)
+
             else:
-                raise Exception(f'Non supported asset type: {asset_path}')
+                return asset_path
+                # raise Exception(f'Non supported asset type: {asset_path}')
 
     def create_experiment_dir(self, experiment_name: str) -> str:
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
@@ -165,6 +170,24 @@ class FILESYSTEM(metaclass=Singleton):
 
         return operation_dir_path
 
+    def prepare_matching_operation_dir(self, experiment_name: str, operation_id: str):
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            os.makedirs(operation_dir_path, exist_ok=True)
+
+            src_templates_set = os.path.join(operation_dir_path, 'src_templates')
+            target_templates_set = os.path.join(operation_dir_path, 'target_templates')
+            matching_report_csv = os.path.join(operation_dir_path, 'matching_report')
+            os.makedirs(src_templates_set, exist_ok=True)
+            os.makedirs(target_templates_set, exist_ok=True)
+            os.makedirs(matching_report_csv, exist_ok=True)
+
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+
+        return operation_dir_path
+
     def get_sub_templates_dir_path(self, experiment_name: str, operation_id: str) -> str:
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
@@ -209,6 +232,40 @@ class FILESYSTEM(metaclass=Singleton):
         else:
             raise Exception(f'Experiment directory {experiment_name} does not exist')
 
+    def get_sub_src_templates_dir_path(self, experiment_name: str, operation_id: str) -> str:
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            if os.path.exists(operation_dir_path) and os.path.isdir(operation_dir_path):
+                return os.path.join(operation_dir_path, 'src_templates')
+            else:
+                raise Exception(f'Operation directory {operation_id} does not exist')
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+
+    def get_sub_target_templates_dir_path(self, experiment_name: str, operation_id: str) -> str:
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            if os.path.exists(operation_dir_path) and os.path.isdir(operation_dir_path):
+                return os.path.join(operation_dir_path, 'target_templates')
+            else:
+                raise Exception(f'Operation directory {operation_id} does not exist')
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+
+    def get_sub_matching_report_csv_path(self, experiment_name: str, operation_id: str) -> str:
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            if os.path.exists(operation_dir_path) and os.path.isdir(operation_dir_path):
+                return os.path.join(operation_dir_path, 'matching_report', 'matching_report.csv')
+            else:
+                raise Exception(f'Operation directory {operation_id} does not exist')
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+
+
     def get_temp_dir_path(self):
         if not (os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir)):
             os.makedirs(self.temp_dir)
@@ -237,6 +294,62 @@ class FILESYSTEM(metaclass=Singleton):
                 dest_dir_path = os.path.join(self.get_sub_templates_dir_path(experiment_name, operation_id),
                                              template_name)
                 shutil.copy(templates_path, dest_dir_path)
+            else:
+                raise Exception(f'Operation directory {operation_id} does not exist')
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+        return dest_dir_path
+
+    def import_src_matching_templates(self, templates_path: str, experiment_name: str, operation_id: str):
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            if os.path.exists(operation_dir_path) and os.path.isdir(operation_dir_path):
+                dest_dir_path = self.get_sub_src_templates_dir_path(experiment_name, operation_id)
+                shutil.copytree(templates_path, dest_dir_path, dirs_exist_ok=True)
+            else:
+                raise Exception(f'Operation directory {operation_id} does not exist')
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+        return dest_dir_path
+
+    def import_target_matching_templates(self, templates_path: str, experiment_name: str, operation_id: str):
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            if os.path.exists(operation_dir_path) and os.path.isdir(operation_dir_path):
+                dest_dir_path = self.get_sub_target_templates_dir_path(experiment_name, operation_id)
+                shutil.copytree(templates_path, dest_dir_path, dirs_exist_ok=True)
+            else:
+                raise Exception(f'Operation directory {operation_id} does not exist')
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+        return dest_dir_path
+
+    def import_src_matching_template(self, template_path: str, experiment_name: str, operation_id: str) -> str:
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        template_name = os.path.basename(template_path)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            if os.path.exists(operation_dir_path) and os.path.isdir(operation_dir_path):
+                dest_dir_path = os.path.join(self.get_sub_src_templates_dir_path(experiment_name, operation_id),
+                                             template_name)
+                shutil.copy(template_path, dest_dir_path)
+            else:
+                raise Exception(f'Operation directory {operation_id} does not exist')
+        else:
+            raise Exception(f'Experiment directory {experiment_name} does not exist')
+        return dest_dir_path
+
+    def import_target_matching_template(self, template_path: str, experiment_name: str, operation_id: str) -> str:
+        experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
+        operation_dir_path = os.path.join(experiment_dir_path, operation_id)
+        template_name = os.path.basename(template_path)
+        if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
+            if os.path.exists(operation_dir_path) and os.path.isdir(operation_dir_path):
+                dest_dir_path = os.path.join(self.get_sub_target_templates_dir_path(experiment_name, operation_id),
+                                             template_name)
+                shutil.copy(template_path, dest_dir_path)
             else:
                 raise Exception(f'Operation directory {operation_id} does not exist')
         else:
@@ -298,7 +411,8 @@ class FILESYSTEM(metaclass=Singleton):
             "operation_type": operation.operation_type.value,
             "operation_timestamp": operation.operation_datetime.timestamp(),
             "input_asset_path": operation.operation_input.path,
-            "output_asset_path": operation.operation_output.path,
+            "optional_extra_asset_path": operation.operation_optional_extra_input.path if not isinstance(operation.operation_optional_extra_input, str) else operation.operation_optional_extra_input,
+            "output_asset_path": operation.operation_output.path if not isinstance(operation.operation_output, str) else operation.operation_output
         }
         metadata_path = self.get_metadata_json_path(experiment_name, operation.operation_id)
         with open(metadata_path, 'w') as json_file:
@@ -320,8 +434,14 @@ class FILESYSTEM(metaclass=Singleton):
                 output_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
                                                                  output_asset_path.relative_to(
                                                                      old_experiment_dir_path)))
+                extra_input_asset_path = operation_metadata['optional_extra_asset_path']
+                if extra_input_asset_path != '':
+                    extra_input_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
+                                                                     extra_input_asset_path.relative_to(
+                                                                         old_experiment_dir_path)))
                 operation_metadata['input_asset_path'] = input_asset_path
                 operation_metadata['output_asset_path'] = output_asset_path
+                operation_metadata['optional_extra_asset_path'] = extra_input_asset_path
                 metadata_path = self.get_metadata_json_path(new_experiment_name, operation_dir)
                 with open(metadata_path, 'w') as json_file:
                     json.dump(operation_metadata, json_file)
