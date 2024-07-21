@@ -22,7 +22,10 @@ class FILESYSTEM(metaclass=Singleton):
 
         experiments_dirs = os.listdir(self.experiments_home_path)
         for experiment_dir in experiments_dirs:
-            experiment_dto = self.load_experiment(experiment_dir)
+            try:
+                experiment_dto = self.load_experiment(experiment_dir)
+            except Exception:
+                pass
             experiments.append(experiment_dto)
 
         # if not (os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir)):
@@ -115,9 +118,8 @@ class FILESYSTEM(metaclass=Singleton):
 
     def delete_operation_dir(self, experiment_name: str, operation_id: str):
         operation_dir_path = os.path.join(self.experiments_home_path, experiment_name, operation_id)
-        if not (os.path.isdir(operation_dir_path)):
-            raise Exception(f'Operation {operation_id} of experiment {experiment_name} does not exist')
-        shutil.rmtree(operation_dir_path)
+        if os.path.isdir(operation_dir_path):
+            shutil.rmtree(operation_dir_path)
 
     def prepare_template_to_image_operation_dir(self, experiment_name: str, operation_id: str):
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)

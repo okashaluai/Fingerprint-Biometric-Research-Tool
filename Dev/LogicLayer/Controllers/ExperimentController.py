@@ -40,7 +40,11 @@ class ExperimentController(metaclass=Singleton):
 
     def revert_operation(self, operation_id: str):
         self.__filesystem.delete_operation_dir(self.current_experiment_name, operation_id)
-
+    def clear_failed_operation(self, experiment_name: str, operation_id: str):
+        experiment = self.experiments[experiment_name]
+        if experiment.operations[operation_id] is not None:
+            del  experiment.operations[operation_id]
+        self.__filesystem.delete_operation_dir(experiment_name, operation_id)
     def load_experiments(self):
         experiment_dtos = self.__filesystem.load_experiments()
         for experiment_dto in experiment_dtos:

@@ -64,6 +64,7 @@ class Service(IService, metaclass=Singleton):
             image_dto = generated_image.to_dto()
             return Response(True, image_dto, None)
         except Exception as error:
+            self.__experiment_controller.clear_failed_operation(current_experiment.experiment_name, operation_id)
             return Response(False, None, str(error))
 
     def convert_image_to_template(self, image_dto: ImageDTO) -> Response:
@@ -88,6 +89,7 @@ class Service(IService, metaclass=Singleton):
             template_dto = template.to_dto()
             return Response(True, template_dto, None)
         except Exception as error:
+            self.__experiment_controller.clear_failed_operation(current_experiment.experiment_name, operation_id)
             return Response(False, None, str(error))
 
     def convert_image_to_printing_object(self, image_dto: ImageDTO) -> Response:
@@ -113,14 +115,15 @@ class Service(IService, metaclass=Singleton):
             printing_object_dto = printing_object.to_dto()
             return Response(True, printing_object_dto, None)
         except Exception as error:
+            self.__experiment_controller.clear_failed_operation(current_experiment.experiment_name, operation_id)
             return Response(False, None, str(error))
 
     def match_one_to_one(self, src_template_path: str, target_template_path: str) -> Response:
-        try:
-            current_experiment_name = self.__experiment_controller.get_current_experiment().experiment_name
-            operation_datetime = datetime.datetime.now()
-            operation_id = f'{OperationType.OneVsOneMatching.value}_{str(round(operation_datetime.timestamp() * 1000))}'
+        current_experiment_name = self.__experiment_controller.get_current_experiment().experiment_name
+        operation_datetime = datetime.datetime.now()
+        operation_id = f'{OperationType.OneVsOneMatching.value}_{str(round(operation_datetime.timestamp() * 1000))}'
 
+        try:
             self.__filesystem.prepare_matching_operation_dir(experiment_name=current_experiment_name,
                                                            operation_id=operation_id)
             local_src_template_path = self.__filesystem.import_src_matching_template(experiment_name=current_experiment_name,
@@ -149,6 +152,7 @@ class Service(IService, metaclass=Singleton):
 
             return Response(True, matching_score, None)
         except Exception as error:
+            self.__experiment_controller.clear_failed_operation(current_experiment_name, operation_id)
             return Response(False, None, str(error))
 
     def match_one_to_many(self, src_template_path: str, target_templates_dir_path: str) -> Response:
@@ -186,6 +190,7 @@ class Service(IService, metaclass=Singleton):
 
             return Response(True, matching_score, None)
         except Exception as error:
+            self.__experiment_controller.clear_failed_operation(current_experiment_name, operation_id)
             return Response(False, None, str(error))
 
     def match_many_to_many(self, src_templates_dir_path: str, target_templates_dir_path: str) -> Response:
@@ -223,6 +228,7 @@ class Service(IService, metaclass=Singleton):
 
             return Response(True, matching_score, None)
         except Exception as error:
+            self.__experiment_controller.clear_failed_operation(current_experiment_name, operation_id)
             return Response(False, None, str(error))
 
     def export_matching_matrix_csv(self, score_matrix, export_full_path: str) -> Response:
