@@ -88,6 +88,7 @@ class OperationDTO(IDto):
     operation_id: str
     operation_type: OperationType
     operation_input: AssetDTO
+    operation_optional_extra_input: AssetDTO
     operation_output: AssetDTO
     operation_datetime: datetime
 
