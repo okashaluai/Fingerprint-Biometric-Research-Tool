@@ -48,13 +48,16 @@ class ExperimentController(metaclass=Singleton):
             for operation_dto in experiment_dto.operations:
                 input_asset = Asset(path=operation_dto.operation_input.path,
                                     is_dir=operation_dto.operation_input.is_dir)
+                extra_input_asset = Asset(path=operation_dto.operation_optional_extra_input. path,
+                                          is_dir=operation_dto.operation_optional_extra_input.is_dir) if not isinstance(operation_dto.operation_optional_extra_input, str) else operation_dto.operation_optional_extra_input
                 output_asset = Asset(path=operation_dto.operation_output.path,
-                                     is_dir=operation_dto.operation_output.is_dir)
+                                     is_dir=operation_dto.operation_output.is_dir) if not isinstance(operation_dto.operation_output, str) else operation_dto.operation_output
                 operation = Operation(operation_id=operation_dto.operation_id,
                                       operation_type=operation_dto.operation_type,
                                       operation_datetime=operation_dto.operation_datetime,
                                       operation_input=input_asset,
-                                      operation_output=output_asset)
+                                      operation_output=output_asset,
+                                      operation_optional_extra_input=extra_input_asset)
                 operations[operation.operation_id] = operation
             experiment = Experiment(experiment_name=experiment_dto.experiment_name,
                                     experiment_datetime=experiment_dto.experiment_datetime,
