@@ -59,6 +59,13 @@ class ExperimentController(metaclass=Singleton):
             experiment = Experiment(experiment_name=experiment_dto.experiment_name,
                                     experiment_datetime=experiment_dto.experiment_datetime,
                                     operations=operations)
+            # Setting the last updated experiment to be the current experiment
+            if self.current_experiment_name is None:
+                self.current_experiment_name = experiment.experiment_name
+            else:
+                if self.experiments[self.current_experiment_name].experiment_datetime < experiment.experiment_datetime:
+                    self.current_experiment_name = experiment.experiment_name
+
             self.experiments[experiment_dto.experiment_name] = experiment
 
     def rename_experiment(self, experiment_name: str, new_experiment_name: str):
