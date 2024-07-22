@@ -98,3 +98,4 @@ class ExperimentDTO(IDto):
     operations: list[OperationDTO]
     experiment_name: str
     experiment_datetime: datetime
+    experiment_last_update_date: datetime
