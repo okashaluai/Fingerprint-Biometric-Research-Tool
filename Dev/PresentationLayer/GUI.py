@@ -1055,17 +1055,29 @@ class OperationRowFrame(customtkinter.CTkFrame):
         self.index = index
         self.experiment_frame = experiment_frame
 
+        input_display = "N\A"
+        if operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching,
+                                            OperationType.ManyVsManyMatching]:
+            input_display = f"{os.path.basename(operation_dto.operation_input.path)} <=> {os.path.basename(operation_dto.operation_optional_extra_input.path)}"
+        else:
+            input_display = f"Input: {os.path.basename(operation_dto.operation_input.path)}"
+
         self.input_label = customtkinter.CTkLabel(
-            self, text=f"Input: {os.path.basename(operation_dto.operation_input.path)}", cursor="hand2"
+            self, text=input_display, cursor="hand2"
         )
         self.input_label.grid(
             row=0, column=0, sticky=customtkinter.EW, padx=10
         )
         self.input_label.bind('<Button-1>', self.view_files_input)
 
-        output_display = os.path.basename(operation_dto.operation_output.path)
-        if operation_dto.operation_type == OperationType.IMG2TMP:
+        output_display = "N\A"
+        if operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching, OperationType.ManyVsManyMatching]:
+            output_display = "Scores.csv"
+        elif operation_dto.operation_type == OperationType.IMG2TMP:
             output_display = os.path.basename(get_single_min_filepath(operation_dto.operation_output.path))
+        else:
+            output_display = os.path.basename(operation_dto.operation_output.path)
+
         self.output_label = customtkinter.CTkLabel(
             self,
             text=f"Output: {output_display}",
@@ -1089,6 +1101,12 @@ class OperationRowFrame(customtkinter.CTkFrame):
             type = "[Template] -> [Image]"
         elif operation_type == OperationType.IMGs2POBJs:
             type = "[Image] -> [Printing Object]"
+        elif operation_type == OperationType.OneVsOneMatching:
+            type = "One <=> One Matching"
+        elif operation_type == OperationType.OneVsManyMatching:
+            type = "One <=> Many Matching"
+        elif operation_type == OperationType.ManyVsManyMatching:
+            type = "Many <=> Many Matching"
 
         self.operation_type = customtkinter.CTkLabel(
             self, text=f"Type: {type}"
@@ -1134,6 +1152,9 @@ class OperationRowFrame(customtkinter.CTkFrame):
 
         elif self.operation_dto.operation_type == OperationType.IMG2TMP or self.operation_dto.operation_type == OperationType.IMG2POBJ:
             view_image(self.operation_dto.operation_input.path)
+        elif self.operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching,
+                                            OperationType.ManyVsManyMatching]:
+            CTkMessagebox(icon="warning", title="Operations Error", message="Viewing .xyt templates is not supported!")
         else:
             CTkMessagebox(icon="warning", title="Operations Error", message="Viewing directories is not supported!")
 
@@ -1153,7 +1174,9 @@ class OperationRowFrame(customtkinter.CTkFrame):
 
         elif self.operation_dto.operation_type == OperationType.IMG2POBJ:
             view_stl_open3d(self.operation_dto.operation_output.path)
-
+        elif self.operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching,
+                                            OperationType.ManyVsManyMatching]:
+            os.startfile(self.operation_dto.operation_output)
         else:
             CTkMessagebox(icon="warning", title="Operations Error", message="Viewing directories is not supported!")
 
@@ -1557,7 +1580,8 @@ class ExperimentsFrame(customtkinter.CTkFrame):
 
                     get_all_experiments_response = service.get_experiments()
                     if not get_all_experiments_response:
-                        CTkMessagebox(icon="cancel", title="Experiments Error", message=get_all_experiments_response.error)
+                        CTkMessagebox(icon="cancel", title="Experiments Error",
+                                      message=get_all_experiments_response.error)
                     if not get_all_experiments_response.data:
                         global side_menu_frame
                         side_menu_frame.convert_assets_button.configure(state=customtkinter.DISABLED)
