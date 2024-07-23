@@ -24,17 +24,19 @@ class ExperimentController(metaclass=Singleton):
         return self.experiments[self.current_experiment_name].add_convert_operation(operation)
 
     def get_experiments(self):
-        return self.experiments.values()
+        return self.get_sorted_experiments_by_date()
 
     def delete_experiment(self, experiment_name: str):
         if experiment_name in self.experiments:
             del self.experiments[experiment_name]
             self.__filesystem.delete_experiment_dir(experiment_name)
+            self.current_experiment_name = None if self.current_experiment_name == experiment_name else self.current_experiment_name
+
         else:
             raise Exception(f'Experiment with name {experiment_name} does not exist!')
 
     def get_sorted_experiments_by_date(self):
-        return sorted(self.experiments.values(), key=lambda experiment: experiment.experiment_date)
+        return sorted(self.experiments.values(), key=lambda experiment: experiment.experiment_datetime, reverse=True)
 
     def export_experiment(self, experiment_name: str, export_path: str):
         raise NotImplementedError
@@ -73,7 +75,8 @@ class ExperimentController(metaclass=Singleton):
             if self.current_experiment_name is None:
                 self.current_experiment_name = experiment.experiment_name
             else:
-                if self.experiments[self.current_experiment_name].experiment_last_update_date < experiment.experiment_last_update_date:
+                if self.experiments[
+                    self.current_experiment_name].experiment_last_update_date < experiment.experiment_last_update_date:
                     self.current_experiment_name = experiment.experiment_name
 
             self.experiments[experiment_dto.experiment_name] = experiment
