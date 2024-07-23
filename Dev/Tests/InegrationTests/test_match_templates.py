@@ -68,8 +68,8 @@ class MatchTemplates(unittest.TestCase):
 
         assert score is not None
 
-        assert score[first_template_path][os.path.join(second_template_dir, '109_2_8bit.xyt')] == 27
-        assert score[first_template_path][os.path.join(second_template_dir, '109_3_8bit.xyt')] == 100
+        assert score[os.path.basename(first_template_path)]['109_2_8bit.xyt'] == 27
+        assert score[os.path.basename(first_template_path)]['109_3_8bit.xyt'] == 100
 
     def test_match_one_to_many_invalid_template(self):
         first_template_path = os.path.join(templates_path, '109_1_8bit', 'bla.xyt')
@@ -91,10 +91,10 @@ class MatchTemplates(unittest.TestCase):
         t_109_2_path = os.path.join(template_dir, '109_2_8bit.xyt')
         t_109_3_path = os.path.join(template_dir, '109_3_8bit.xyt')
 
-        assert score[t_109_2_path][t_109_2_path] == 253
-        assert score[t_109_2_path][t_109_3_path] == 32
-        assert score[t_109_3_path][t_109_3_path] == 420
-        assert score[t_109_3_path][t_109_2_path] == 32
+        assert score[os.path.basename(t_109_2_path)][os.path.basename(t_109_2_path)] == 253
+        assert score[os.path.basename(t_109_2_path)][os.path.basename(t_109_3_path)] == 32
+        assert score[os.path.basename(t_109_3_path)][os.path.basename(t_109_3_path)] == 420
+        assert score[os.path.basename(t_109_3_path)][os.path.basename(t_109_2_path)] == 32
 
     def test_match_many_to_many_invalid_template(self):
         template_dir = os.path.join(templates_path, 'bla')

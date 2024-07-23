@@ -1,3 +1,5 @@
+import os.path
+
 from Dev.LogicLayer.Matcher.IMatcher import IMatcher
 from Dev.NBIS.NBIS import match_templates
 from Dev.Utils import Singleton
@@ -14,8 +16,8 @@ class Matcher(IMatcher, metaclass=Singleton):
 
         scores_dic = dict()  # <Key: template2_path, Value: score>
         for tp2 in templates_path:
-            scores_dic[tp2] = match_templates(template_path, tp2)
-        matrix_score[template_path] = scores_dic
+            scores_dic[os.path.basename(tp2)] = match_templates(template_path, tp2)
+        matrix_score[os.path.basename(template_path)] = scores_dic
 
         return matrix_score
 
@@ -25,7 +27,7 @@ class Matcher(IMatcher, metaclass=Singleton):
         for tp1 in templates1_path:
             scores_dic = dict()  # <Key: template2_path, Value: score>
             for tp2 in templates2_path:
-                scores_dic[tp2] = match_templates(tp1, tp2)
-            matrix_score[tp1] = scores_dic
+                scores_dic[os.path.basename(tp2)] = match_templates(tp1, tp2)
+            matrix_score[os.path.basename(tp1)] = scores_dic
 
         return matrix_score
