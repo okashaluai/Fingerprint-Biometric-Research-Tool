@@ -5,7 +5,7 @@ from Dev.LogicLayer.LogicObjects.Operation import Operation
 
 
 class Experiment(ILogicObject):
-    def __init__(self, experiment_name, experiment_datetime: datetime, operations: dict[str: Operation] = None):
+    def __init__(self, experiment_name, experiment_datetime: datetime, experiment_last_update_date: datetime, operations: dict[str: Operation] = None):
         if experiment_name is None:
             raise Exception('Experiment name cannot be None')
         if len(experiment_name) < 1 or len(experiment_name) > 20:
@@ -18,7 +18,7 @@ class Experiment(ILogicObject):
 
         self.experiment_name: str = experiment_name
         self.experiment_datetime: datetime = experiment_datetime
-
+        self.experiment_last_update_date = experiment_last_update_date
     def add_convert_operation(
             self,
             operation: Operation,
@@ -45,4 +45,5 @@ class Experiment(ILogicObject):
 
         return ExperimentDTO(operations=operation_dtos,
                              experiment_name=self.experiment_name,
-                             experiment_datetime=self.experiment_datetime)
+                             experiment_datetime=self.experiment_datetime,
+                             experiment_last_update_date=self.experiment_last_update_date)

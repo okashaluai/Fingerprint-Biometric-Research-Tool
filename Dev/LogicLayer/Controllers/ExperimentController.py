@@ -20,6 +20,7 @@ class ExperimentController(metaclass=Singleton):
         if self.current_experiment_name is None:
             raise Exception('No current experiment is defined!')
         self.__filesystem.register_operation_metadata(self.current_experiment_name, operation.to_dto())
+        self.experiments[self.current_experiment_name].experiment_last_update_date = operation.operation_datetime
         return self.experiments[self.current_experiment_name].add_convert_operation(operation)
 
     def get_experiments(self):
@@ -38,8 +39,11 @@ class ExperimentController(metaclass=Singleton):
     def export_experiment(self, experiment_name: str, export_path: str):
         raise NotImplementedError
 
-    def revert_operation(self, operation_id: str):
-        self.__filesystem.delete_operation_dir(self.current_experiment_name, operation_id)
+    def clear_failed_operation(self, experiment_name: str, operation_id: str):
+        experiment = self.experiments[experiment_name]
+        if experiment.operations.get(operation_id) is not None:
+            del experiment.operations[operation_id]
+        self.__filesystem.delete_operation_dir(experiment_name, operation_id)
 
     def load_experiments(self):
         experiment_dtos = self.__filesystem.load_experiments()
@@ -48,17 +52,30 @@ class ExperimentController(metaclass=Singleton):
             for operation_dto in experiment_dto.operations:
                 input_asset = Asset(path=operation_dto.operation_input.path,
                                     is_dir=operation_dto.operation_input.is_dir)
+                extra_input_asset = Asset(path=operation_dto.operation_optional_extra_input.path,
+                                          is_dir=operation_dto.operation_optional_extra_input.is_dir) if not isinstance(
+                    operation_dto.operation_optional_extra_input, str) else operation_dto.operation_optional_extra_input
                 output_asset = Asset(path=operation_dto.operation_output.path,
-                                     is_dir=operation_dto.operation_output.is_dir)
+                                     is_dir=operation_dto.operation_output.is_dir) if not isinstance(
+                    operation_dto.operation_output, str) else operation_dto.operation_output
                 operation = Operation(operation_id=operation_dto.operation_id,
                                       operation_type=operation_dto.operation_type,
                                       operation_datetime=operation_dto.operation_datetime,
                                       operation_input=input_asset,
-                                      operation_output=output_asset)
+                                      operation_output=output_asset,
+                                      operation_optional_extra_input=extra_input_asset)
                 operations[operation.operation_id] = operation
             experiment = Experiment(experiment_name=experiment_dto.experiment_name,
                                     experiment_datetime=experiment_dto.experiment_datetime,
-                                    operations=operations)
+                                    operations=operations,
+                                    experiment_last_update_date=experiment_dto.experiment_last_update_date)
+            # Setting the last updated experiment to be the current experiment
+            if self.current_experiment_name is None:
+                self.current_experiment_name = experiment.experiment_name
+            else:
+                if self.experiments[self.current_experiment_name].experiment_last_update_date < experiment.experiment_last_update_date:
+                    self.current_experiment_name = experiment.experiment_name
+
             self.experiments[experiment_dto.experiment_name] = experiment
 
     def rename_experiment(self, experiment_name: str, new_experiment_name: str):
@@ -84,7 +101,8 @@ class ExperimentController(metaclass=Singleton):
         if experiment_name in self.experiments:
             raise Exception(f'Experiment with name {experiment_name} already exists!')
 
-        new_experiment = Experiment(experiment_name, datetime.now())
+        creation_date = datetime.now()
+        new_experiment = Experiment(experiment_name, creation_date, creation_date)
         self.experiments[experiment_name] = new_experiment
 
         self.__filesystem.create_experiment_dir(experiment_name=experiment_name)

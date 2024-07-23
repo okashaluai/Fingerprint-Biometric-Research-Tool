@@ -88,7 +88,8 @@ class OperationDTO(IDto):
     operation_id: str
     operation_type: OperationType
     operation_input: AssetDTO
-    operation_output: AssetDTO
+    operation_optional_extra_input: AssetDTO | str
+    operation_output: AssetDTO | str
     operation_datetime: datetime
 
 
@@ -97,3 +98,4 @@ class ExperimentDTO(IDto):
     operations: list[OperationDTO]
     experiment_name: str
     experiment_datetime: datetime
+    experiment_last_update_date: datetime

@@ -14,3 +14,6 @@ class OperationType(Enum):
     IMGs2TMPs: str = 'IMGs2TMPs'
     IMG2POBJ: str = 'IMG2POBJ'
     IMGs2POBJs: str = 'IMGs2POBJs'
+    OneVsOneMatching: str = 'OneVsOneMatching'
+    OneVsManyMatching: str = 'OneVsManyMatching'
+    ManyVsManyMatching: str = 'ManyVsManyMatching'
