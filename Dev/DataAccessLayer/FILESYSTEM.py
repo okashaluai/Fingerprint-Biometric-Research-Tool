@@ -56,11 +56,11 @@ class FILESYSTEM(metaclass=Singleton):
         creation_date = datetime.fromtimestamp(os.stat(experiment_path).st_ctime)
         experiment_dto = ExperimentDTO(experiment_name=experiment_name,
                                        experiment_datetime=creation_date,
-                                       experiment_last_update_date = latest_update_date,
+                                       experiment_last_update_date=latest_update_date,
                                        operations=operations)
         return experiment_dto
 
-    def load_operation(self, experiment_name: str, operation_id: str) -> OperationDTO|None:
+    def load_operation(self, experiment_name: str, operation_id: str) -> OperationDTO | None:
         try:
             operation_path = os.path.join(self.experiments_home_path, experiment_name, operation_id)
             if not os.path.isdir(operation_path):
@@ -86,7 +86,7 @@ class FILESYSTEM(metaclass=Singleton):
 
     def wrap_asset(self, asset_path: str) -> AssetDTO | str:
         if asset_path == '':
-            return  ''
+            return ''
         if not os.path.exists(asset_path):
             raise Exception(f'Asset {asset_path} path does not exist')
 
@@ -283,7 +283,6 @@ class FILESYSTEM(metaclass=Singleton):
         else:
             raise Exception(f'Experiment directory {experiment_name} does not exist')
 
-
     def get_temp_dir_path(self):
         if not (os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir)):
             os.makedirs(self.temp_dir)
@@ -429,8 +428,10 @@ class FILESYSTEM(metaclass=Singleton):
             "operation_type": operation.operation_type.value,
             "operation_timestamp": operation.operation_datetime.timestamp(),
             "input_asset_path": operation.operation_input.path,
-            "optional_extra_asset_path": operation.operation_optional_extra_input.path if not isinstance(operation.operation_optional_extra_input, str) else operation.operation_optional_extra_input,
-            "output_asset_path": operation.operation_output.path if not isinstance(operation.operation_output, str) else operation.operation_output
+            "optional_extra_asset_path": operation.operation_optional_extra_input.path if not isinstance(
+                operation.operation_optional_extra_input, str) else operation.operation_optional_extra_input,
+            "output_asset_path": operation.operation_output.path if not isinstance(operation.operation_output,
+                                                                                   str) else operation.operation_output
         }
         metadata_path = self.get_metadata_json_path(experiment_name, operation.operation_id)
         with open(metadata_path, 'w') as json_file:
@@ -449,14 +450,15 @@ class FILESYSTEM(metaclass=Singleton):
                 output_asset_path = Path(operation_metadata['output_asset_path'])
                 input_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
                                                                 input_asset_path.relative_to(old_experiment_dir_path)))
-                output_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
-                                                                 output_asset_path.relative_to(
-                                                                     old_experiment_dir_path)))
-                extra_input_asset_path = operation_metadata['optional_extra_asset_path']
-                if extra_input_asset_path != '':
-                    extra_input_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
-                                                                     extra_input_asset_path.relative_to(
+                if not isinstance(output_asset_path, str):
+                    output_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
+                                                                     output_asset_path.relative_to(
                                                                          old_experiment_dir_path)))
+                extra_input_asset_path = operation_metadata['optional_extra_asset_path']
+                if not isinstance(extra_input_asset_path, str):
+                    extra_input_asset_path = os.path.abspath(os.path.join(new_experiment_dir_path,
+                                                                          extra_input_asset_path.relative_to(
+                                                                              old_experiment_dir_path)))
                 operation_metadata['input_asset_path'] = input_asset_path
                 operation_metadata['output_asset_path'] = output_asset_path
                 operation_metadata['optional_extra_asset_path'] = extra_input_asset_path
