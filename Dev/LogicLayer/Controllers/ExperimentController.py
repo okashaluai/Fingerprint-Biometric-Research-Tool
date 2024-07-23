@@ -30,8 +30,8 @@ class ExperimentController(metaclass=Singleton):
         if experiment_name in self.experiments:
             del self.experiments[experiment_name]
             self.__filesystem.delete_experiment_dir(experiment_name)
-            self.current_experiment_name = None if self.current_experiment_name == experiment_name else self.current_experiment_name
-
+            if self.current_experiment_name == experiment_name:
+                self.current_experiment_name = None
         else:
             raise Exception(f'Experiment with name {experiment_name} does not exist!')
 

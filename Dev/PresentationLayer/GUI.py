@@ -1077,7 +1077,8 @@ class OperationRowFrame(customtkinter.CTkFrame):
         self.input_label.bind('<Button-1>', self.view_files_input)
 
         output_display = "N\A"
-        if operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching, OperationType.ManyVsManyMatching]:
+        if operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching,
+                                            OperationType.ManyVsManyMatching]:
             output_display = "Scores.csv"
         elif operation_dto.operation_type == OperationType.IMG2TMP:
             output_display = os.path.basename(get_single_min_filepath(operation_dto.operation_output.path))
@@ -1159,7 +1160,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
         elif self.operation_dto.operation_type == OperationType.IMG2TMP or self.operation_dto.operation_type == OperationType.IMG2POBJ:
             view_image(self.operation_dto.operation_input.path)
         elif self.operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching,
-                                            OperationType.ManyVsManyMatching]:
+                                                   OperationType.ManyVsManyMatching]:
             CTkMessagebox(icon="warning", title="Operations Error", message="Viewing .xyt templates is not supported!")
         else:
             CTkMessagebox(icon="warning", title="Operations Error", message="Viewing directories is not supported!")
@@ -1181,7 +1182,7 @@ class OperationRowFrame(customtkinter.CTkFrame):
         elif self.operation_dto.operation_type == OperationType.IMG2POBJ:
             view_stl_open3d(self.operation_dto.operation_output.path)
         elif self.operation_dto.operation_type in [OperationType.OneVsOneMatching, OperationType.OneVsManyMatching,
-                                            OperationType.ManyVsManyMatching]:
+                                                   OperationType.ManyVsManyMatching]:
             os.startfile(self.operation_dto.operation_output)
         else:
             CTkMessagebox(icon="warning", title="Operations Error", message="Viewing directories is not supported!")
@@ -1566,16 +1567,21 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 CTkMessagebox(icon="cancel", title="Experiments Error", message=response.error)
 
         def handle_delete_experiment(self, event=None):
-            get_curr_exp_response = service.get_current_experiment()
-            if not get_curr_exp_response.success:
-                CTkMessagebox(icon="cancel", title="Experiment", message=get_curr_exp_response.error)
-            elif get_curr_exp_response.data.experiment_name == self.experiment_dto.experiment_name:
+            delete_msg = CTkMessagebox(title="Experiment",
+                                       message="Experiment will be deleted, are you sure you want to continue?",
+                                       icon="question", option_1="Yes", option_2="No")
+            delete_msg_response = delete_msg.get()
 
+            if delete_msg_response == "Yes":
                 delete_response = service.delete_experiment(self.experiment_dto.experiment_name)
                 if not delete_response.success:
                     CTkMessagebox(icon="cancel", title="Experiments Error", message=delete_response.error)
                 else:
-                    App(service).change_current_experiment_name("NO EXPERIMENT")
+                    current_experiment_response = service.get_current_experiment()
+                    if current_experiment_response.success:
+                        App(service).change_current_experiment_name(current_experiment_response.data.experiment_name)
+                    else:
+                        App(service).change_current_experiment_name("NO EXPERIMENT")
 
                     for e in experiments_frame.experiment_dtos:
                         if e.experiment_name == self.experiment_dto.experiment_name:
