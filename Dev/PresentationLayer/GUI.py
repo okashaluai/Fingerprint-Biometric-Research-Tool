@@ -33,11 +33,17 @@ supported_images_formats = ['png', 'gpeg', 'tiff', 'jpg']
 
 def send_request(f):
     app = App(service)
-    app.set_processing_status()
-    app.disable_app()
+    get_curr_experiment_response = service.get_current_experiment()
+    if not get_curr_experiment_response.success:
+        CTkMessagebox(icon="cancel", title="Experiment Error", message=get_curr_experiment_response.error)
+    elif not get_curr_experiment_response.data.experiment_name:
+        CTkMessagebox(icon="cancel", title="Experiment Error", message="No experiment is set, please choose one!")
+    else:
+        app.set_processing_status()
+        app.disable_app()
 
-    t = Thread(target=f, daemon=True)
-    t.start()
+        t = Thread(target=f, daemon=True)
+        t.start()
 
 
 # Builds drag and drop / browse files widget
