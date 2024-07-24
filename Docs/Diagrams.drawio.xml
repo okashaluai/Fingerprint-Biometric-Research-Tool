@@ -2731,7 +2731,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="Pvg7g-n44IGeFTQkqdbm" name="System-Architecture">
-    <mxGraphModel dx="642" dy="304" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="149" dy="71" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -2781,7 +2781,7 @@
           <mxGeometry x="90" y="80" width="110" height="30" as="geometry" />
         </mxCell>
         <mxCell id="hnbQZnFFaGYOnljE7Y-z-16" value="images" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.folders;" parent="1" vertex="1">
-          <mxGeometry x="303.52" y="402" width="32.96" height="30" as="geometry" />
+          <mxGeometry x="249.99999999999997" y="402" width="32.96" height="30" as="geometry" />
         </mxCell>
         <mxCell id="hnbQZnFFaGYOnljE7Y-z-17" value="templates" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.folders;" parent="1" vertex="1">
           <mxGeometry x="122.97000000000003" y="401" width="34.06" height="31" as="geometry" />
@@ -2832,6 +2832,15 @@
         </mxCell>
         <mxCell id="3wXTXDOTOZQgkS0ScdUt-1" value="&lt;div&gt;Template Matching&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="420" y="230" width="70" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="y7hSfHOThjxfhHsz92FB-1" value="Matching Reports" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.folders;" vertex="1" parent="1">
+          <mxGeometry x="360" y="402" width="32.96" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="y7hSfHOThjxfhHsz92FB-2" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.493;exitY=1.018;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="hnbQZnFFaGYOnljE7Y-z-5" target="y7hSfHOThjxfhHsz92FB-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="324.69" y="393.99" as="sourcePoint" />
+            <mxPoint x="336.4767205387205" y="406.0081818181818" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
