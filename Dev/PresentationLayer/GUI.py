@@ -1531,7 +1531,8 @@ class ExperimentsFrame(customtkinter.CTkFrame):
                 self.operations_frames.append(row_frame)
 
         def load_operations(self):
-            self.operations_dtos = self.experiment_dto.operations
+            self.operations_dtos = sorted(self.experiment_dto.operations,
+                                          key=lambda operation: operation.operation_datetime, reverse=True)
             self.show_operations_on_frame(self.operations_dtos)
 
         def search(self, event=None):
