@@ -309,6 +309,48 @@ class SideMenuFrame(customtkinter.CTkFrame):
             self.is_light_mode = False
             customtkinter.set_appearance_mode("Dark")
 
+    def rebuild_buttons(self):
+        self.convert_assets_button.destroy()
+        self.match_templates_button.destroy()
+        self.experiments_button.destroy()
+        self.new_experiment_button.destroy()
+
+        self.convert_assets_button = customtkinter.CTkButton(
+            self, text="Convert Assets", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "file.png")),
+                size=(25, 25)
+            ), anchor='w',
+            command=self.handle_convert_assets_button
+        )
+        self.convert_assets_button.grid(row=1, column=0, padx=20, pady=10, sticky=customtkinter.EW)
+
+        self.match_templates_button = customtkinter.CTkButton(
+            self, text="Match Templates", font=customtkinter.CTkFont(weight="bold"),
+            image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "compare.png")),
+                size=(25, 25)
+            ), anchor='w',
+            command=self.handle_match_template_button
+        )
+        self.match_templates_button.grid(row=2, column=0, padx=20, pady=10, sticky=customtkinter.EW)
+
+        self.experiments_button = customtkinter.CTkButton(
+            self, text="Experiments", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "chemistry.png")),
+                size=(25, 25),
+            ), anchor='w', command=self.handle_experiments_button
+        )
+        self.experiments_button.grid(row=3, column=0, padx=20, pady=10, sticky=customtkinter.EW)
+
+        self.new_experiment_button = customtkinter.CTkButton(
+            self, text="New Experiment", font=customtkinter.CTkFont(weight="bold"), image=customtkinter.CTkImage(
+                Image.open(os.path.join(assets_path, "add.png")),
+                size=(25, 25)
+            ), anchor='w',
+            command=self.handle_new_experiment_button
+        )
+        self.new_experiment_button.grid(row=4, column=0, padx=20, pady=10, sticky=customtkinter.EW)
+
 
 class ConvertAssetsFrame(customtkinter.CTkFrame):
 
@@ -843,10 +885,11 @@ class ConvertAssetsFrame(customtkinter.CTkFrame):
                     if response.success:
                         self.parent_tab.build_printing_object_export_frame(response.data.path)
 
-                        total_images = len(os.listdir(self.image_path))
-                        CTkMessagebox(icon="check",
-                                      title="Convert Status",
-                                      message=f"Successfully converted {response.data.converted_successfully_count} out of {total_images} images!")
+                        if os.path.isdir(self.image_path):
+                            total_images = len(os.listdir(self.image_path))
+                            CTkMessagebox(icon="check",
+                                          title="Convert Status",
+                                          message=f"Successfully converted {response.data.converted_successfully_count} out of {total_images} images!")
                     else:
                         CTkMessagebox(icon="cancel", title="Image Converter Error", message=response.error)
 
@@ -1819,6 +1862,9 @@ class App(Tk, metaclass=Singleton):
         self.enableChildren(self.new_experiment_frame)
         for child in self.side_menu_frame.winfo_children():
             child.configure(state=customtkinter.NORMAL)
+
+        self.side_menu_frame.rebuild_buttons()
+
         # for child in self.convert_assets_frame.winfo_children():
         #     child.configure(state=customtkinter.NORMAL)
         # for child in self.match_templates_frame.winfo_children():

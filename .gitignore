@@ -1,5 +1,8 @@
 # ignore python virtual enviroment
-myenv/
+env/
+
+# ignore experiments the software file system
+Dev/DataAccessLayer/experiments
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
