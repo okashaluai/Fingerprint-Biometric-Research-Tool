@@ -35,4 +35,4 @@ pip install -r requirements.txt
 
 * Run **main.py** to start the system.
 
-See User Manual [here]([https://www.codecademy.com/pages/contribute-docs](https://github.com/okashaluai/Fingerprint-Biometric-Research-Tool/blob/main/Docs/User%20Manual.pdf))!.
+See User Manual [here]([https://www.codecademy.com/pages/contribute-docs](https://github.com/okashaluai/Fingerprint-Biometric-Research-Tool/blob/main/Docs/User%20Manual.pdf)!.
