@@ -37,7 +37,7 @@ pip install -r requirements.txt
 
 See User Manual [here](https://github.com/okashaluai/Fingerprint-Biometric-Research-Tool/blob/main/Docs/User%20Manual.pdf)!
 
-## disclaimer
+## Disclaimer
 If you use this repository in your work please cite the original publication: 
 
 Yaniv Hacmon, Keren Gorelik, and Yisroel Mirsky. 2025. The Threat of
