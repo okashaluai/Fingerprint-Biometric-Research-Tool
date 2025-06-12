@@ -36,3 +36,11 @@ pip install -r requirements.txt
 * Run **main.py** to start the system.
 
 See User Manual [here](https://github.com/okashaluai/Fingerprint-Biometric-Research-Tool/blob/main/Docs/User%20Manual.pdf)!
+
+## disclaimer
+If you use this repository in your work please cite the original publication: 
+
+Yaniv Hacmon, Keren Gorelik, and Yisroel Mirsky. 2025. The Threat of
+Deepfake Fingerprints. In The 4th Workshop on security implications of
+Deepfakes and Cheapfakes (WDC ’25), August 25–29, 2025, Hanoi, Vietnam.
+ACM, New York, NY, USA, 8 pages. https://doi.org/10.1145/3709022.3736542
