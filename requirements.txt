@@ -1,4 +1,4 @@
-setuptools==57.4.0
+setuptools==70.0.0
 altgraph==0.17.4
 asttokens==2.4.1
 attrs==23.2.0
