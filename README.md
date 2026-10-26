@@ -32,7 +32,10 @@ pip install -r requirements.txt
 ```
 
 ## Start
-
-* Run **main.py** to start the system.
+Run
+```
+python -m Dev.main
+```
+to start the system.
 
 See User Manual [here](https://github.com/okashaluai/Fingerprint-Biometric-Research-Tool/blob/main/Docs/User%20Manual.pdf)!
