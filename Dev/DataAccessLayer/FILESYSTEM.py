@@ -6,12 +6,21 @@ from datetime import datetime
 from Dev.Enums import OperationType
 from Dev.Utils import Singleton
 from pathlib import Path
+import re
+
+_SAFE_FILENAME_RE = re.compile(r'^[A-Za-z0-9._-]+$')
+
+def _assert_safe_filename(file_name: str) -> None:
+    if not _SAFE_FILENAME_RE.match(file_name):
+        raise Exception(f"Rejected unsafe file name '{file_name}'...")
+
 
 
 class FILESYSTEM(metaclass=Singleton):
     def __init__(self):
         self.experiments_home_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'experiments'))
         self.temp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'temp_dir'))
+
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
@@ -296,6 +305,7 @@ class FILESYSTEM(metaclass=Singleton):
         return temp_min_maps_dir_path
 
     def import_temp_template(self, template_path):
+        _assert_safe_filename(template_path)
         if not os.path.exists(template_path):
             raise Exception(f'Template path {template_path} does not exist')
         temp_dir_path = self.get_temp_dir_path()
@@ -303,6 +313,7 @@ class FILESYSTEM(metaclass=Singleton):
         return os.path.join(temp_dir_path, os.path.basename(template_path))
 
     def import_template_into_dir(self, templates_path: str, experiment_name: str, operation_id: str) -> str:
+        _assert_safe_filename(templates_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
         template_name = os.path.basename(templates_path)
@@ -318,6 +329,7 @@ class FILESYSTEM(metaclass=Singleton):
         return dest_dir_path
 
     def import_src_matching_templates(self, templates_path: str, experiment_name: str, operation_id: str):
+        _assert_safe_filename(templates_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
         if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
@@ -331,6 +343,7 @@ class FILESYSTEM(metaclass=Singleton):
         return dest_dir_path
 
     def import_target_matching_templates(self, templates_path: str, experiment_name: str, operation_id: str):
+        _assert_safe_filename(templates_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
         if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
@@ -344,6 +357,7 @@ class FILESYSTEM(metaclass=Singleton):
         return dest_dir_path
 
     def import_src_matching_template(self, template_path: str, experiment_name: str, operation_id: str) -> str:
+        _assert_safe_filename(template_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
         template_name = os.path.basename(template_path)
@@ -359,6 +373,7 @@ class FILESYSTEM(metaclass=Singleton):
         return dest_dir_path
 
     def import_target_matching_template(self, template_path: str, experiment_name: str, operation_id: str) -> str:
+        _assert_safe_filename(template_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
         template_name = os.path.basename(template_path)
@@ -374,6 +389,7 @@ class FILESYSTEM(metaclass=Singleton):
         return dest_dir_path
 
     def import_templates_dir(self, templates_path: str, experiment_name: str, operation_id: str) -> str:
+        _assert_safe_filename(templates_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
         if os.path.exists(experiment_dir_path) and os.path.isdir(experiment_dir_path):
@@ -387,6 +403,7 @@ class FILESYSTEM(metaclass=Singleton):
         return dest_dir_path
 
     def import_image_into_dir(self, images_path: str, experiment_name: str, operation_id: str) -> str:
+        _assert_safe_filename(images_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
         image_name = os.path.basename(images_path)
@@ -403,6 +420,7 @@ class FILESYSTEM(metaclass=Singleton):
         return dest_dir_path
 
     def import_images_dir(self, images_path: str, experiment_name: str, operation_id: str) -> str:
+        _assert_safe_filename(images_path)
         experiment_dir_path = os.path.join(self.experiments_home_path, experiment_name)
         operation_dir_path = os.path.join(experiment_dir_path, operation_id)
 
