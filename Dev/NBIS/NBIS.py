@@ -33,7 +33,7 @@ def detect_minutiae(images_dir_path: str, templates_dir_path: str) -> None:
         image_file_name = os.path.splitext(os.path.basename(image_file))[0]
         template_file_path = os.path.abspath(os.path.join(templates_dir_path, image_file_name))
         image_file_path = os.path.abspath(os.path.join(images_dir_path, image_file))
-        run_process(get_exe_lib_path(LibName.MINDTCT), f'"{image_file_path}" "{template_file_path}"')
+        run_process(get_exe_lib_path(LibName.MINDTCT), [image_file_path, template_file_path])
 
     # Keep only .min and .xyt files
     for template_file in os.listdir(templates_dir_path):
@@ -42,17 +42,14 @@ def detect_minutiae(images_dir_path: str, templates_dir_path: str) -> None:
 
 
 def match_templates(first_xyt_template_path, second_xyt_template_path) -> int:
-    first_xyt_template_path = f'"{first_xyt_template_path}"'
-    second_xyt_template_path = f'"{second_xyt_template_path}"'
-    stdout = run_process(get_exe_lib_path(LibName.BOZORTH3), f"{first_xyt_template_path} {second_xyt_template_path}")
-
+    stdout = run_process(get_exe_lib_path(LibName.BOZORTH3), [first_xyt_template_path, second_xyt_template_path])
     # Parse the output to extract the matching score
     score_line = stdout.strip().split('\n')[-1]
     score = int(score_line.split()[0])
     return score
 
 
-def run_process(exe_lib_path: str, arguments: str) -> str:
+def run_process(exe_lib_path: str, arguments: list) -> str:
     # Give the lib an execution permission
     # TODO: this command corrupts NBIS executables on Windows.
     # if not os.access(exe_lib_path, mode=os.X_OK):
@@ -60,8 +57,8 @@ def run_process(exe_lib_path: str, arguments: str) -> str:
 
     # Execute lib
     completed_process = subprocess.run(
-        args=f'"{exe_lib_path}" {arguments}',
-        shell=True,
+        args=[exe_lib_path, *arguments],
+        shell=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
